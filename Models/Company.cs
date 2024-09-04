@@ -4,9 +4,13 @@ namespace truckPRO_api.Models
 {
     public class Company
     {
+        [Key]
         public int Id { get; set; }
+
         [Required]
-        public string Name { get; set; }
-        public List<User> Users {get; set;}
+        [MinLength(2), MaxLength(50)]
+        public string? Name { get; set; }
+        //one-to-many relationship with user
+        public ICollection<User>? Users { get; set; }
     }
 }
