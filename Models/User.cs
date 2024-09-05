@@ -20,6 +20,10 @@ namespace truckPRO_api.Models
         public string Email { get; set; }
         [Required]
         public string Password { get; set; }
+        [Phone]
+        [Required]
+        public string Phone { get; set; }
+
         [Required]
         [EnumDataType(typeof(UserRole))]
         public UserRole Role { get; set; }
