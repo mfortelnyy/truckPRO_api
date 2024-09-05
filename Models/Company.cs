@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace truckPRO_api.Models
 {
+    [Table("Company")]
     public class Company
     {
         [Key]

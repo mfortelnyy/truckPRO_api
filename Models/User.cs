@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace truckPRO_api.Models
 {
-    [Table("Users")]
+    [Table("User")]
     public class User
     {
         [Key]

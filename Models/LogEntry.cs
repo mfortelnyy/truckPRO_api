@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace truckPRO_api.Models
 {
+    [Table("LogEntry")]
     public class LogEntry
     {
         [Key]

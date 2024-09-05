@@ -7,9 +7,9 @@ namespace truckPRO_api.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Company> Companys { get; set; }
-        public DbSet<LogEntry> LogEntries { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<Company> Company { get; set; }
+        public DbSet<LogEntry> LogEntry { get; set; }
     }
     
 }

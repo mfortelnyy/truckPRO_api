@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using truckPRO_api.Data;
 
@@ -11,9 +12,11 @@ using truckPRO_api.Data;
 namespace truckPRO_api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240905224853_SecondM")]
+    partial class SecondM
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,7 +40,7 @@ namespace truckPRO_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Company");
+                    b.ToTable("Companys");
                 });
 
             modelBuilder.Entity("truckPRO_api.Models.LogEntry", b =>
@@ -64,7 +67,7 @@ namespace truckPRO_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LogEntry");
+                    b.ToTable("LogEntries");
                 });
 
             modelBuilder.Entity("truckPRO_api.Models.User", b =>
@@ -107,7 +110,7 @@ namespace truckPRO_api.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("truckPRO_api.Models.LogEntry", b =>
