@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Entity;
-using truckPRO_api.Models;
+using truckPRO_api.DTOs;
 
 namespace truckPRO_api.Controllers
 {
