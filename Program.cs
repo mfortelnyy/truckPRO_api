@@ -1,12 +1,19 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using truckPRO_api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+//builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});  
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAuthentication(options =>
 {
@@ -32,7 +39,7 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-//app.UseAuthorization();
+app.UseAuthorization();
 
 app.MapControllers();
 

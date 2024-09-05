@@ -20,7 +20,7 @@ namespace truckPRO_api.Controllers
                 return Ok(user);
             }
             */
-        }
+        } 
 
 
         [HttpPost]
@@ -32,5 +32,17 @@ namespace truckPRO_api.Controllers
 
             
         }
+
+        /*
+        [HttpGet]
+        [Route("Welcome")]
+        public IActionResult Welcome()
+        {
+            this.ViewData["Message"] = "Under Development.";
+            return this.View();
+        }
+        */
+
+
     }
 }

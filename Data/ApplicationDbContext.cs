@@ -6,4 +6,5 @@ namespace truckPRO_api.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
     }
+    
 }
