@@ -13,4 +13,22 @@ Content-Type: application/json
   "password": "pass"
 }
 
+
 ###
+POST {{truckPRO_api_HostAddress}}/SignUp
+Content-Type: application/json
+
+{
+  
+  "FirstName": "John",
+  "LastName": "Doe",
+  "Email": "john.doe@example.com",
+  "Password": "SecurePassword123!",
+  "Role": "Driver",
+  "CompanyId": 1
+
+
+}
+
+###
+ 
