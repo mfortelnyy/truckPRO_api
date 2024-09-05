@@ -24,6 +24,7 @@ namespace truckPRO_api.Models
         public LogEntryType LogEntryType { get; set; }
 
         //store list of images for the shift, nullable
+        [NotMapped]
         public IFormFileCollection? Images { get; set; }
 
 
