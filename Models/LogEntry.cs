@@ -16,6 +16,7 @@ namespace truckPRO_api.Models
 
         [Required]
         public DateTime StartTime { get; set; }
+        //start of shift is required, end of the shift is determined by the driver
         public DateTime? EndTime { get; set; }
         
         [Required]

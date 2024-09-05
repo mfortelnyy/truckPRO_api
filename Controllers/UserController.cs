@@ -10,16 +10,27 @@ namespace truckPRO_api.Controllers
     {
         [HttpPost]
         [Route("Login")]
-        public IActionResult Login(LoginDTO loginDTO)
+        public IActionResult Login([FromBody] LoginDTO LoginDTO)
         {
+            //Console.WriteLine(LoginDTO.Email);
             return Ok(200);
 
-            //to do - add dbContext in program.cs and scaffold a controller
             /*var user = dbContext.Users.FirstOrDefault(x => x.userName && x.Password == loginDTO.Password);
             if (user != null) {
                 return Ok(user);
             }
             */
+        }
+
+
+        [HttpPost]
+        [Route("SignUp")]
+        public IActionResult SignUp([FromBody]SignUpDTO SignUpDTO)
+        {
+            //Console.WriteLine(SignUpDTO.Email);
+            return Ok(200);
+
+            
         }
     }
 }
