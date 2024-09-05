@@ -1,6 +1,16 @@
-@truckPRO_api_HostAddress = http://localhost:5048
+@truckPRO_api_HostAddress = https://localhost:7010
 
 GET {{truckPRO_api_HostAddress}}/weatherforecast/
 Accept: application/json
+
+###
+
+POST {{truckPRO_api_HostAddress}}/Login
+Content-Type: application/json
+
+{
+  "email": "helloworld@email.com",
+  "password": "pass"
+}
 
 ###
