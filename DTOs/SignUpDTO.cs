@@ -7,8 +7,6 @@ namespace truckPRO_api.DTOs
     {
 
         [Required]
-        public string Username { get; set; }
-        [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; }
         [Required]

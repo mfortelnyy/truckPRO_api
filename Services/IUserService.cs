@@ -4,7 +4,7 @@ namespace truckPRO_api.Services
 {
     public interface IUserService
     {
-        Task<bool> CreateUserAsync(SignUpDTO sDTO);
-        Task<bool> LoginUserAsync(LoginDTO lDTO);
+        Task<string> CreateUserAsync(SignUpDTO sDTO);
+        Task<string> LoginUserAsync(LoginDTO lDTO);
     }
 }
