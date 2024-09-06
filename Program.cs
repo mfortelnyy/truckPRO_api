@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using truckPRO_api.Data;
+using truckPRO_api.MappingProfiles;
+using truckPRO_api.Models;
+using truckPRO_api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +21,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 
 builder.Services.AddEndpointsApiExplorer();
+//Add and register  Automapper service SignUpDTO -> User; LoginDTO -> User
+builder.Services.AddAutoMapper(typeof(DriverMappingProfilecs));
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+
+//register userservice
+builder.Services.AddScoped<IUserService, UserService>();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
