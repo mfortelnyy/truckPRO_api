@@ -3,11 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Entity;
 using truckPRO_api.DTOs;
+using truckPRO_api.Services;
 
 namespace truckPRO_api.Controllers
 {
     public class UserController : Controller
     {
+        private readonly IUserService _userService;
+
+        public UserController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
         [HttpPost]
         [Route("Login")]
         public IActionResult Login([FromBody] LoginDTO LoginDTO)
@@ -25,12 +33,12 @@ namespace truckPRO_api.Controllers
 
         [HttpPost]
         [Route("SignUp")]
-        public IActionResult SignUp([FromBody]SignUpDTO SignUpDTO)
+        public async Task<IActionResult> SignUp([FromBody]SignUpDTO SignUpDTO)
         {
-            //Console.WriteLine(SignUpDTO.Email);
-            return Ok(200);
+            var result = await _userService.CreateUserAsync(SignUpDTO);
+            if (result) return Ok();
+            return BadRequest();
 
-            
         }
 
         /*
