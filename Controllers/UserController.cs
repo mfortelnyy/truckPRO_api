@@ -20,8 +20,6 @@ namespace truckPRO_api.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO LoginDTO)
         {
-            //Console.WriteLine(LoginDTO.Email);
-            //return Ok(200);
             //if model is not valid then the request is bad - 400
             if (!ModelState.IsValid)
             {

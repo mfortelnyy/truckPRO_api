@@ -54,6 +54,8 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+//enable jwt token
+app.UseAuthentication();
 
 app.MapControllers();
 
