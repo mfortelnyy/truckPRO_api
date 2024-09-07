@@ -18,16 +18,19 @@ namespace truckPRO_api.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public IActionResult Login([FromBody] LoginDTO LoginDTO)
+        public async Task<IActionResult> Login([FromBody] LoginDTO LoginDTO)
         {
             //Console.WriteLine(LoginDTO.Email);
-            return Ok(200);
-
-            /*var user = dbContext.Users.FirstOrDefault(x => x.userName && x.Password == loginDTO.Password);
-            if (user != null) {
-                return Ok(user);
+            //return Ok(200);
+            //if model is not valid then the request is bad - 400
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
             }
-            */
+
+            string result = await _userService.LoginUserAsync(LoginDTO);
+            if (result != null) return Ok(result);
+            return BadRequest();
         } 
 
 
@@ -35,14 +38,14 @@ namespace truckPRO_api.Controllers
         [Route("SignUp")]
         public async Task<IActionResult> SignUp([FromBody]SignUpDTO SignUpDTO)
         {
-            //if model is not balid then the request is bad - 400
+            //if model is not valid then the request is bad - 400
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = await _userService.CreateUserAsync(SignUpDTO);
-            if (user != null) return Ok(user);
+            string result = await _userService.CreateUserAsync(SignUpDTO);
+            if (result != null) return Ok(result);
             return BadRequest();
 
         }

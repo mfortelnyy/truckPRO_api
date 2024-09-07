@@ -31,8 +31,25 @@ namespace truckPRO_api.Services
 
         public async Task<string> LoginUserAsync(LoginDTO loginDTO)
         {
+            //retrieve driver from the db by the email provided
+            var driver = _context.User.FirstOrDefault(dr => dr.Email == loginDTO.Email);
+            
+            //if there is no driver with indicated email then return message
+            if (driver == null)
+            {
+                return "Invalid username or password.";
+            }
 
-            return "OK";
+            //verify provided password against password stored in db
+            var paswordVerification = _passwordHasher.VerifyHashedPassword(driver,driver.Password, loginDTO.Password);
+
+            //if user provided incorrect password then return same message
+            if(paswordVerification == PasswordVerificationResult.Failed)
+            {
+                return "Invalid username or password.";
+            }
+            //otherwise allow sign in 
+            return $"User with {driver.Email} succefully signed in";
         }
     }
 }
