@@ -49,6 +49,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+//register tole based authorization for 3 roles
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireDriverRole", policy => policy.RequireRole("Driver"));
+    options.AddPolicy("RequireManagerRole", policy => policy.RequireRole("Manager"));
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+});
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Entity;
@@ -20,7 +21,6 @@ namespace truckPRO_api.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO LoginDTO)
         {
-            //if model is not valid then the request is bad - 400
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
