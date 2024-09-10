@@ -1,3 +1,4 @@
+using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,12 @@ builder.Services.AddEndpointsApiExplorer();
 //Add and register  Automapper service SignUpDTO -> User; LoginDTO -> User
 builder.Services.AddAutoMapper(typeof(DriverMappingProfilecs));
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+// Register S3 Client
+builder.Services.AddAWSService<IAmazonS3>();
+
+// Register the S3Service
+builder.Services.AddScoped<S3Service>();
 
 
 //register userservice
