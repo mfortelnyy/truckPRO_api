@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using truckPRO_api.Services;
 
@@ -16,6 +17,7 @@ namespace truckPRO_api.Controllers
 
         [HttpPost]
         [Route("createOnDuty")]
+        [Authorize(Roles = "Driver")]
         public async Task<IActionResult> CreateOnDuty([FromForm] IFormFileCollection images)
         {
             Console.WriteLine(images.Count);
