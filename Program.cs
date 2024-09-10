@@ -10,6 +10,8 @@ using truckPRO_api.Models;
 using truckPRO_api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddConsole(); // Add console logging
+
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -51,12 +53,14 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Auidence"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+
 
     };
 });
 
-//register tole based authorization for 3 roles
+
+//register role based authorization for 3 roles
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireDriverRole", policy => policy.RequireRole("Driver"));
@@ -66,11 +70,14 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
 //enable jwt token
 app.UseAuthentication();
+
+app.UseHttpsRedirection();
+
+
+app.UseAuthorization();
+
 
 app.MapControllers();
 
@@ -86,5 +93,7 @@ app.MapPost("/register/{userName}", (RegistrationModel registration) =>
     return $"Signing Up! {registration.userName} with password: {registration.password}";
 });
 */
+
+
 
 app.Run();

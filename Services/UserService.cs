@@ -81,7 +81,7 @@ namespace truckPRO_api.Services
             //the signing credentials are created using the security key and a hmacsha256 algorithms which
             //ensures that the token can’t be tampered with because any modification would result in an invalid signature.
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
+            //Console.WriteLine(user.Role.ToString());
             //array of claims - key-value pairs 
             var claims = new[]
             {
@@ -90,6 +90,7 @@ namespace truckPRO_api.Services
                 //adds a custom claim representing the user's role
                 //allows to enforce role-based authorization
                 new Claim("role", user.Role.ToString())
+                
             };
 
             //generate token with the expiaretion time of 1 hour
