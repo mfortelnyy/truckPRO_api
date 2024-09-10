@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace truckPRO_api.Services
@@ -31,6 +32,12 @@ namespace truckPRO_api.Services
 
         public async Task<string> CreateUserAsync(SignUpDTO signUpDTO)
         {
+            var userExists = await _context.User.AnyAsync(u => u.Email == signUpDTO.Email);
+            if (userExists)
+            {
+                throw new Exception("User already exists.");
+            }
+
             User newDriver = _mapper.Map<User>(signUpDTO);
             //hash password from signupDTO to User for db  
             newDriver.Password = _passwordHasher.HashPassword(newDriver, signUpDTO.Password);
