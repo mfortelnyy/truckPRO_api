@@ -42,6 +42,8 @@ builder.Services.AddScoped<S3Service>();
 // Register custom UserService for handling user-related operations
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<ILogEntryService, LogEntryService>();
+
 // Retrieve the JWT key from configuration
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrEmpty(jwtKey))
