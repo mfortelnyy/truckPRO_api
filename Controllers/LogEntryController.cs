@@ -16,7 +16,8 @@ namespace truckPRO_api.Controllers
         private readonly ILogEntryService _logEntryService = logEntryService;
 
 
-
+        
+        //test endpoint
         [HttpPost]
         [Route("uploadPhotos")]
         [Authorize(Roles = "Driver")]

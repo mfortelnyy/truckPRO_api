@@ -36,18 +36,19 @@ namespace truckPRO_api.Services
 
         public async Task<string> CreateOnDutyLog(LogEntry logEntry)
         {
+
             var userId = logEntry.UserId;
 
             //check for existing logs that may conflict
             if(await HasActiveOnDutyOrDrivingLog(userId)) 
             {
-                throw new InvalidOperationException("User has already has an active on-duty or driving log!");
+                return "User has already has an active on-duty or driving log!";
             }
 
             //check if on duty is started after the 10 hour break
             if (await IsValidStartTimeAfterBreak(userId))
             {
-                throw new InvalidOperationException("On-duty log entry cannot start before completing the required break period. (10 hours)");
+                return "On-duty log entry cannot start before completing the required break period. (10 hours)";
             }
 
             //if all checks are passed then create and save logentry to db
@@ -97,7 +98,7 @@ namespace truckPRO_api.Services
 
             }
             //enusres new drivers can start the log
-            else if(allBreaks.Count == 0) return true;
+            else if(activeBreak == null && allBreaks == null) return true;
             else return false;
         }
 
