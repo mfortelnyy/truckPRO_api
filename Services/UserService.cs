@@ -15,20 +15,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace truckPRO_api.Services
 {
-    public class UserService : IUserService
+    public class UserService(ApplicationDbContext context, IMapper mapper, IPasswordHasher<User> passwordHasher, IConfiguration configuration) : IUserService
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper;
-        private readonly IPasswordHasher<User> _passwordHasher;
-        private readonly IConfiguration _config;
-
-        public UserService(ApplicationDbContext context, IMapper mapper, IPasswordHasher<User> passwordHasher, IConfiguration configuration)
-        {
-            _context = context;
-            _mapper = mapper;
-            _passwordHasher = passwordHasher;
-            _config = configuration;
-        }
+        private readonly ApplicationDbContext _context = context;
+        private readonly IMapper _mapper = mapper;
+        private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
+        private readonly IConfiguration _config = configuration;
 
         public async Task<string> CreateUserAsync(SignUpDTO signUpDTO)
         {
@@ -90,8 +82,9 @@ namespace truckPRO_api.Services
 
                 //adds a custom claim representing the user's role
                 //allows to enforce role-based authorization
-                new Claim(ClaimTypes.Role, user.Role.ToString())
-                
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim("userId", user.Id.ToString())
+
             };
 
             //generate token with the expiaretion time of 1 hour
