@@ -64,7 +64,7 @@ namespace truckPRO_api.Controllers
 
 
             Console.WriteLine(userId);
-            return Ok();
+            return Ok(result);
         }
 
 
@@ -92,8 +92,7 @@ namespace truckPRO_api.Controllers
             }
 
             // Validate and process the driving log entry
-            Console.WriteLine(userId);
-            //var res = _logEntryService.CreateDrivingLog();
+            var res = _logEntryService.CreateDrivingLog();
             return Ok();
         }
     }
