@@ -31,28 +31,25 @@ namespace truckPRO_api.Services
         {
             var fileName = Guid.NewGuid() + "_" + file.FileName;
 
-            using (var stream = new MemoryStream()) 
+            using var stream = new MemoryStream();
+            await file.CopyToAsync(stream);
+            var request = new PutObjectRequest
             {
-                await file.CopyToAsync(stream);
-                var request = new PutObjectRequest
-                {
-                    BucketName = _bucketName,
-                    Key = fileName,
-                    InputStream = stream,
-                    ContentType = file.ContentType
-                };
-                
-                var response = await _amazonS3.PutObjectAsync(request);
+                BucketName = _bucketName,
+                Key = fileName,
+                InputStream = stream,
+                ContentType = file.ContentType
+            };
 
-                if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                {
-                    return $"https://{_bucketName}.s3.amazonaws.com/{fileName}";
-                }
-                else
-                {
-                    throw new Exception("File upload failed. Response code: " + response.HttpStatusCode);
-                }
+            var response = await _amazonS3.PutObjectAsync(request);
 
+            if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return $"https://{_bucketName}.s3.amazonaws.com/{fileName}";
+            }
+            else
+            {
+                throw new Exception("File upload failed. Response code: " + response.HttpStatusCode);
             }
         }
     }

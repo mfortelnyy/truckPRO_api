@@ -31,4 +31,33 @@ Content-Type: application/json
 }
 
 ###
- 
+GET {{truckPRO_api_HostAddress}}/test/driver-data
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb3J0QGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiRHJpdmVyIiwiZXhwIjoxNzI2MDI5NzgxLCJpc3MiOiJKd3RJc3N1ZXIiLCJhdWQiOiJKd3RBdWRpZW5jZSJ9.gzmciV0ZGdkGeVPIYmylgnmv08nasxWrDY1cwce4HvA
+Content-Type: application/json
+{
+
+}
+
+###
+
+
+###
+GET {{truckPRO_api_HostAddress}}/test/token-claims
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb3J0QGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiRHJpdmVyIiwiZXhwIjoxNzI2MDI5NzgxLCJpc3MiOiJKd3RJc3N1ZXIiLCJhdWQiOiJKd3RBdWRpZW5jZSJ9.gzmciV0ZGdkGeVPIYmylgnmv08nasxWrDY1cwce4HvA
+Content-Type: application/json
+{
+
+}
+
+###
+
+
+###
+POST {{truckPRO_api_HostAddress}}/CreateOnDuty
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb3J0QGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiRHJpdmVyIiwiZXhwIjoxNzI2MDMwMTc5LCJpc3MiOiJKd3RJc3N1ZXIiLCJhdWQiOiJKd3RBdWRpZW5jZSJ9.CDFw4gZhhjTNegRyTlPntQM7rzKIUbPcmxg11Y0Gl7w
+Content-Type: application/json
+{
+
+}
+
+###

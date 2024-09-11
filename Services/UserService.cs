@@ -50,7 +50,7 @@ namespace truckPRO_api.Services
         public async Task<string> LoginUserAsync(LoginDTO loginDTO)
         {
             //retrieve driver from the db by the email provided
-            var driver = _context.User.FirstOrDefault(dr => dr.Email == loginDTO.Email);
+            var driver =  _context.User.FirstOrDefault(dr => dr.Email == loginDTO.Email);
             
             //if there is no driver with indicated email then return message
             if (driver == null)
@@ -75,8 +75,9 @@ namespace truckPRO_api.Services
 
         private string GenerateJwtToken(User user)
         {
+            //Console.WriteLine(_config["Jwt:Key"]);
             //symmetric security key is created using a secret key stored in appsetings.json
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("QoyLLM8SxXaUfYMJKT7svrVlAgpJD04d"));
 
             //the signing credentials are created using the security key and a hmacsha256 algorithms which
             //ensures that the token can’t be tampered with because any modification would result in an invalid signature.
@@ -89,14 +90,14 @@ namespace truckPRO_api.Services
 
                 //adds a custom claim representing the user's role
                 //allows to enforce role-based authorization
-                new Claim("role", user.Role.ToString())
+                new Claim(ClaimTypes.Role, user.Role.ToString())
                 
             };
 
             //generate token with the expiaretion time of 1 hour
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
+                audience: _config["Jwt:Audience"], 
                 claims: claims,
                 expires: DateTime.Now.AddHours(1),
                 signingCredentials: credentials

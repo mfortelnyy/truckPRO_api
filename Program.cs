@@ -1,5 +1,6 @@
 using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,90 +11,99 @@ using truckPRO_api.Models;
 using truckPRO_api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Logging.AddConsole(); // Add console logging
 
+// Add console logging
+builder.Logging.AddConsole();
 
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllers();
-//builder.Services.AddControllersWithViews();
+
+// Add DbContext for SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-
-
+// Add Swagger for API documentation
 builder.Services.AddEndpointsApiExplorer();
-//Add and register  Automapper service SignUpDTO -> User; LoginDTO -> User
+
+// Add and register AutoMapper service
 builder.Services.AddAutoMapper(typeof(DriverMappingProfilecs));
+
+// Register PasswordHasher for User model
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
-// Register S3 Client
+// Register AWS S3 Client
 builder.Services.AddAWSService<IAmazonS3>();
 
-// Register the S3Service
+// Register the S3Service for S3 interactions
 builder.Services.AddScoped<S3Service>();
 
-
-//register userservice
+// Register custom UserService for handling user-related operations
 builder.Services.AddScoped<IUserService, UserService>();
 
+// Retrieve the JWT key from configuration
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new Exception("JWT Key is not configured properly in appsettings.json.");
+}
+else if (!string.IsNullOrEmpty(jwtKey))
+{
+    Console.WriteLine("Succ key parsed");
+}
+
+// Add JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Auidence"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-
-
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("QoyLLM8SxXaUfYMJKT7svrVlAgpJD04d")),
     };
 });
 
+builder.Services.AddAuthorization(auth =>
+    {
+        auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+            .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser().Build());
+    });
 
-//register role based authorization for 3 roles
+
+// Optional: Register role-based authorization policies 
+/*
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireDriverRole", policy => policy.RequireRole("Driver"));
     options.AddPolicy("RequireManagerRole", policy => policy.RequireRole("Manager"));
     options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
 });
-
-var app = builder.Build();
-
-//enable jwt token
-app.UseAuthentication();
-
-app.UseHttpsRedirection();
-
-
-app.UseAuthorization();
-
-
-app.MapControllers();
-
-//minimal api
-/*Routing
-app.MapGet("/signIn", () =>
-{
-   return "Signing in!";
-});
-
-app.MapPost("/register/{userName}", (RegistrationModel registration) =>
-{
-    return $"Signing Up! {registration.userName} with password: {registration.password}";
-});
 */
 
+// Build the application
+var app = builder.Build();
 
+// Enable HTTPS redirection
+app.UseHttpsRedirection();
 
+// Enable JWT authentication
+app.UseAuthentication();
+
+// Enable authorization for secured endpoints
+app.UseAuthorization();
+
+// Map controller endpoints
+app.MapControllers();
+
+// Start the application
 app.Run();
