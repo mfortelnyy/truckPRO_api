@@ -74,7 +74,6 @@ namespace truckPRO_api.Controllers
             }
             catch (Exception ex)
             {
-                // Log or handle the exception as needed
                 return Unauthorized($"Token validation failed: {ex.Message}");
             }
         }
