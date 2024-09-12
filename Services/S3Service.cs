@@ -14,13 +14,15 @@ namespace truckPRO_api.Services
             _bucketName = configuration["AWS:BucketName"];
         }
 
-        public async Task<List<string>> UploadPhotos(IFormFileCollection files)
+        public async Task<List<string>> UploadPhotos(List<IFormFile> files)
         {
             var urls = new List<string>();
-
+            Console.WriteLine($"In Uploading {files.Count}");
             foreach (var file in files)
             {
+                
                 var url = await UploadFileAsync(file);
+                Console.WriteLine(url);
                 urls.Add(url);
 
             }

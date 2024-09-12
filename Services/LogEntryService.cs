@@ -56,7 +56,7 @@ namespace truckPRO_api.Services
             //if there is no on duty log 
             if (!await HasActiveOnDuty(userId))
             {
-                return "Cannot create a driving log. The user does not have an active on-duty log. ";
+                throw new InvalidOperationException( "Cannot create a driving log. The user does not have an active on-duty log. ");
             }
 
             //if there is already a driving log
@@ -104,6 +104,61 @@ namespace truckPRO_api.Services
 
         }
 
+
+        public async Task<string> StopDrivingLog(int userId)
+        {
+            //find last driving log
+            LogEntry activeDrivingLog = await context.LogEntry.Where(u => u.UserId == userId && 
+                                                                              u.LogEntryType == LogEntryType.Driving &&
+                                                                              u.EndTime == null)
+                                                         .OrderByDescending(u => u.StartTime)
+                                                         .FirstAsync() ?? throw new InvalidOperationException("No Active Driving Log Found!");
+            // if found then update it's endtime
+            activeDrivingLog.EndTime = DateTime.Now;
+            context.Update(activeDrivingLog);
+            await context.SaveChangesAsync();
+
+            return $"Driving Log with {activeDrivingLog.Id} Ended";
+        }
+
+        public async Task<string> StopOnDutyLog(int userId)
+        {
+            //find last on duty log
+            LogEntry activeOnDutyLog = await context.LogEntry.Where(u => u.UserId == userId &&
+                                                                              u.LogEntryType == LogEntryType.OnDuty &&
+                                                                              u.EndTime == null)
+                                                         .OrderByDescending(u => u.StartTime)
+                                                         .FirstAsync() ?? throw new InvalidOperationException("No On Duty Log Found!");
+            // if found then update it's endtime
+            activeOnDutyLog.EndTime = DateTime.Now;
+            context.Update(activeOnDutyLog);
+            await context.SaveChangesAsync();
+
+            return $"On Duty Log with {activeOnDutyLog.Id} Ended";
+        }
+
+        public async Task<string> StopOffDutyLog(int userId)
+        {
+            //find last off Duty log
+            Console.WriteLine(userId);
+
+            LogEntry activeOffDutyLog = await context.LogEntry.Where(u => u.UserId == userId &&
+                                                                              u.LogEntryType == LogEntryType.OffDuty &&
+                                                                              u.EndTime == null)
+                                                         .OrderByDescending(u => u.StartTime)
+                                                         .FirstOrDefaultAsync() ?? throw new InvalidOperationException("No Off Duty Log Found!");
+            // if found then update it's endtime
+            Console.WriteLine(activeOffDutyLog.StartTime);
+            activeOffDutyLog.EndTime = DateTime.Now;
+            context.Update(activeOffDutyLog);
+            await context.SaveChangesAsync();
+
+            return $"Off Duty Log with {activeOffDutyLog.Id} Ended";
+        }
+
+
+
+        //Validation Methods
         //Checks to validate if the log can be added
         private async Task<bool> HasActiveOnDutyOrDrivingLog(int userId)
 
@@ -209,7 +264,6 @@ namespace truckPRO_api.Services
                                                 u.LogEntryType == LogEntryType.OffDuty &&
                                                 u.EndTime == null); 
         }
-
 
     }
 }

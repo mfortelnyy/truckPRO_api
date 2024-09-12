@@ -21,14 +21,14 @@ namespace truckPRO_api.Controllers
         [HttpPost]
         [Route("uploadPhotos")]
         [Authorize(Roles = "Driver")]
-        public async Task<IActionResult> UploadPhotos([FromForm] IFormFileCollection images)
+        public async Task<IActionResult> UploadPhotos([FromForm] List<IFormFile> images)
         {
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
             List<string> imageUrls = await _s3Service.UploadPhotos(images);
             if (imageUrls.Count == 0)
             {
-                return NotFound("Api failed");
+                return Conflict("Api failed");
             }
             else
             {
@@ -87,12 +87,13 @@ namespace truckPRO_api.Controllers
         [HttpPost]
         [Route("createDrivingLog")]
         [Authorize(Roles = "Driver")]
-        public async Task<IActionResult> CreateDrivingLog([FromForm] IFormFileCollection images)
+        public async Task<IActionResult> CreateDrivingLog([FromForm] List<IFormFile> images)
         {
+            string res = "";
             try
             {
                 var userId = User.FindFirst("userId").Value;
-
+                
 
                 //Console.WriteLine($"userId :   {userId}");
 
@@ -119,8 +120,8 @@ namespace truckPRO_api.Controllers
 
                 };
 
-                var res = await _logEntryService.CreateDrivingLog(logEntry);
-                return Ok($"DrivingLogEntry with id {res} was added");
+                res = await _logEntryService.CreateDrivingLog(logEntry);
+                
             }
             catch (InvalidOperationException ex)
             {
@@ -130,6 +131,7 @@ namespace truckPRO_api.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
+            return Ok($"DrivingLogEntry with id {res} was added");
         }
 
 
