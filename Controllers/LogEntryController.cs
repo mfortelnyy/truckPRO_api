@@ -16,7 +16,7 @@ namespace truckPRO_api.Controllers
         private readonly ILogEntryService _logEntryService = logEntryService;
 
 
-        
+
         //test endpoint
         [HttpPost]
         [Route("uploadPhotos")]
@@ -24,7 +24,7 @@ namespace truckPRO_api.Controllers
         public async Task<IActionResult> UploadPhotos([FromForm] IFormFileCollection images)
         {
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-       
+
             List<string> imageUrls = await _s3Service.UploadPhotos(images);
             if (imageUrls.Count == 0)
             {
@@ -33,7 +33,7 @@ namespace truckPRO_api.Controllers
             else
             {
                 return Ok(imageUrls);
-            }   
+            }
         }
 
 
@@ -53,7 +53,7 @@ namespace truckPRO_api.Controllers
                 }
 
 
-                LogEntry logEntry = new ()
+                LogEntry logEntry = new()
                 {
                     UserId = int.Parse(userId),
                     StartTime = DateTime.Now,
@@ -70,7 +70,7 @@ namespace truckPRO_api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                 return Conflict(ex.Message);
+                return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
@@ -92,11 +92,11 @@ namespace truckPRO_api.Controllers
             try
             {
                 var userId = User.FindFirst("userId").Value;
-                
+
 
                 //Console.WriteLine($"userId :   {userId}");
 
-                if (string.IsNullOrEmpty(userId)) 
+                if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized("User ID not found in the token.");
                 }
@@ -109,7 +109,7 @@ namespace truckPRO_api.Controllers
 
                 // Validate and process the driving log entry
 
-                LogEntry logEntry = new ()
+                LogEntry logEntry = new()
                 {
                     UserId = int.Parse(userId),
                     StartTime = DateTime.Now,
@@ -141,7 +141,7 @@ namespace truckPRO_api.Controllers
             try
             {
                 var userId = User.FindFirst("userId").Value;
-                
+
 
                 if (string.IsNullOrEmpty(userId))
                 {
@@ -167,6 +167,90 @@ namespace truckPRO_api.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+
+        [HttpPost]
+        [Route("stopDrivingLog")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> StopDrivingLog()
+        {
+            try
+            {
+                var userId = User.FindFirst("userId").Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+                var result = await _logEntryService.StopDrivingLog(int.Parse(userId));
+                return Ok(result);
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPost]
+        [Route("stopOnDutyLog")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> StopOnDutyLog()
+        {
+            try
+            {
+                var userId = User.FindFirst("userId").Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+                var result = await _logEntryService.StopOnDutyLog(int.Parse(userId));
+                return Ok(result);
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPost]
+        [Route("stopOffDutyLog")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> StopOffDutyLog()
+        {
+            try
+            {
+                var userId = User.FindFirst("userId").Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+                var result = await _logEntryService.StopOffDutyLog(int.Parse(userId));
+                return Ok(result);
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }
