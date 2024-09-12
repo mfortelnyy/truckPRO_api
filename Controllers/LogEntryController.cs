@@ -42,29 +42,40 @@ namespace truckPRO_api.Controllers
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> CreateOnDutyLog()
         {
-            //Get userid form token
-            var userId = User.FindFirst("userId").Value;
-
-            if (string.IsNullOrEmpty(userId))
+            try
             {
-                return Unauthorized("User ID not found in the token.");
+                //Get userid form token
+                var userId = User.FindFirst("userId").Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+
+                LogEntry logEntry = new LogEntry
+                {
+                    UserId = int.Parse(userId),
+                    StartTime = DateTime.Now,
+                    EndTime = null,
+                    LogEntryType = LogEntryType.OnDuty,
+                    ImageUrls = null,
+
+                };
+                var result = await _logEntryService.CreateOnDutyLog(logEntry);
+
+
+                //Console.WriteLine(userId);
+                return Ok($"OnDutyLogEntry with id {result} was added");
             }
-
-
-            LogEntry logEntry = new LogEntry
+            catch (InvalidOperationException ex)
             {
-                UserId = int.Parse(userId),
-                StartTime = DateTime.Now,
-                EndTime = null,
-                LogEntryType = LogEntryType.OnDuty,
-                ImageUrls = null,
-
-            };
-             var result = await _logEntryService.CreateOnDutyLog(logEntry);
-
-
-            Console.WriteLine(userId);
-            return Ok(result);
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
 
@@ -78,6 +89,52 @@ namespace truckPRO_api.Controllers
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> CreateDrivingLog([FromForm] IFormFileCollection images)
         {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+                List<string> imageUrls = await _s3Service.UploadPhotos(images);
+                if (imageUrls.Count == 0)
+                {
+                    return NotFound("Image upload failed");
+                }
+
+                // Validate and process the driving log entry
+
+                LogEntry logEntry = new LogEntry
+                {
+                    UserId = int.Parse(userId),
+                    StartTime = DateTime.Now,
+                    EndTime = null,
+                    LogEntryType = LogEntryType.Driving,
+                    ImageUrls = imageUrls,
+
+                };
+
+                var res = _logEntryService.CreateDrivingLog(logEntry);
+                return Ok($"DrivingLogEntry with id {res} was added");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+
+        [HttpPost]
+        [Route("createBreakLog")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> CreateBreakLog()
+        {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
@@ -85,15 +142,19 @@ namespace truckPRO_api.Controllers
                 return Unauthorized("User ID not found in the token.");
             }
 
-            List<string> imageUrls = await _s3Service.UploadPhotos(images);
-            if (imageUrls.Count == 0)
+            LogEntry logEntry = new LogEntry
             {
-                return NotFound("Image upload failed");
-            }
+                UserId = int.Parse(userId),
+                StartTime = DateTime.Now,
+                EndTime = null,
+                LogEntryType = LogEntryType.Break,
+                ImageUrls = null,
+            };
 
-            // Validate and process the driving log entry
-            var res = _logEntryService.CreateDrivingLog();
-            return Ok();
+            var res = _logEntryService.CreateBreakLog(logEntry);
+            return Ok(res);
+
+
         }
     }
 }
