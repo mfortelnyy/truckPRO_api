@@ -15,12 +15,29 @@ namespace truckPRO_api.Services
 
             if (!await HasActiveOnDutyOrDrivingLog(userId))
             {
-                throw new Exception("Cannot create a break log. The user does not have an active on-duty or driving log.");
+                throw new InvalidOperationException("Cannot create a Duty Off log. The user does not have an active on-duty or driving log.");
             }
             if (await HasActiveOffDutyLog(userId))
             {
-                throw new Exception("Cannot create a break log. The user is currently on the break");
+                throw new InvalidOperationException("Cannot create a Duty Off log. The user is currently OFF Duty");
             }
+            var activeLogEntryDriving = await context.LogEntry
+                                                     .Where(logEntry => userId == logEntry.UserId &&
+                                                                        
+                                                                     (logEntry.LogEntryType == LogEntryType.OnDuty ||
+                                                                     logEntry.LogEntryType == LogEntryType.Driving) &&
+                                                                     logEntry.EndTime == null)
+                                                     .ToListAsync();
+           
+            
+            //ends all active logs
+            foreach (var le in activeLogEntryDriving)
+            {
+             le.EndTime = DateTime.Now;
+             context.LogEntry.Update(le);  
+                
+            }
+
 
             context.Add(logEntry);
             await context.SaveChangesAsync();
@@ -81,27 +98,31 @@ namespace truckPRO_api.Services
             context.LogEntry.Add(logEntry);
             await context.SaveChangesAsync();
 
+
+
             return logEntry.Id.ToString();
 
         }
 
         //Checks to validate if the log can be added
         private async Task<bool> HasActiveOnDutyOrDrivingLog(int userId)
-        {
-            return await context.LogEntry.AnyAsync(u => u.UserId == userId &&
-                                                                  (u.LogEntryType == LogEntryType.OnDuty || u.LogEntryType == LogEntryType.Driving) &&
-                                                                  u.EndTime == null);
+
+        { 
+            Console.WriteLine($"userid   {userId}");
+            return await context.LogEntry.AnyAsync(logEntry => logEntry.UserId == userId &&
+                                                                  (logEntry.LogEntryType == LogEntryType.OnDuty || logEntry.LogEntryType == LogEntryType.Driving) &&
+                                                                  logEntry.EndTime == null);
         }
 
         private async Task<bool> IsValidStartTimeAfterBreak(int userId)
 
         {
             var allOffDuty = await context.LogEntry
-                                          .Where(u => u.UserId == userId && u.LogEntryType == LogEntryType.OffDuty).ToListAsync();
+                                          .Where(logEntry => logEntry.UserId == userId && logEntry.LogEntryType == LogEntryType.OffDuty).ToListAsync();
 
             var activeOffDuty = await context.LogEntry
-                                          .Where(u => u.UserId == userId && u.LogEntryType == LogEntryType.OffDuty && u.EndTime == null)
-                                          .OrderByDescending(u => u.StartTime)
+                                          .Where(logEntry => logEntry.UserId == userId && logEntry.LogEntryType == LogEntryType.OffDuty && logEntry.EndTime == null)
+                                          .OrderByDescending(logEntry => logEntry.StartTime)
                                           .FirstOrDefaultAsync();
 
             //ensures that new drivers can start their shift

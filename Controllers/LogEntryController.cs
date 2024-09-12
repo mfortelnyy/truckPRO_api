@@ -24,7 +24,7 @@ namespace truckPRO_api.Controllers
         public async Task<IActionResult> UploadPhotos([FromForm] IFormFileCollection images)
         {
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-            Console.WriteLine(token);
+       
             List<string> imageUrls = await _s3Service.UploadPhotos(images);
             if (imageUrls.Count == 0)
             {
@@ -70,7 +70,7 @@ namespace truckPRO_api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                 return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
@@ -91,15 +91,18 @@ namespace truckPRO_api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userId = User.FindFirst("userId").Value;
+                
 
-                if (string.IsNullOrEmpty(userId))
+                //Console.WriteLine($"userId :   {userId}");
+
+                if (string.IsNullOrEmpty(userId)) 
                 {
                     return Unauthorized("User ID not found in the token.");
                 }
 
                 List<string> imageUrls = await _s3Service.UploadPhotos(images);
-                if (imageUrls.Count == 0)
+                if (imageUrls.Count < 0)
                 {
                     return NotFound("Image upload failed");
                 }
@@ -116,12 +119,12 @@ namespace truckPRO_api.Controllers
 
                 };
 
-                var res = _logEntryService.CreateDrivingLog(logEntry);
+                var res = await _logEntryService.CreateDrivingLog(logEntry);
                 return Ok($"DrivingLogEntry with id {res} was added");
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
@@ -137,7 +140,8 @@ namespace truckPRO_api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userId = User.FindFirst("userId").Value;
+                
 
                 if (string.IsNullOrEmpty(userId))
                 {
@@ -149,7 +153,7 @@ namespace truckPRO_api.Controllers
                     UserId = int.Parse(userId),
                     StartTime = DateTime.Now,
                     EndTime = null,
-                    LogEntryType = LogEntryType.Break,
+                    LogEntryType = LogEntryType.OffDuty,
                     ImageUrls = null,
                 };
 
@@ -158,7 +162,7 @@ namespace truckPRO_api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
