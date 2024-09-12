@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Graph.Models;
 using truckPRO_api.Data;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
@@ -8,9 +9,22 @@ namespace truckPRO_api.Services
 {
     public class LogEntryService(ApplicationDbContext context) : ILogEntryService
     {
-        public async Task<string> CreateBreakLog(LogEntry logEntry)
+        public async Task<string> CreateOffDutyLog(LogEntry logEntry)
         {
-            throw new NotImplementedException();
+            var userId = logEntry.UserId;
+
+            if (!await HasActiveOnDutyOrDrivingLog(userId))
+            {
+                throw new Exception("Cannot create a break log. The user does not have an active on-duty or driving log.");
+            }
+            if (await HasActiveOffDutyLog(userId))
+            {
+                throw new Exception("Cannot create a break log. The user is currently on the break");
+            }
+
+            context.Add(logEntry);
+            await context.SaveChangesAsync();
+            return logEntry.Id.ToString();
         }
 
         public async Task<string> CreateCycleLog(LogEntry logEntry)
@@ -57,10 +71,10 @@ namespace truckPRO_api.Services
                 throw new InvalidOperationException("User has already has an active on-duty or driving log!");
             }
 
-            //check if on duty is started after the 10 hour break
+            //check if on duty is started after the 10 hour off-duty
             if (await IsValidStartTimeAfterBreak(userId))
             {
-                throw new InvalidOperationException("On-duty log entry cannot start before completing the required break period. (10 hours)");
+                throw new InvalidOperationException("On-duty log entry cannot start before completing the required off duty period. (10 hours)");
             }
 
             //if all checks are passed then create and save logentry to db
@@ -82,18 +96,18 @@ namespace truckPRO_api.Services
         private async Task<bool> IsValidStartTimeAfterBreak(int userId)
 
         {
-            var allBreaks = await context.LogEntry
-                                          .Where(u => u.UserId == userId && u.LogEntryType == LogEntryType.Break).ToListAsync();
+            var allOffDuty = await context.LogEntry
+                                          .Where(u => u.UserId == userId && u.LogEntryType == LogEntryType.OffDuty).ToListAsync();
 
-            var activeBreak = await context.LogEntry
-                                          .Where(u => u.UserId == userId && u.LogEntryType == LogEntryType.Break && u.EndTime == null)
+            var activeOffDuty = await context.LogEntry
+                                          .Where(u => u.UserId == userId && u.LogEntryType == LogEntryType.OffDuty && u.EndTime == null)
                                           .OrderByDescending(u => u.StartTime)
                                           .FirstOrDefaultAsync();
 
             //ensures that new drivers can start their shift
-            if (activeBreak != null)
+            if (activeOffDuty != null)
             {
-                var breakDuration = DateTime.Now - activeBreak.StartTime;
+                var breakDuration = DateTime.Now - activeOffDuty.StartTime;
                 if (breakDuration < TimeSpan.FromHours(10))
                 {
                     return false; //"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.";
@@ -101,8 +115,8 @@ namespace truckPRO_api.Services
                 else
                 {
                     // update the end time of the break log to now
-                    activeBreak.EndTime = DateTime.Now;
-                    context.LogEntry.Update(activeBreak);
+                    activeOffDuty.EndTime = DateTime.Now;
+                    context.LogEntry.Update(activeOffDuty);
                     await context.SaveChangesAsync();
                     // break duration is ended when on duty is strated
                     return true; 
@@ -110,7 +124,7 @@ namespace truckPRO_api.Services
 
             }
             //enusres new drivers can start the log
-            else if(activeBreak == null && allBreaks == null) return true;
+            else if(activeOffDuty == null && allOffDuty == null) return true;
             else return false;
         }
 
@@ -166,6 +180,13 @@ namespace truckPRO_api.Services
 
             //if any other type of logentry is last then no driving is allowed
             return false;
+        }
+
+        private async Task<bool> HasActiveOffDutyLog(int userId)
+        {
+            return await context.LogEntry.AnyAsync(u => u.UserId == userId &&
+                                                u.LogEntryType == LogEntryType.OffDuty &&
+                                                u.EndTime == null); 
         }
 
 

@@ -7,7 +7,7 @@ namespace truckPRO_api.Services
     {
         public Task<string> CreateDrivingLog(LogEntry logEntry);
         public Task<string> CreateOnDutyLog(LogEntry logEntry);
-        public Task<string> CreateBreakLog(LogEntry logEntry);
+        public Task<string> CreateOffDutyLog(LogEntry logEntry);
         public Task<string> CreateCycleLog(LogEntry logEntry);
 
 

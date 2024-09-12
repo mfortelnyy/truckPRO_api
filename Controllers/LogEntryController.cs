@@ -53,7 +53,7 @@ namespace truckPRO_api.Controllers
                 }
 
 
-                LogEntry logEntry = new LogEntry
+                LogEntry logEntry = new ()
                 {
                     UserId = int.Parse(userId),
                     StartTime = DateTime.Now,
@@ -106,7 +106,7 @@ namespace truckPRO_api.Controllers
 
                 // Validate and process the driving log entry
 
-                LogEntry logEntry = new LogEntry
+                LogEntry logEntry = new ()
                 {
                     UserId = int.Parse(userId),
                     StartTime = DateTime.Now,
@@ -131,30 +131,39 @@ namespace truckPRO_api.Controllers
 
 
         [HttpPost]
-        [Route("createBreakLog")]
+        [Route("createOffDutyLog")]
         [Authorize(Roles = "Driver")]
-        public async Task<IActionResult> CreateBreakLog()
+        public async Task<IActionResult> CreateOffDutyLog()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
+            try
             {
-                return Unauthorized("User ID not found in the token.");
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+                LogEntry logEntry = new()
+                {
+                    UserId = int.Parse(userId),
+                    StartTime = DateTime.Now,
+                    EndTime = null,
+                    LogEntryType = LogEntryType.Break,
+                    ImageUrls = null,
+                };
+
+                var res = await _logEntryService.CreateOffDutyLog(logEntry);
+                return Ok($"Off Duty log with id {res} was added");
             }
-
-            LogEntry logEntry = new LogEntry
+            catch (InvalidOperationException ex)
             {
-                UserId = int.Parse(userId),
-                StartTime = DateTime.Now,
-                EndTime = null,
-                LogEntryType = LogEntryType.Break,
-                ImageUrls = null,
-            };
-
-            var res = _logEntryService.CreateBreakLog(logEntry);
-            return Ok(res);
-
-
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
     }
 }
