@@ -2,8 +2,8 @@
 {
     public enum UserRole
     {
-        Admin, 
-        Manager,
-        Driver
+        Admin = 0, 
+        Manager = 1,
+        Driver = 2,
     }
 }

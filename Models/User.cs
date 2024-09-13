@@ -30,8 +30,8 @@ namespace truckPRO_api.Models
 
         //foreign key -> company
         [ForeignKey("CompanyId")]
-        public int CompanyId { get; set; }
-        public Company Company { get; set; }
+        public int? CompanyId { get; set; }
+        public Company? Company { get; set; }
 
 
 

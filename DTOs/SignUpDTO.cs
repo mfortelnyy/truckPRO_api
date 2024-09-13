@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using truckPRO_api.Models;
 
 namespace truckPRO_api.DTOs
 {
@@ -20,8 +21,10 @@ namespace truckPRO_api.DTOs
         [Required]
         public string Email { get; set; }
         [Required]
-        public string Phone { get; set; }
+        [EnumDataType(typeof(UserRole))]
+        public int Role { get; set; }
         [Required]
-        public int CompanyId { get; set; }
+        public string Phone { get; set; }
+        public int? CompanyId { get; set; }
     }
 }

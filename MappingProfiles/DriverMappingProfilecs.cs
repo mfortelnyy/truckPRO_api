@@ -15,7 +15,7 @@ namespace truckPRO_api.MappingProfiles
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password))
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => UserRole.Driver)) // Default role  - driver
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => (UserRole) src.Role)) 
                 .ForMember(dest => dest.Company, opt => opt.Ignore()) // Company is not set by the driver
                 .ForMember(dest => dest.CompanyId, opt => opt.MapFrom(src => src.CompanyId));
         }
