@@ -46,6 +46,7 @@ builder.Services.AddScoped<ILogEntryService, LogEntryService>();
 
 builder.Services.AddScoped<IManagerService, ManagerService>();
 
+
 // Retrieve the JWT key from configuration
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrEmpty(jwtKey))
@@ -84,15 +85,6 @@ builder.Services.AddAuthorization(auth =>
     });
 
 
-// Optional: Register role-based authorization policies 
-/*
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("RequireDriverRole", policy => policy.RequireRole("Driver"));
-    options.AddPolicy("RequireManagerRole", policy => policy.RequireRole("Manager"));
-    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
-});
-*/
 
 // Build the application
 var app = builder.Build();

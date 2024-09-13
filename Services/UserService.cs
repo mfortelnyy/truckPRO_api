@@ -30,13 +30,13 @@ namespace truckPRO_api.Services
                 throw new Exception("User already exists.");
             }
 
-            User newDriver = _mapper.Map<User>(signUpDTO);
+            User newUser = _mapper.Map<User>(signUpDTO);
             //hash password from signupDTO to User for db  
-            newDriver.Password = _passwordHasher.HashPassword(newDriver, signUpDTO.Password);
+            newUser.Password = _passwordHasher.HashPassword(newUser, signUpDTO.Password);
 
-            await _context.User.AddAsync(newDriver);
+            await _context.User.AddAsync(newUser);
             await _context.SaveChangesAsync();
-            return $"Driver with email {newDriver.Email} was succesfully registered" ;
+            return $"{newUser.Role} with email {newUser.Email} was succesfully registered" ;
         }
 
         public async Task<string> LoginUserAsync(LoginDTO loginDTO)
