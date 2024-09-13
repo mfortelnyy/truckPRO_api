@@ -83,7 +83,8 @@ namespace truckPRO_api.Services
                 //adds a custom claim representing the user's role
                 //allows to enforce role-based authorization
                 new Claim(ClaimTypes.Role, user.Role.ToString()),
-                new Claim("userId", user.Id.ToString())
+                new Claim("userId", user.Id.ToString()),
+                new Claim("companyId", user.CompanyId.ToString())
 
             };
 

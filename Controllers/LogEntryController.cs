@@ -103,9 +103,9 @@ namespace truckPRO_api.Controllers
                 }
 
                 List<string> imageUrls = await _s3Service.UploadPhotos(images);
-                if (imageUrls.Count < 0)
+                if (imageUrls.Count == 0)
                 {
-                    return NotFound("Image upload failed");
+                    return Conflict("Image upload failed");
                 }
 
                 // Validate and process the driving log entry

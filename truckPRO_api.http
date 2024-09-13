@@ -9,7 +9,7 @@ POST {{truckPRO_api_HostAddress}}/Login
 Content-Type: application/json
 
 {
-   "email": "fort@example.com",
+   "email": "manager@example.com",
    "password": "SecurePassword123!"
 }
 
@@ -20,11 +20,13 @@ Content-Type: application/json
 
 {
   
-  "FirstName": "John",
-  "LastName": "Doe",
-  "Email": "john.doe@example.com",
+  "FirstName": "Manager",
+  "LastName": "DManageroe",
+  "Email": "manager@example.com",
   "Password": "SecurePassword123!",
-  "Role": "Driver",
+  "Phone": "3128383865",
+  "ConfirmPassword": "SecurePassword123!",
+  "Role": "Manager",
   "CompanyId": 1
 
 
@@ -54,7 +56,7 @@ Content-Type: application/json
 
 ###
 POST {{truckPRO_api_HostAddress}}/CreateOnDutyLog
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb3J0QGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiRHJpdmVyIiwidXNlcklkIjoiNCIsImV4cCI6MTcyNjE3OTY4MCwiaXNzIjoiSnd0SXNzdWVyIiwiYXVkIjoiSnd0QXVkaWVuY2UifQ.vAKZz9av5lMsJmL1E105-5rQ78r_n53bEs8UVo-_UGo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmb3J0QGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiRHJpdmVyIiwidXNlcklkIjoiNCIsImV4cCI6MTcyNjE4NDA0MSwiaXNzIjoiSnd0SXNzdWVyIiwiYXVkIjoiSnd0QXVkaWVuY2UifQ.M-xqondXicPRZcdXtF4izhdjI0ELlbTmMq23YwkXra0
 Content-Type: application/json
 {
 
@@ -98,3 +100,13 @@ Content-Type: application/json
 {
 
 }
+### 
+
+GET {{truckPRO_api_HostAddress}}/AllDriversByCompany
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtYW5hZ2VyQGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiTWFuYWdlciIsInVzZXJJZCI6IjciLCJjb21wYW55SWQiOiIxIiwiZXhwIjoxNzI2MTg5MjE2LCJpc3MiOiJKd3RJc3N1ZXIiLCJhdWQiOiJKd3RBdWRpZW5jZSJ9.WXqZX_qbU_tAZberQPCwApXj9qyccyExUSjMJLJyq9Y
+Content-Type: application/json
+{
+
+}
+### 
+
