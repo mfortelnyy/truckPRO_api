@@ -5,14 +5,14 @@ using truckPRO_api.Services;
 
 namespace truckPRO_api.Models
 {
-    
+
     [ApiController]
     public class ManagerController(IManagerService _managerService) : ControllerBase
     {
 
         [HttpGet]
         [Authorize(Roles = "Manager")]
-        [Route("AllDriversByCompany")]
+        [Route("allDriversByCompany")]
         public async Task<IActionResult> GetAllDriversByCompany()
         {
             try
@@ -22,7 +22,7 @@ namespace truckPRO_api.Models
                 var drivers = await _managerService.GetAllDriversByCompany(companyId);
                 if (drivers == null || drivers.Count == 0)
                 {
-                    return NoContent();
+                    return NotFound("Sorry, no drivers found in your company!");
                 }
                 return Ok(drivers);
             }
@@ -32,5 +32,25 @@ namespace truckPRO_api.Models
             }
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Manager")]
+        [Route("allLogsByDriver")]
+        public async Task<IActionResult> GetAllLogsByDriver(int driverId)
+        {
+            try
+            {
+                var companyId = int.Parse(User.FindFirst("companyId").Value);
+                var allLogs = await _managerService.GetLogsByDriver(driverId, companyId);
+                if (allLogs == null || allLogs.Count == 00)
+                {
+                    return NotFound("Sorry, driver has no logs at this moment!");
+                }
+                return Ok(allLogs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

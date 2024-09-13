@@ -12,9 +12,11 @@ namespace truckPRO_api.Services
             return AllDrivers;
         }
 
-        public async Task<List<LogEntry>> GetLogsByDriver(int DriverId)
+        public async Task<List<LogEntry>> GetLogsByDriver(int driverId, int companyId)
         {
-            var AllLogs = context.LogEntry.Where(u=> u.UserId == DriverId).ToList();
+            //ensure that companyid for manager and user is the same
+            var AllLogs = context.LogEntry.Where(u=> u.UserId == driverId &&
+                                                              u.User.CompanyId == companyId).ToList();
             return AllLogs;
         }
     }
