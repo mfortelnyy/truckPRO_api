@@ -39,28 +39,39 @@ namespace truckPRO_api.Controllers
         [Route("SignUp")]
         public async Task<IActionResult> SignUp([FromBody] SignUpDTO SignUpDTO)
         {
-            var role = (UserRole)SignUpDTO.Role;
-            if ((role == UserRole.Admin || role == UserRole.Manager) && !SignUpDTO.CompanyId.HasValue)
+            try
             {
-                return BadRequest("CompanyId is required for drivers.");
-            }
-
-            if (role != UserRole.Admin && role != UserRole.Manager)
-            {
-                //if model is not valid then the request is bad - 400
-                if (!ModelState.IsValid)
+                var role = (UserRole)SignUpDTO.Role;
+                if ((role == UserRole.Admin || role == UserRole.Manager) && !SignUpDTO.CompanyId.HasValue)
                 {
-                    return BadRequest(ModelState);
+                    return BadRequest("CompanyId is required for drivers.");
                 }
 
-                
-                string result = await _userService.CreateUserAsync(SignUpDTO);
-                await _emailService.SendEmailAsync(email: SignUpDTO.Email, subject: "Registration", message: "You are registered!");
-                if (result != null) return Ok(result);
-                return BadRequest();
+                if (role != UserRole.Admin && role != UserRole.Manager)
+                {
+                    //if model is not valid then the request is bad - 400
+                    if (!ModelState.IsValid)
+                    {
+                        return BadRequest(ModelState);
+                    }
+
+
+                    string result = await _userService.CreateUserAsync(SignUpDTO);
+                    await _emailService.SendEmailAsync(email: SignUpDTO.Email, subject: "Registration", message: "You are registered!");
+                    if (result != null) return Ok(result);
+                    return BadRequest();
+                }
+                //ensures admin can not be created
+                else return Unauthorized($"User with role {role.ToString()} can not be created");
             }
-            //ensures admin can not be created
-            else return Unauthorized($"User with role {role.ToString()} can not be created");
+            catch (InvalidOperationException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
 
         }

@@ -27,7 +27,7 @@ namespace truckPRO_api.Services
             var userExists = await _context.User.AnyAsync(u => u.Email == signUpDTO.Email);
             if (userExists)
             {
-                throw new Exception("User already exists.");
+                throw new InvalidOperationException("User already exists.");
             }
 
             User newUser = _mapper.Map<User>(signUpDTO);
