@@ -12,10 +12,12 @@ namespace truckPRO_api.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IEmailService emailService)
         {
             _userService = userService;
+            _emailService = emailService;
         }
 
         [HttpPost]
@@ -37,27 +39,33 @@ namespace truckPRO_api.Controllers
         [Route("SignUp")]
         public async Task<IActionResult> SignUp([FromBody] SignUpDTO SignUpDTO)
         {
-            if (SignUpDTO.Role != 0)
+            var role = (UserRole)SignUpDTO.Role;
+            if ((role == UserRole.Admin || role == UserRole.Manager) && !SignUpDTO.CompanyId.HasValue)
             {
-                if ((SignUpDTO.Role == 1 || SignUpDTO.Role == 2) && !SignUpDTO.CompanyId.HasValue)
-                {
-                    return BadRequest("CompanyId is required for drivers.");
-                }
+                return BadRequest("CompanyId is required for drivers.");
+            }
 
+            if (role != UserRole.Admin && role != UserRole.Manager)
+            {
                 //if model is not valid then the request is bad - 400
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
 
+                
                 string result = await _userService.CreateUserAsync(SignUpDTO);
+                await _emailService.SendEmailAsync(email: SignUpDTO.Email, subject: "Registration", message: "You are registered!");
                 if (result != null) return Ok(result);
                 return BadRequest();
             }
             //ensures admin can not be created
-            else return Unauthorized("admin can not be created");
+            else return Unauthorized($"User with role {role.ToString()} can not be created");
+
 
         }
+
+
 
         [HttpPost]
         [Route("signUpManager")]

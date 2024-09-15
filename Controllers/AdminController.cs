@@ -6,7 +6,6 @@ namespace truckPRO_api.Controllers
 {
     public class AdminController(IAdminService adminService) : Controller
     {
-
-
+        public IAdminService AdminService { get; } = adminService;
     }
 }
