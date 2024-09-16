@@ -8,7 +8,7 @@ namespace truckPRO_api.DTOs
 
         [Required]
         [MinLength(2), MaxLength(50)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         //public List<User> users { get; set; }   
     }
