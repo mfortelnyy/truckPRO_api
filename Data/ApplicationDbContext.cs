@@ -11,5 +11,5 @@ namespace truckPRO_api.Data
         public DbSet<Company> Company { get; set; }
         public DbSet<LogEntry> LogEntry { get; set; }
     }
-    
+
 }
