@@ -20,5 +20,10 @@ namespace truckPRO_api.Services
                                                               u.User.CompanyId == companyId).ToListAsync();
             return AllLogs;
         }
+
+        public async Task<string> AddDriverByCompanyId(int companyID)
+        {
+            return ""; 
+        }
     }
 }

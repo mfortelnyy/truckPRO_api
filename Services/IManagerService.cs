@@ -6,6 +6,7 @@ namespace truckPRO_api.Services
     {
         public Task<List<User>> GetAllDriversByCompany(int companyId);
         public Task<List<LogEntry>> GetLogsByDriver(int driverId, int companyId);
+        public Task<string> AddDriverByCompanyId(int companyId);
 
     }
 }
