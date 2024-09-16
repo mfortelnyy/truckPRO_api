@@ -52,7 +52,7 @@ namespace truckPRO_api.Services
         public async Task<string> LoginUserAsync(LoginDTO loginDTO)
         {
             //retrieve driver from the db by the email provided
-            var driver =  _context.User.FirstOrDefault(dr => dr.Email == loginDTO.Email);
+            var driver =  await _context.User.FirstOrDefaultAsync(dr => dr.Email == loginDTO.Email);
             
             //if there is no driver with indicated email then return message
             if (driver == null)

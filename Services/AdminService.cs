@@ -7,43 +7,57 @@ using truckPRO_api.Models;
 
 namespace truckPRO_api.Services
 {
-    public class AdminService(ApplicationDbContext context, IMapper mapper) : IAdminService
+    public class AdminService(ApplicationDbContext context) : IAdminService
     {
         public async Task<List<Company>> GetAllComapnies()
         {
-            var companies = context.Company.Where(c => c.Id > 0).ToList();
+            var companies = await context.Company.Where(c => c.Id > 0).ToListAsync();
             return companies;
         }
 
         public async Task<List<User>> GetAllDrivers()
         {
-            var allDrivers = context.User.Where(u => u.Role == UserRole.Driver).ToList(); 
+            var allDrivers = await context.User.Where(u => u.Role == UserRole.Driver).ToListAsync(); 
             return allDrivers;
            
         }
 
         public async Task<User> GetDriverById(int id)
         {
-            var driver = context.User.Where(u =>u.Id == id).FirstOrDefault();
+            var driver = await context.User.Where(u =>u.Id == id).FirstOrDefaultAsync();
             return driver;
         }
 
         public async Task<List<User>> GetDriversByComapnyId(int id)
         {
-            var drivers = context.User.Where(u => u.Id == id &&
-                                                  u.Role == UserRole.Driver).ToList();
+            var drivers = await context.User.Where(u => u.Id == id &&
+                                                  u.Role == UserRole.Driver).ToListAsync();
             return drivers;
         }
 
         public async Task<List<LogEntry>> GetLogsByDriverId(int id)
         {
-            var logs = context.LogEntry.Where(log => log.UserId == id).ToList();
+            var logs = await context.LogEntry.Where(log => log.UserId == id).ToListAsync();
             return logs;
         }
 
         public async Task<string> CreateCompany(CompanyDTO companyDTO)
         {
-            return "";
+            var newCompany = new Company()
+            { 
+                Name = companyDTO.Name,
+
+            };
+            Console.WriteLine(newCompany.Name);
+
+            await context.Company.AddAsync(newCompany);
+           
+            await context.SaveChangesAsync();
+
+            //var addedCompany = await context.Company.Where(comp => comp.Name == newCompany.Name ).FirstOrDefaultAsync();
+            return newCompany.Id == 0
+                ? throw new InvalidOperationException("Company can not be added!")
+                : $"Company with id {newCompany.Id} added";
         }
     }
 }

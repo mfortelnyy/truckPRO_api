@@ -44,7 +44,7 @@ namespace truckPRO_api.Services
             return logEntry.Id.ToString();
         }
 
-        public async Task<string> CreateCycleLog(LogEntry logEntry)
+        public Task<string> CreateCycleLog(LogEntry logEntry)
         {
             throw new NotImplementedException();
         }
