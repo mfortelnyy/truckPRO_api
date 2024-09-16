@@ -11,12 +11,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 
 namespace truckPRO_api.Services
 {
     public class UserService(ApplicationDbContext context, IMapper mapper, IPasswordHasher<User> passwordHasher, IConfiguration configuration) : IUserService
     {
+
+        private static readonly Random _random = new Random();
         private readonly ApplicationDbContext _context = context;
         private readonly IMapper _mapper = mapper;
         private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
@@ -31,12 +34,19 @@ namespace truckPRO_api.Services
             }
 
             User newUser = _mapper.Map<User>(signUpDTO);
+            newUser.EmailVerified = false;
+            newUser.EmailVerificationToken = GenerateVerificationToken();
             //hash password from signupDTO to User for db  
             newUser.Password = _passwordHasher.HashPassword(newUser, signUpDTO.Password);
 
             await _context.User.AddAsync(newUser);
             await _context.SaveChangesAsync();
-            return $"{newUser.Role} with email {newUser.Email} was succesfully registered" ;
+            return newUser.EmailVerificationToken; 
+                //$"{newUser.Role} with email {newUser.Email} was succesfully registered" ;
+        }
+        public static string GenerateVerificationToken()
+        {
+            return _random.Next(100000, 999999).ToString();
         }
 
         public async Task<string> LoginUserAsync(LoginDTO loginDTO)
@@ -98,6 +108,22 @@ namespace truckPRO_api.Services
                 );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<string> VerifyEmail(string emailToken)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.EmailVerificationToken == emailToken);
+            Console.WriteLine($"email token: {emailToken}");
+            if (user == null)
+            {
+                throw new InvalidOperationException("Invalid token!");
+            }
+            user.EmailVerified = true;
+            user.EmailVerificationToken = null;
+            await _context.SaveChangesAsync();
+            return "Email verfied Sucefully!";
+
+            
         }
     }
 }

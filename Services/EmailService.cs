@@ -9,10 +9,11 @@ namespace truckPRO_api.Services
 {
     public class EmailService(IConfiguration configuration) : IEmailService
     {
-        public async Task SendEmailAsync(string recieverEmail, string subject, string message)
+
+        public async Task SendEmailAsync(string recieverEmail, string subject, string message, string emailVerificationToken)
         {
             Console.WriteLine($"Here is {configuration["SmtpSettings:Host"]}, {configuration["SmtpSettings:Port"]}, {configuration["SmtpSettings:Username"]}");
-            //setting should come from appsettings.json 
+             
             var sender = new SmtpSender(() => new SmtpClient("localhost")
             {
                 Host = configuration["SmtpSettings:Host"],
@@ -39,10 +40,12 @@ namespace truckPRO_api.Services
                 .From("mfortelnyy1@gmail.com")
                 .To(recieverEmail, "Max")
                 .Subject("Email Verification")
-                .Body("Verification Code: ")
+                .Body($"Verification Code: {emailVerificationToken}")
                 .SendAsync();
-            Console.WriteLine($"Email Successfull:  {email.ErrorMessages.ToString()}");
+            //Console.WriteLine($"Email Successfull:  {email.ErrorMessages.ToString()}");
 
         }
+        
+
     }
 }

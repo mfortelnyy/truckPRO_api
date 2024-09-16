@@ -56,9 +56,9 @@ namespace truckPRO_api.Controllers
                     }
 
 
-                    string result = await _userService.CreateUserAsync(SignUpDTO);
-                    await _emailService.SendEmailAsync(email: SignUpDTO.Email, subject: "Registration", message: "You are registered!");
-                    if (result != null) return Ok(result);
+                    string emailVerificarionToken = await _userService.CreateUserAsync(SignUpDTO);
+                    await _emailService.SendEmailAsync(email: SignUpDTO.Email, subject: "Registration", message: "You are registered", emailVerificarionToken);
+                    if (emailVerificarionToken != null) return Ok(emailVerificarionToken);
                     return BadRequest();
                 }
                 //ensures admin can not be created
@@ -99,6 +99,30 @@ namespace truckPRO_api.Controllers
             return BadRequest();
 
         }
+
+
+        [HttpPost]
+        [Route("/verifyEmail")]
+        public async Task<IActionResult> VerifyEmail([FromQuery] string emailToken)
+        {
+            try
+            {
+                Console.WriteLine($"email token: {emailToken}");
+
+                var result = await _userService.VerifyEmail(emailToken);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+
+        }
+       
 
 
 
