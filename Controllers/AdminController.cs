@@ -61,13 +61,17 @@ namespace truckPRO_api.Controllers
             return Ok(logs);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("/adm/createCompany")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCompany([FromBody] CompanyDTO companyDTO)
         {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var res = await adminService.CreateCompany(companyDTO);
-            if (res == null) return NotFound("No Logs found!");
+            if (res == null) return NotFound("Company can not be created at this moment!");
             return Ok(res);
         }
 
