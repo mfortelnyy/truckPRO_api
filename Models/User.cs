@@ -35,8 +35,7 @@ namespace truckPRO_api.Models
         public Company Company { get; set; }
 
         public bool EmailVerified { get; set; }
-        [Required]  
-        public string EmailVerificationToken { get; set; }
+        public string? EmailVerificationToken { get; set; }
   
     }
 }
