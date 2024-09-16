@@ -131,4 +131,12 @@ Content-Type: application/json
   "CompanyId": 1
   
 }
+###
+
+POST {{truckPRO_api_HostAddress}}/verifyEmail?emailToken=633014
+Content-Type: application/json
+{
+  "emailToken": "633014"
+  
+}
 
