@@ -75,6 +75,22 @@ namespace truckPRO_api.Services
             return $"User with {driver.Email} succefully signed in. Token: {token}";
         }
 
+        public async Task<string> VerifyEmail(string emailToken)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.EmailVerificationToken == emailToken);
+            Console.WriteLine($"email token: {emailToken}");
+            if (user == null)
+            {
+                throw new InvalidOperationException("Invalid token!");
+            }
+            user.EmailVerified = true;
+            user.EmailVerificationToken = null;
+            await _context.SaveChangesAsync();
+            return "Email verfied Sucefully!";
+
+
+        }
+
         private string GenerateJwtToken(User user)
         {
             //Console.WriteLine(_config["Jwt:Key"]);
@@ -108,22 +124,6 @@ namespace truckPRO_api.Services
                 );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public async Task<string> VerifyEmail(string emailToken)
-        {
-            var user = await _context.User.FirstOrDefaultAsync(u => u.EmailVerificationToken == emailToken);
-            Console.WriteLine($"email token: {emailToken}");
-            if (user == null)
-            {
-                throw new InvalidOperationException("Invalid token!");
-            }
-            user.EmailVerified = true;
-            user.EmailVerificationToken = null;
-            await _context.SaveChangesAsync();
-            return "Email verfied Sucefully!";
-
-            
         }
     }
 }
