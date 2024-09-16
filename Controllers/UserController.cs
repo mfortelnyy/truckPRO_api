@@ -9,16 +9,10 @@ using truckPRO_api.Services;
 
 namespace truckPRO_api.Controllers
 {
-    public class UserController : Controller
+    public class UserController(IUserService userService, IEmailService emailService) : Controller
     {
-        private readonly IUserService _userService;
-        private readonly IEmailService _emailService;
-
-        public UserController(IUserService userService, IEmailService emailService)
-        {
-            _userService = userService;
-            _emailService = emailService;
-        }
+        private readonly IUserService _userService = userService;
+        private readonly IEmailService _emailService = emailService;
 
         [HttpPost]
         [Route("Login")]
