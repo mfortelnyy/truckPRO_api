@@ -7,9 +7,9 @@ namespace truckPRO_api.Controllers
     public class ManagerController(IManagerService managerService): Controller
     {
         [HttpGet]
-        [Route("/adm/addDriverByCompanyId")]
+        [Route("addDriverByCompanyId")]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> AddDriverByCompanyId(int companyId)
+        public async Task<IActionResult> AddDriversByCompanyId(int companyId)
         {
             var res = await managerService.AddDriverByCompanyId(companyId);
             return Ok(res);
