@@ -48,6 +48,8 @@ builder.Services.AddScoped<IManagerService, ManagerService>();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddScoped<IAdminService, AdminService>();
+
 
 // Retrieve the JWT key from configuration
 var jwtKey = builder.Configuration["Jwt:Key"];
