@@ -1,44 +1,48 @@
 ﻿using System;
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
+using FluentEmail.Smtp;
+using System.Net.Mail;
+using FluentEmail.Core;
+using System.Net;
+
 
 namespace truckPRO_api.Services
 {
-    public class EmailService : IEmailService
+    public class EmailService(IConfiguration configuration) : IEmailService
     {
-        public async Task SendEmailAsync(string email, string subject, string message)
+        public async Task SendEmailAsync(string recieverEmail, string subject, string message)
         {
-            
-            
-            // Create a new SMTP client to send the email
-            using (var client = new SmtpClient())
+            Console.WriteLine($"Here is {configuration["SmtpSettings:Host"]}, {configuration["SmtpSettings:Port"]}, {configuration["SmtpSettings:Username"]}");
+            //setting should come from appsettings.json 
+            var sender = new SmtpSender(() => new SmtpClient("localhost")
             {
-                try
-                {
-                    // Connect to the SMTP server (replace with your actual settings)
-                    await client.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+                Host = configuration["SmtpSettings:Host"],
 
-                    // Authenticate with the SMTP server (replace with your actual email/password)
-                    await client.AuthenticateAsync("fc.molochko@gmail.com", "Max11072001!");
-                    
-                 
-                    // Send the email
-                    await client.SendAsync(mm);
-                }
-                catch (Exception ex)
-                {
-                    // Handle any exceptions
-                    Console.WriteLine($"Error sending email: {ex.Message}");
-                    //throw ex;  
-                }
-                finally
-                {
-                    // Disconnect the client and clean up
-                    await client.DisconnectAsync(true);
-                    client.Dispose();
-                }
-            }
+                Port = int.Parse(configuration["SmtpSettings:Port"]),
+                EnableSsl = true,
+                UseDefaultCredentials = false,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Credentials = new NetworkCredential(configuration["SmtpSettings:Username"], configuration["SmtpSettings:Password"])
+                
+                /*
+                //testing
+                EnableSsl = false,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Port = 567
+                
+                //DeliveryMethod = SmtpDeliveryMethod.SpecifiedPickupDirectory,
+                //PickupDirectoryLocation = @"C:\Games"
+                */
+            });
+
+            Email.DefaultSender = sender;
+            var email = await Email
+                .From("mfortelnyy1@gmail.com")
+                .To(recieverEmail, "Max")
+                .Subject("Email Verification")
+                .Body("Verification Code: ")
+                .SendAsync();
+            Console.WriteLine($"Email Successfull:  {email.ErrorMessages.ToString()}");
+
         }
     }
 }
