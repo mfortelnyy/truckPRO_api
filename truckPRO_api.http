@@ -140,3 +140,25 @@ Content-Type: application/json
   
 }
 
+
+###
+
+Get {{truckPRO_api_HostAddress}}/adm/GetAllDrivers
+Authorization: Bearer 
+Content-Type: application/json
+{
+ 
+  
+}
+###
+
+Get {{truckPRO_api_HostAddress}}/adm/getDriversByCompanyId?companyId=1
+Authorization: Bearer 
+Content-Type: application/json
+{
+  
+  
+}
+
+
+
