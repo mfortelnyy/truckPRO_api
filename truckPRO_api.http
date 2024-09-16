@@ -133,10 +133,10 @@ Content-Type: application/json
 }
 ###
 
-POST {{truckPRO_api_HostAddress}}/verifyEmail?emailToken=633014
+POST {{truckPRO_api_HostAddress}}/verifyEmail?emailToken=677214
 Content-Type: application/json
 {
-  "emailToken": "633014"
+  "emailToken": "384601"
   
 }
 
