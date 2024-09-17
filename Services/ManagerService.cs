@@ -1,6 +1,5 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Graph.Models;
 using truckPRO_api.Data;
 using truckPRO_api.Models;
 
@@ -60,5 +59,16 @@ namespace truckPRO_api.Services
             if (drivingLogs == null || drivingLogs.Count == 0) throw new InvalidOperationException("No active drivers driving");
             return drivingLogs;
         }
+
+        public async Task<string> ApproveDrivingLogById(int logEntryId)
+        {
+            var logEntry = await context.LogEntry.FirstOrDefaultAsync(log => log.Id == logEntryId);
+            if (logEntry == null) throw new InvalidOperationException("Log could not be found!");
+            logEntry.IsApprovedByManager = true;
+            await context.SaveChangesAsync(true);
+            return "Log was successfully approved!";
+        }
+
+        
     }
 }

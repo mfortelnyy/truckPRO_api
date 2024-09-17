@@ -86,7 +86,7 @@ namespace truckPRO_api.Controllers
                 string companyId = User.Claims.FirstOrDefault(c => c.Type == "companyId").Value
                     ?? throw new InvalidOperationException();
                 string link = "";
-                var pendingDrivers = await managerService.GetPendingUsersByCompanyId(int.Parse(companyId));
+                var pendingDrivers = await managerService.GetPendingDriversByCompanyId(int.Parse(companyId));
                 foreach (var driver in pendingDrivers)
                 {
                     await emailService.SendEmailAsync(
@@ -135,7 +135,14 @@ namespace truckPRO_api.Controllers
         }
 
 
-        
+        [HttpPost]
+        [Route("approveDrivingLogById")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> ApproveDrivingLogById([FromQuery] int logEntryId)
+        {
+            managerService.ApproveDrivingLogById(logEntryId);
+            return Ok();
+        }
 
 
 
