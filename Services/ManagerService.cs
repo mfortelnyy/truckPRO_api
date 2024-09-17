@@ -48,5 +48,15 @@ namespace truckPRO_api.Services
             return "Pending Driver succefully updated!";
 
         }
+
+        public async Task<List<LogEntry>> GetAllActiveDrivingLogs(int companyId)
+        {
+            var drivingLogs = await context.LogEntry.Where(predicate: log => log.User.CompanyId == companyId && 
+                                                                log.LogEntryType == LogEntryType.Driving &&
+                                                                log.EndTime == null).ToListAsync();
+
+            if (drivingLogs == null || drivingLogs.Count == 0) throw new InvalidOperationException("No active drivers driving");
+            return drivingLogs;
+        }
     }
 }
