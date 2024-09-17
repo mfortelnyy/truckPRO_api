@@ -6,7 +6,7 @@ using truckPRO_api.Services;
 
 namespace truckPRO_api.Controllers
 {
-    public class ManagerController(IManagerService managerService, IEmailService emailService): Controller
+    public class ManagerController(IManagerService managerService,IAdminService adminService, IEmailService emailService): Controller
     {
         [HttpPost]
         [Route("addDriversToCompany")]
@@ -136,5 +136,51 @@ namespace truckPRO_api.Controllers
 
 
         
+
+
+
+        [HttpGet]
+        [Route("getAllDriversByCompany")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> GgetAllDriversByCompany()
+        {
+            var companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
+
+            try
+            {
+                var drivers = await adminService.GetDriversByComapnyId(companyId);
+                return Ok(drivers);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("geLogsByDriverId")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> GetLogsByDriverId([FromQuery] int driverId)
+        {
+
+            try
+            {
+                var drivers = await adminService.GetLogsByDriverId(driverId);
+                return Ok(drivers);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

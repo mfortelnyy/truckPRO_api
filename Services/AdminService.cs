@@ -24,20 +24,20 @@ namespace truckPRO_api.Services
 
         public async Task<User> GetDriverById(int id)
         {
-            var driver = await context.User.Where(u =>u.Id == id).FirstOrDefaultAsync();
+            var driver = await context.User.Where(u =>u.Id == id).FirstOrDefaultAsync() ?? "No driver can be found with the given Id!");
             return driver;
         }
 
         public async Task<List<User>> GetDriversByComapnyId(int id)
         {
-            var drivers = await context.User.Where(u => u.Id == id &&
-                                                  u.Role == UserRole.Driver).ToListAsync();
+            var drivers = await context.User.Where(u => u.CompanyId == id &&
+                                                  u.Role == UserRole.Driver).ToListAsync() ?? throw new InvalidOperationException("No Drivers found!");
             return drivers;
         }
 
         public async Task<List<LogEntry>> GetLogsByDriverId(int id)
         {
-            var logs = await context.LogEntry.Where(log => log.UserId == id).ToListAsync();
+            var logs = await context.LogEntry.Where(log => log.UserId == id).ToListAsync() ?? throw new InvalidOperationException("No Logs found!");
             return logs;
         }
 
@@ -48,7 +48,7 @@ namespace truckPRO_api.Services
                 Name = companyDTO.Name,
 
             };
-            Console.WriteLine(newCompany.Name);
+            //Console.WriteLine(newCompany.Name);
 
             await context.Company.AddAsync(newCompany);
            
