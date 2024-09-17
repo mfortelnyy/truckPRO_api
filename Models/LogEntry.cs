@@ -27,6 +27,8 @@ namespace truckPRO_api.Models
         //store list of images urls for the shift, nullable
         public List<string>? ImageUrls { get; set; }
 
+        public bool IsApprovedByManager { get; set; }  
+
 
     }
 }
