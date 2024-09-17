@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Graph.Models;
 using truckPRO_api.Data;
 using truckPRO_api.Models;
 
@@ -21,9 +22,22 @@ namespace truckPRO_api.Services
             return AllLogs;
         }
 
-        public async Task<string> AddDriverByCompanyId(int companyID)
+        public async Task<string> AddDriverToCompany(PendingUser pendingUser)
         {
-            return ""; 
+            
+            var pUser = await context.PendingUser.AddAsync(pendingUser);
+            await context.SaveChangesAsync();
+
+            if (pUser == null) throw new InvalidOperationException("Driver can not be created!");
+            //Console.WriteLine($"Driver with id {pUser.Entity.Id} added to company {pUser.Entity.CompanyId} by manager with result {pUser.Entity.Email}");
+            return $"Driver with id {pUser.Entity.Id} added to company {pUser.Entity.CompanyId} by manager"; 
+        }
+
+        public async Task<List<PendingUser>> GetPendingDriversByCompanyId(int companyId)
+        {
+            var pUsers = await context.PendingUser.Where(u => u.CompanyId==companyId).ToListAsync();
+            if (pUsers == null) throw new InvalidOperationException("Drivers can not be found!");
+            return pUsers;
         }
     }
 }
