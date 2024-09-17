@@ -11,8 +11,9 @@ namespace truckPRO_api.Services
         public Task<string> UpdatePendingDriver(PendingUser pendingUser);
         public Task<List<LogEntry>> GetAllActiveDrivingLogs(int companyId);
         public Task<string> ApproveDrivingLogById(int logEntryId);
-        
-        
+        public Task<List<string>> GetImagesOfDrivingLog(int logId);
+
+
 
     }
 }
