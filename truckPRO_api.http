@@ -167,6 +167,15 @@ Content-Type: application/json
   "Name": "KFC"
   
 }
+###
 
+POST {{truckPRO_api_HostAddress}}/addDriversToCompanny
+Authorization: Bearer 
+Content-Type: application/json
+{
+  "Name": "KFC"
+  
+}
+###
 
 
