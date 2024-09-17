@@ -51,7 +51,7 @@ namespace truckPRO_api.Controllers
 
 
                     string emailVerificarionToken = await _userService.CreateUserAsync(SignUpDTO);
-                    await _emailService.SendEmailAsync(email: SignUpDTO.Email, subject: "Registration", message: "You are registered", emailVerificarionToken);
+                    await _emailService.SendEmailAsync(email: SignUpDTO.Email, subject: "Registration", message: $"You are registered!\nHere is your verification code: {emailVerificarionToken}");
                     if (emailVerificarionToken != null) return Ok(emailVerificarionToken);
                     return BadRequest();
                 }
