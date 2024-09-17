@@ -24,7 +24,7 @@ namespace truckPRO_api.Services
 
         public async Task<User> GetDriverById(int id)
         {
-            var driver = await context.User.Where(u =>u.Id == id).FirstOrDefaultAsync() ?? "No driver can be found with the given Id!");
+            var driver = await context.User.Where(u =>u.Id == id).FirstOrDefaultAsync() ?? throw new InvalidOperationException("No driver can be found with the given Id!");
             return driver;
         }
 

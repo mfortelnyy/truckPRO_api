@@ -7,11 +7,12 @@ namespace truckPRO_api.Services
         public Task<List<User>> GetAllDriversByCompany(int companyId);
         public Task<List<LogEntry>> GetLogsByDriver(int driverId, int companyId);
         public Task<string> AddDriverToCompany(PendingUser pendingUser);
-        public Task<List<PendingUser>> GetPendingUsersByCompanyId(int companyId);
+        public Task<List<PendingUser>> GetPendingDriversByCompanyId(int companyId);
         public Task<string> UpdatePendingDriver(PendingUser pendingUser);
-
         public Task<List<LogEntry>> GetAllActiveDrivingLogs(int companyId);
-
+        public Task<string> ApproveDrivingLogById(int logEntryId);
+        
+        
 
     }
 }
