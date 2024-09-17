@@ -95,6 +95,9 @@ namespace truckPRO_api.Controllers
                         message: $"Dear Driver, Please register with the following email - {driver.Email} to our system. " +
                         $"\nFollow this link - {link}"
                         );
+                    //email was sent then change flag to true
+                    driver.InvitationSent = true;
+                    await managerService.UpdatePendingDriver(driver);
 
                 }
                 return Ok("Emails sent successfully!");

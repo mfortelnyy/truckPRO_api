@@ -39,5 +39,14 @@ namespace truckPRO_api.Services
             if (pUsers == null) throw new InvalidOperationException("Drivers can not be found!");
             return pUsers;
         }
+
+        public async Task<string> UpdatePendingDriver(PendingUser pendingUser)
+        {
+            context.Update(pendingUser);
+            var res = await context.SaveChangesAsync(true);
+            //if (res == null) throw new InvalidOperationException("PendingDriver can not be updated");
+            return "Pending Driver succefully updated!";
+
+        }
     }
 }
