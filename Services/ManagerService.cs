@@ -51,7 +51,9 @@ namespace truckPRO_api.Services
 
         public async Task<List<LogEntry>> GetAllActiveDrivingLogs(int companyId)
         {
-            var drivingLogs = await context.LogEntry.Where(predicate: log => log.User.CompanyId == companyId && 
+            var drivingLogs = await context.LogEntry
+                .Include(log => log.User)
+                .Where(predicate: log => log.User.CompanyId == companyId && 
                                                                 log.LogEntryType == LogEntryType.Driving &&
                                                                 log.EndTime == null).ToListAsync();
 
