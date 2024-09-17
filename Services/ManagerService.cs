@@ -69,6 +69,15 @@ namespace truckPRO_api.Services
             return "Log was successfully approved!";
         }
 
+        public async Task<List<string>> GetImagesOfDrivingLog(int logId)
+        {
+            var logentry = await context.LogEntry.FirstOrDefaultAsync(log => log.Id == logId);
+            if (logentry == null) throw new InvalidOperationException("Log could not be found!");
+            if (logentry.LogEntryType != LogEntryType.Driving) throw new InvalidOperationException("Log prvoided is not a driving Log");
+            return logentry.ImageUrls;
+            
+        }
+
         
     }
 }

@@ -140,8 +140,19 @@ namespace truckPRO_api.Controllers
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> ApproveDrivingLogById([FromQuery] int logEntryId)
         {
-            managerService.ApproveDrivingLogById(logEntryId);
-            return Ok();
+            try
+            {
+                var res = await managerService.ApproveDrivingLogById(logEntryId);
+                return Ok(res);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
@@ -188,6 +199,28 @@ namespace truckPRO_api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet]
+        [Route("getImagesOfDrivingLog")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> GetImagesOfDrivingLog([FromQuery] int drivingLogId)
+        {
+            try
+            {
+                var res = await managerService.GetImagesOfDrivingLog(drivingLogId);
+                return Ok(res);
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
     }
 }
