@@ -19,6 +19,7 @@ namespace truckPRO_api.Services
                 Host = configuration["SmtpSettings:Host"],
 
                 Port = int.Parse(configuration["SmtpSettings:Port"]),
+                Timeout = 600000, //600 seconds to ensure all emails are sent 
                 EnableSsl = true,
                 UseDefaultCredentials = false,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
