@@ -26,7 +26,8 @@ Content-Type: application/json
   "Password": "SecurePassword123!",
   "Phone": "3128383865",
   "ConfirmPassword": "SecurePassword123!",
-  "Role": 0
+  "CompanyId" : 1,
+  "Role": 2
 }
 
 ###
@@ -133,7 +134,7 @@ Content-Type: application/json
 }
 ###
 
-POST {{truckPRO_api_HostAddress}}/verifyEmail?emailToken=677214
+POST {{truckPRO_api_HostAddress}}/verifyEmail?emailToken=633416
 Content-Type: application/json
 {
   "emailToken": "384601"
