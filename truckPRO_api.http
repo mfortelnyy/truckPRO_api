@@ -9,7 +9,7 @@ POST {{truckPRO_api_HostAddress}}/Login
 Content-Type: application/json
 
 {
-   "email": "admin@example.com",
+   "email": "manager@example.com",
    "password": "SecurePassword123!"
 }
 
@@ -20,9 +20,9 @@ Content-Type: application/json
 
 {
   
-  "FirstName": "Taras",
-  "LastName": "Stefan",
-  "Email": "Stefan@example.com",
+  "FirstName": "admin",
+  "LastName": "admin",
+  "Email": "admin@example.com",
   "Password": "SecurePassword123!",
   "Phone": "3128383865",
   "ConfirmPassword": "SecurePassword123!",
@@ -134,7 +134,7 @@ Content-Type: application/json
 }
 ###
 
-POST {{truckPRO_api_HostAddress}}/verifyEmail?emailToken=633416
+POST {{truckPRO_api_HostAddress}}/verifyEmail?emailToken=387869
 Content-Type: application/json
 {
   "emailToken": "384601"
@@ -178,5 +178,12 @@ Content-Type: application/json
   
 }
 ###
-
-
+ 
+POST {{truckPRO_api_HostAddress}}/sendEmailToPendingUsers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtYW5hZ2VyQGV4YW1wbGUuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiTWFuYWdlciIsInVzZXJJZCI6IjMiLCJjb21wYW55SWQiOiIxIiwiZXhwIjoxNzI2NjMyMDIzLCJpc3MiOiJKd3RJc3N1ZXIiLCJhdWQiOiJKd3RBdWRpZW5jZSJ9.oFBxnq2X7XuQnpUFaEjBGS6gPOQEpxwXed06LQ8PYZE
+Content-Type: application/json
+{
+  "Name": "KFC"
+  
+}
+###
