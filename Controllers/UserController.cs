@@ -73,29 +73,6 @@ namespace truckPRO_api.Controllers
 
 
         [HttpPost]
-        [Route("signUpManager")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> SignUpManager([FromBody] SignUpDTO SignUpDTO)
-        {
-            if ((SignUpDTO.Role == 1 || SignUpDTO.Role == 2) && !SignUpDTO.CompanyId.HasValue)
-            {
-                return BadRequest("CompanyId is required for drivers.");
-            }
-
-            //if model is not valid then the request is bad - 400
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            string result = await _userService.CreateUserAsync(SignUpDTO);
-            if (result != null) return Ok(result);
-            return BadRequest();
-
-        }
-
-
-        [HttpPost]
         [Route("/verifyEmail")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string emailToken)
         {
