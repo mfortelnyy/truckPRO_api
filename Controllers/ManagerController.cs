@@ -222,5 +222,29 @@ namespace truckPRO_api.Controllers
         }
 
 
+        //returns list of users that registered from pendingUsers table
+        [HttpGet]
+        [Route("gGetRegisteredFromPending")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> GetRegisteredFromPending()
+        {
+            var companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
+            try
+            {
+                var res = await managerService.GetRegisteredFromPending(drivingLogId);
+                return Ok(res);
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
     }
 }

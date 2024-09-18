@@ -78,6 +78,24 @@ namespace truckPRO_api.Services
             
         }
 
+        public async Task<List<User>> GetRegisteredFromPending(int companyId) 
+        {
+            //join user and pendingUser tables and filter by copanyid and verifiedEmail
+            var regisredUsers =  await context.PendingUser
+                     .Join(
+                          context.User,
+            pendingUser => pendingUser.Email, // key selector from PendingUser
+            user => user.Email, // key selector from User
+            (pendingUser, user) => new { PendingUser = pendingUser, User = user } // result selector
+            )
+            .Where(result => result.PendingUser.CompanyId == companyId && result.User.EmailVerified == true) // filter by company ID and verfified email
+            .Select(result => result.User) // Select the user information
+            .ToListAsync();
+
+            if (regisredUsers == null) throw new InvalidOperationException("No registered users found!");
+            return regisredUsers;
+        }
+
        
 
         
