@@ -71,9 +71,8 @@ namespace truckPRO_api.Controllers
         }
 
 
-
         [HttpPost]
-        [Route("/verifyEmail")]
+        [Route("verifyEmail")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string emailToken)
         {
             try
@@ -92,6 +91,29 @@ namespace truckPRO_api.Controllers
                 return Conflict(ex.Message);
             }
 
+        }
+
+
+        [HttpPatch]
+        [Route("updateDriverPassword")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> UpdateDriverPassword([FromForm] string password)
+        {
+            try
+            {
+                var driverId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
+                Console.WriteLine($"{password}");
+                var res = await _userService.UpdatePassword(driverId, password);
+                return Ok(res);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
        
 

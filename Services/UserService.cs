@@ -91,6 +91,17 @@ namespace truckPRO_api.Services
 
         }
 
+        public async Task<string> UpdatePassword(int driverId, string password)
+        {
+            var driver = await context.User.FirstOrDefaultAsync(u => u.Id == driverId) ??
+                       throw new InvalidOperationException("No driver found!");
+            Console.WriteLine("Driver found!!!!!!!!!!!!!!");
+            driver.Password = _passwordHasher.HashPassword(driver, password);
+            await _context.SaveChangesAsync();
+            return "Password for driver successfully updated!";
+        }
+
+
         private string GenerateJwtToken(User user)
         {
             //Console.WriteLine(_config["Jwt:Key"]);
@@ -125,5 +136,6 @@ namespace truckPRO_api.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
     }
 }
