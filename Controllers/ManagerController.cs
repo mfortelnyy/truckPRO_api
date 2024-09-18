@@ -224,14 +224,14 @@ namespace truckPRO_api.Controllers
 
         //returns list of users that registered from pendingUsers table
         [HttpGet]
-        [Route("gGetRegisteredFromPending")]
+        [Route("getRegisteredFromPending")]
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetRegisteredFromPending()
         {
             var companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
             try
             {
-                var res = await managerService.GetRegisteredFromPending(drivingLogId);
+                var res = await managerService.GetRegisteredFromPending(companyId);
                 return Ok(res);
 
             }
@@ -244,6 +244,32 @@ namespace truckPRO_api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+
+        //returns list of pendingusers that did not register yet from pendingUsers table
+        [HttpGet]
+        [Route("getNotRegisteredFromPending")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> GetNotRegisteredFromPending()
+        {
+            var companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
+            try
+            {
+                var res = await managerService.GetNotRegisteredFromPending(companyId);
+                return Ok(res);
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
 
 
     }

@@ -87,17 +87,34 @@ namespace truckPRO_api.Services
             pendingUser => pendingUser.Email, // key selector from PendingUser
             user => user.Email, // key selector from User
             (pendingUser, user) => new { PendingUser = pendingUser, User = user } // result selector
-            )
-            .Where(result => result.PendingUser.CompanyId == companyId && result.User.EmailVerified == true) // filter by company ID and verfified email
-            .Select(result => result.User) // Select the user information
-            .ToListAsync();
+                     )
+                    .Where(result => result.PendingUser.CompanyId == companyId && result.User.EmailVerified == true) // filter by company ID and verfified email
+                    .Select(result => result.User) // select the user information
+                    .ToListAsync();
 
             if (regisredUsers == null) throw new InvalidOperationException("No registered users found!");
             return regisredUsers;
         }
 
-       
+        public async Task<List<PendingUser>> GetNotRegisteredFromPending(int companyId)
+        {
+            //get the list of registered user emails
+            var registeredEmails = await context.User
+                .Where(u => u.EmailVerified)
+                .Select(u => u.Email) //list of onlyemails
+                .ToListAsync();
 
-        
+            //filter by confirming company id and the email is not in registered emails list
+            var notRegisteredPendingUsers = await context.PendingUser
+                    .Where(pu => pu.CompanyId == companyId && !registeredEmails.Contains(pu.Email)) 
+                    .ToListAsync() ?? throw new InvalidOperationException("All users where registered!");
+            
+            return notRegisteredPendingUsers;
+        }
+
+
+
+
+
     }
 }
