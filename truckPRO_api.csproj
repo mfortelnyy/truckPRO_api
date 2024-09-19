@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>ad1f9c1c-0bc0-4c33-9b63-70a13e3c225d</UserSecretsId>
-    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
   </PropertyGroup>
 
@@ -13,6 +13,7 @@
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.402.7" />
+    <PackageReference Include="Docker.DotNet" Version="3.125.15" />
     <PackageReference Include="EntityFramework" Version="6.5.1" />
     <PackageReference Include="EPPlus" Version="7.3.1" />
     <PackageReference Include="FluentEmail.Smtp" Version="3.0.2" />
