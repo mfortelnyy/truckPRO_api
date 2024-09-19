@@ -1,4 +1,4 @@
-@truckPRO_api_HostAddress = https://localhost:7010
+@truckPRO_api_HostAddress = http://localhost:8080
 
 GET {{truckPRO_api_HostAddress}}/weatherforecast/
 Accept: application/json
@@ -20,9 +20,9 @@ Content-Type: application/json
 
 {
   
-  "FirstName": "admin",
-  "LastName": "admin",
-  "Email": "admin@example.com",
+  "FirstName": "driver",
+  "LastName": "driver",
+  "Email": "mfortelnyy1@gmail.com",
   "Password": "SecurePassword123!",
   "Phone": "3128383865",
   "ConfirmPassword": "SecurePassword123!",
@@ -54,7 +54,7 @@ Content-Type: application/json
 
 ###
 POST {{truckPRO_api_HostAddress}}/createOnDutyLog
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwidXNlcklkIjoiMTUiLCJjb21wYW55SWQiOiIiLCJleHAiOjE3MjYyNjYyNjQsImlzcyI6Ikp3dElzc3VlciIsImF1ZCI6Ikp3dEF1ZGllbmNlIn0.ScwMlrK_fvUQoG-AbM0rD95FgNiuqTV0ob8UCqC6uUQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTdGVmYW5AZXhhbXBsZS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJEcml2ZXIiLCJ1c2VySWQiOiIyIiwiY29tcGFueUlkIjoiMSIsImV4cCI6MTcyNjcxMTUyOCwiaXNzIjoiSnd0SXNzdWVyIiwiYXVkIjoiSnd0QXVkaWVuY2UifQ.k1F-VS-S5WvKX0QpfohBaeunalN0LtIVfduvHY14yUw
 Content-Type: application/json
 {
 
