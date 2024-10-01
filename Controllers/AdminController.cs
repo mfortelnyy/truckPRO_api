@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Collections;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Graph.Models;
 using truckPRO_api.DTOs;
+using truckPRO_api.Models;
 using truckPRO_api.Services;
 
 
@@ -34,10 +37,10 @@ namespace truckPRO_api.Controllers
         [HttpGet]
         [Route("/adm/getAllCompanies")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllCompanies()
+        public async Task<ActionResult> GetAllCompanies()
         {
             var companies = await adminService.GetAllComapnies();
-            if (companies == null) return NotFound("No Companies found!");
+            if (companies == null) return Conflict("No Companies found!");
             return Ok(companies);
         }
 
