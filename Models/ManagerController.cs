@@ -18,13 +18,22 @@ namespace truckPRO_api.Models
             try
             {
                 var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-                var companyId = int.Parse(User.FindFirst("companyId").Value);
-                var drivers = await _managerService.GetAllDriversByCompany(companyId);
-                if (drivers == null || drivers.Count == 0)
+                string? cIdString = User.FindFirst("companyId").Value;
+
+                Console.WriteLine("companyid:  "+cIdString);
+
+                if (cIdString != null) 
                 {
-                    return NotFound("Sorry, no drivers found in your company!");
+                    var companyId = int.Parse(cIdString);
+                    var drivers = await _managerService.GetAllDriversByCompany(companyId);
+                    if (drivers == null || drivers.Count == 0)
+                    {
+                        return NotFound("Sorry, no drivers found in your company!");
+                    }
+                    return Ok(drivers);
                 }
-                return Ok(drivers);
+                return BadRequest("company id nor found from token!");
+                
             }
             catch (Exception ex)
             {
