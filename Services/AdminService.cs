@@ -1,7 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.Kiota.Abstractions.Extensions;
-using System.Data.Entity;
-using truckPRO_api.Data;
+﻿using truckPRO_api.Data;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
 
@@ -11,33 +8,34 @@ namespace truckPRO_api.Services
     {
         public async Task<List<Company>> GetAllComapnies()
         {
-            var companies = await context.Company.Where(c => c.Id > 0).ToListAsync();
+            var companies = context.Company.ToList() ?? throw new InvalidOperationException("No company could be found!");
             return companies;
         }
 
         public async Task<List<User>> GetAllDrivers()
         {
-            var allDrivers = await context.User.Where(u => u.Role == UserRole.Driver).ToListAsync(); 
+            Console.WriteLine("getting all drivers!");
+            var allDrivers = context.User.Where(u => u.Role == UserRole.Driver).ToList(); 
             return allDrivers;
            
         }
 
         public async Task<User> GetDriverById(int id)
         {
-            var driver = await context.User.Where(u =>u.Id == id).FirstOrDefaultAsync() ?? throw new InvalidOperationException("No driver can be found with the given Id!");
+            var driver = context.User.Where(u =>u.Id == id).FirstOrDefault() ?? throw new InvalidOperationException("No driver can be found with the given Id!");
             return driver;
         }
 
         public async Task<List<User>> GetDriversByComapnyId(int id)
         {
-            var drivers = await context.User.Where(u => u.CompanyId == id &&
-                                                  u.Role == UserRole.Driver).ToListAsync() ?? throw new InvalidOperationException("No Drivers found!");
+            var drivers = context.User.Where(u => u.CompanyId == id &&
+                                                  u.Role == UserRole.Driver).ToList() ?? throw new InvalidOperationException("No Drivers found!");
             return drivers;
         }
 
         public async Task<List<LogEntry>> GetLogsByDriverId(int id)
         {
-            var logs = await context.LogEntry.Where(log => log.UserId == id).ToListAsync() ?? throw new InvalidOperationException("No Logs found!");
+            var logs = context.LogEntry.Where(log => log.UserId == id).ToList() ?? throw new InvalidOperationException("No Logs found!");
             return logs;
         }
 
