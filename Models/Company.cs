@@ -13,6 +13,6 @@ namespace truckPRO_api.Models
         [MinLength(2), MaxLength(50)]
         public string? Name { get; set; }
         //one-to-many relationship with user
-        public ICollection<User>? Users { get; set; }
+        //public ICollection<User>? Users { get; set; }
     }
 }
