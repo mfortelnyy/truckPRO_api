@@ -92,15 +92,16 @@ namespace truckPRO_api.Controllers
 
 
         [HttpPatch]
-        [Route("updateDriverPassword")]
+        [Route("updatePassword")]
         [Authorize(Roles = "Driver")]
-        public async Task<IActionResult> UpdateDriverPassword([FromForm] string password)
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> UpdatePassword([FromBody] string oldPassword, string newPassword)
         {
             try
             {
-                var driverId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
-                Console.WriteLine($"{password}");
-                var res = await _userService.UpdatePassword(driverId, password);
+                var userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
+                //Console.WriteLine($"{oldpassword}");
+                var res = await _userService.UpdatePassword(userId, oldPassword, newPassword);
                 return Ok(res);
             }
             catch (InvalidOperationException ex)
