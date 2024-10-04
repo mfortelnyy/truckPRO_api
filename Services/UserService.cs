@@ -57,7 +57,7 @@ namespace truckPRO_api.Services
             //if there is no driver with indicated email then return message
             if (driver == null)
             {
-                return "Invalid username or password.";
+                throw new Exception("Invalid username or password.");
             }
 
             //verify provided password against password stored in db
@@ -66,7 +66,7 @@ namespace truckPRO_api.Services
             //if user provided incorrect password then return same message
             if(paswordVerification == PasswordVerificationResult.Failed)
             {
-                return "Invalid username or password.";
+                throw new Exception("Invalid username or password.");
             }
 
             string token = GenerateJwtToken(driver);
@@ -91,9 +91,9 @@ namespace truckPRO_api.Services
 
         }
 
-        public async Task<string> UpdatePassword(int driverId, string oldPassword, string newPassword)
+        public async Task<string> UpdatePassword(int userId, string oldPassword, string newPassword)
         {
-            var driver = await context.User.FirstOrDefaultAsync(u => u.Id == driverId) ??
+            var driver = await context.User.FirstOrDefaultAsync(u => u.Id == userId) ??
                        throw new InvalidOperationException("No driver found!");
             Console.WriteLine("Driver found!");
             if(driver.Password == _passwordHasher.HashPassword(driver, oldPassword))
@@ -104,7 +104,7 @@ namespace truckPRO_api.Services
             }
             else
             {
-                return "Old Password is incorrect";
+                throw new Exception("Old Password is incorrect");
             }
         }
 
