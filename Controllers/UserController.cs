@@ -57,7 +57,7 @@ namespace truckPRO_api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return Unauthorized(ex.Message);
+                return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
