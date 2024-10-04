@@ -62,7 +62,7 @@ namespace truckPRO_api.Services
 
         public async Task<string> ApproveDrivingLogById(int logEntryId)
         {
-            var logEntry = await context.LogEntry.FirstOrDefaultAsync(log => log.Id == logEntryId);
+            var logEntry = await context.LogEntry.FirstOrDefaultAsync(log => log.Id == logEntryId && log.LogEntryType == LogEntryType.Driving);
             if (logEntry == null) throw new InvalidOperationException("Log could not be found!");
             logEntry.IsApprovedByManager = true;
             await context.SaveChangesAsync(true);
@@ -88,7 +88,7 @@ namespace truckPRO_api.Services
             user => user.Email, // key selector from User
             (pendingUser, user) => new { PendingUser = pendingUser, User = user } // result selector
                      )
-                    .Where(result => result.PendingUser.CompanyId == companyId && result.User.EmailVerified == true) // filter by company ID and verfified email
+                    .Where(result => result.PendingUser.CompanyId == companyId && result.User.Email != null) // filter by company ID and verfified email
                     .Select(result => result.User) // select the user information
                     .ToListAsync();
 
@@ -100,7 +100,7 @@ namespace truckPRO_api.Services
         {
             //get the list of registered user emails
             var registeredEmails = await context.User
-                .Where(u => u.EmailVerified)
+                .Where(u => u.CompanyId == companyId && u.Email != null)
                 .Select(u => u.Email) //list of onlyemails
                 .ToListAsync();
 
