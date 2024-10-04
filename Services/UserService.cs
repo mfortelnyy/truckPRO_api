@@ -5,14 +5,9 @@ using System.Text;
 using truckPRO_api.Data;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
-using System;
-
 
 namespace truckPRO_api.Services
 {
@@ -28,9 +23,14 @@ namespace truckPRO_api.Services
         public async Task<string> CreateUserAsync(SignUpDTO signUpDTO)
         {
             var userExists = await _context.User.AnyAsync(u => u.Email == signUpDTO.Email);
+            var pendingDriver = await _context.PendingUser.FirstOrDefaultAsync(pd => pd.Email == signUpDTO.Email);
             if (userExists)
             {
                 throw new InvalidOperationException("User already exists.");
+            }
+            if (pendingDriver == null)
+            {
+                throw new InvalidOperationException($"Email {signUpDTO.Email} was not added by the manager.");
             }
 
             User newUser = _mapper.Map<User>(signUpDTO);
