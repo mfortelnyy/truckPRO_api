@@ -9,7 +9,7 @@ namespace truckPRO_api.Services
     {
         public async Task<List<User>> GetAllDriversByCompany(int CompanyId)
         {
-            var AllDrivers = await context.User.Where(u =>  u.CompanyId == CompanyId).ToListAsync();
+            var AllDrivers = await context.User.Where(u =>  u.CompanyId == CompanyId && u.Role == UserRole.Driver).ToListAsync();
             return AllDrivers;
         }
 
