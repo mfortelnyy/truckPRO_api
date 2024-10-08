@@ -14,6 +14,7 @@ namespace truckPRO_api.Services
         public Task<List<string>> GetImagesOfDrivingLog(int logId);
         public Task<List<User>> GetRegisteredFromPending(int companyId);
         public Task<List<PendingUser>> GetNotRegisteredFromPending(int companyId);
+        public Task<List<PendingUser>> GetAllPendingUsers(int companyId);
 
 
 

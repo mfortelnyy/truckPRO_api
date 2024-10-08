@@ -114,6 +114,12 @@ namespace truckPRO_api.Services
             return notRegisteredPendingUsers;
         }
 
+        public async Task<List<PendingUser>> GetAllPendingUsers(int companyId)
+        {
+            var pUsers = await context.PendingUser.Where(pu => pu.CompanyId == companyId).ToListAsync() ?? throw new InvalidOperationException("All users where registered!");
+            return pUsers;
+        }
+
 
 
 
