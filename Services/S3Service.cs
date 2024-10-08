@@ -54,5 +54,36 @@ namespace truckPRO_api.Services
                 throw new Exception("File upload failed. Response code: " + response.HttpStatusCode);
             }
         }
+
+        public List<string> GenerateSignedUrls(List<string> fileUrls)
+        {
+            var signedUrls = new List<string>();
+
+            foreach (var fileUrl in fileUrls)
+            {
+                var fileName = GetFileNameFromUrl(fileUrl);
+
+                var request = new GetPreSignedUrlRequest
+                {
+                    BucketName = _bucketName,
+                    Key = fileName,
+                    Expires = DateTime.UtcNow.AddMinutes(30) 
+                };
+
+                var signedUrl = _amazonS3.GetPreSignedURL(request);
+                signedUrls.Add(signedUrl);
+            }
+
+            return signedUrls;
+        }
+
+        private string GetFileNameFromUrl(string fileUrl)
+        {
+            var uri = new Uri(fileUrl);
+            return uri.AbsolutePath.TrimStart('/'); 
+        }
+
+
+        
     }
 }
