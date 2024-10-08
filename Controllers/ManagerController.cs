@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Amazon.S3;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using truckPRO_api.Models;
@@ -6,8 +7,10 @@ using truckPRO_api.Services;
 
 namespace truckPRO_api.Controllers
 {
-    public class ManagerController(IManagerService managerService,IAdminService adminService, IEmailService emailService): Controller
+    public class ManagerController(IManagerService managerService, IAdminService adminService, IEmailService emailService, S3Service s3Service): Controller
     {
+        private readonly S3Service _s3Service = s3Service;
+   
         [HttpPost]
         [Route("addDriversToCompany")]
         [Authorize(Roles = "Manager")]
@@ -306,7 +309,7 @@ namespace truckPRO_api.Controllers
         [HttpGet]
         [Authorize(Roles = "Manager")]
         [Route("allLogsByDriver")]
-        public async Task<IActionResult> GetAllLogsByDriver(int driverId)
+        public async Task<IActionResult> GetAllLogsByDriver([FromQuery] int driverId)
         {
             try
             {
@@ -323,6 +326,28 @@ namespace truckPRO_api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Manager")]
+        [Route("getSignedUrls")]
+        public async Task<IActionResult> GetSignedUrls([FromBody] List<string> urls)
+        {
+            try
+            {
+                var companyId = int.Parse(User.FindFirst("companyId").Value);
+                var signedUrls = _s3Service.GenerateSignedUrls(urls);
+                if (signedUrls == null || signedUrls.Count == 00)
+                {
+                    return NotFound("Sorry, no signed urls can be generated!");
+                }
+                return Ok(signedUrls);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     
 
 
