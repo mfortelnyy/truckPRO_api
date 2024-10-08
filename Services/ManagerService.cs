@@ -15,9 +15,11 @@ namespace truckPRO_api.Services
 
         public async Task<List<LogEntry>> GetLogsByDriver(int driverId, int companyId)
         {
+            var user = await context.User.Where(u => u.Id == driverId).FirstOrDefaultAsync();
+            int? cid = user.CompanyId;
             //ensure that companyid for manager and user is the same
-            var AllLogs = await context.LogEntry.Where(u=> u.UserId == driverId &&
-                                                              u.User.CompanyId == companyId).ToListAsync();
+            var AllLogs = await context.LogEntry.Where(log=> log.UserId == driverId &&
+                                                              cid == companyId).ToListAsync();
             return AllLogs;
         }
 
