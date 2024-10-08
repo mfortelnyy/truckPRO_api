@@ -356,8 +356,8 @@ namespace truckPRO_api.Controllers
             try
             {
                 var companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
-                var activeDrivingLogs = await managerService.GetAllActiveDrivingLogs(companyId);
-                return Ok(activeDrivingLogs);
+                var allPendingUsers = await managerService.GetAllPendingUsers(companyId);
+                return Ok(allPendingUsers);
             }
             catch (InvalidOperationException ex)
             {
