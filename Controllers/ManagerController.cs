@@ -87,9 +87,9 @@ namespace truckPRO_api.Controllers
             try
             {
                 string companyId = User.Claims.FirstOrDefault(c => c.Type == "companyId").Value
-                    ?? throw new InvalidOperationException();
+                    ?? throw new InvalidOperationException("Not allowed to access!");
                 string link = "";
-                var pendingDrivers = await managerService.GetPendingDriversByCompanyId(int.Parse(companyId));
+                var pendingDrivers = await managerService.GetNotRegisteredFromPending(int.Parse(companyId));
                 foreach (var driver in pendingDrivers)
                 {
                     await emailService.SendEmailAsync(
