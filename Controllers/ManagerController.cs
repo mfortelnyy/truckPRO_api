@@ -348,6 +348,29 @@ namespace truckPRO_api.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("getAllPendingUsers")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> getAllPendingUsers()
+        {
+            try
+            {
+                var companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
+                var activeDrivingLogs = await managerService.GetAllActiveDrivingLogs(companyId);
+                return Ok(activeDrivingLogs);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
     
 
 
