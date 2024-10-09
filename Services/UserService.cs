@@ -95,7 +95,7 @@ namespace truckPRO_api.Services
         {
             var driver = await context.User.FirstOrDefaultAsync(u => u.Id == userId) ??
                        throw new InvalidOperationException("No driver found!");
-            Console.WriteLine("Driver found!");
+            //Console.WriteLine("Driver found!");
             if(driver.Password == _passwordHasher.HashPassword(driver, oldPassword))
             {
                 driver.Password = _passwordHasher.HashPassword(driver, newPassword);
