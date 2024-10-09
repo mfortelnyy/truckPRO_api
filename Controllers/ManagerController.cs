@@ -351,13 +351,34 @@ namespace truckPRO_api.Controllers
         [HttpGet]
         [Route("getAllPendingUsers")]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> getAllPendingUsers()
+        public async Task<IActionResult> GetAllPendingUsers()
         {
             try
             {
                 var companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
                 var allPendingUsers = await managerService.GetAllPendingUsers(companyId);
                 return Ok(allPendingUsers);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete]
+        [Route("deletePendingUser")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> DeletePendingUser([FromQuery] int userId)
+        {
+            try
+            {
+                var uId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
+                int res = await managerService.DeletePendingUser(userId);
+                return Ok(res);
             }
             catch (InvalidOperationException ex)
             {
