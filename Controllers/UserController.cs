@@ -95,11 +95,12 @@ namespace truckPRO_api.Controllers
         [Route("updatePassword")]
         [Authorize(Roles = "Driver")]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> UpdatePassword([FromBody] string oldPassword, string newPassword)
+        public async Task<IActionResult> UpdatePassword([FromBody] int userId, string oldPassword, string newPassword, string confirmPassword)
         {
+            if (newPassword != confirmPassword) return BadRequest("Password did not match!");
             try
             {
-                var userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
+                var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
                 //Console.WriteLine($"{oldpassword}");
                 var res = await _userService.UpdatePassword(userId, oldPassword, newPassword);
                 return Ok(res);
