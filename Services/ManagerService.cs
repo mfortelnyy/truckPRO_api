@@ -120,9 +120,17 @@ namespace truckPRO_api.Services
             return pUsers;
         }
 
-
-
-
-
+        public async Task<int> DeletePendingUser(int userId)
+        {
+            var pUser = await context.PendingUser.Where(pu => pu.Id == userId).FirstOrDefaultAsync();
+            if (pUser != null)
+            {
+                context.Remove(pUser);
+                var res = await context.SaveChangesAsync();
+                return res;
+            }
+            return 0;
+            
+        }
     }
 }
