@@ -64,5 +64,15 @@ namespace truckPRO_api.Services
             var managers = context.User.Where(u => u.Role == UserRole.Manager).ToList() ?? throw new InvalidOperationException("No Managers found!");
             return managers;
         }
+
+        public async Task<bool> DeleteCompany(int companyId)
+        {
+            var company = await context.Company.Where(c=> c.Id == companyId).FirstOrDefaultAsync() 
+                                            ?? throw new InvalidOperationException("Company not found");
+            context.Company.Remove(company);
+            var res = await context.SaveChangesAsync();
+            if (res > 0) return true;
+            return false;
+        }
     }
 }
