@@ -1,4 +1,5 @@
-﻿using truckPRO_api.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using truckPRO_api.Data;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
 
@@ -56,6 +57,12 @@ namespace truckPRO_api.Services
             return newCompany.Id == 0
                 ? throw new InvalidOperationException("Company can not be added!")
                 : $"Company with id {newCompany.Id} added";
+        }
+
+        public async Task<List<User>> GetAllManagers()
+        {
+            var managers = context.User.Where(u => u.Role == UserRole.Manager).ToList() ?? throw new InvalidOperationException("No Managers found!");
+            return managers;
         }
     }
 }
