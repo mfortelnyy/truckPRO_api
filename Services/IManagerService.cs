@@ -17,7 +17,6 @@ namespace truckPRO_api.Services
         public Task<List<PendingUser>> GetAllPendingUsers(int companyId);
         public Task<int> DeletePendingUser(int userId);
 
-
-
+       
     }
 }
