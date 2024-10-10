@@ -14,6 +14,7 @@ namespace truckPRO_api.Services
         public Task<string> CreateCompany(CompanyDTO companyDTO);
 
         public Task<List<User>> GetAllManagers();
+        public Task<bool> DeleteCompany(int companyId);
        
     }
 }
