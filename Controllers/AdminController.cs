@@ -98,5 +98,15 @@ namespace truckPRO_api.Controllers
             return Ok(res);
         }
 
+        [HttpGet]
+        [Route("/adm/getAllManagers")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllManagers()
+        {
+            var res = await adminService.GetAllManagers();
+            if (res == null) return NotFound("Managers can not be found!");
+            return Ok(res);
+        }
+
     }
 }
