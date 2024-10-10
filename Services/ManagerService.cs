@@ -13,13 +13,14 @@ namespace truckPRO_api.Services
             return AllDrivers;
         }
 
-        public async Task<List<LogEntry>> GetLogsByDriver(int driverId, int companyId)
+        public async Task<List<LogEntry>> GetLogsByDriver(int driverId)
         {
             var user = await context.User.Where(u => u.Id == driverId).FirstOrDefaultAsync();
             int? cid = user.CompanyId;
             //ensure that companyid for manager and user is the same
-            var AllLogs = await context.LogEntry.Where(log=> log.UserId == driverId &&
-                                                              cid == companyId).ToListAsync();
+            var AllLogs = context.LogEntry.Where(log=> log.UserId == driverId
+                                                              ).ToList() ?? throw new InvalidOperationException("No Logs found!");
+
             return AllLogs;
         }
 
