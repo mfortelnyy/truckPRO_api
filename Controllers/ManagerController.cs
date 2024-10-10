@@ -160,37 +160,18 @@ namespace truckPRO_api.Controllers
 
 
 
-        [HttpGet]
-        [Route("getAllDriversByCompany")]
-        [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> GgetAllDriversByCompany()
-        {
-            var companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
-
-            try
-            {
-                var drivers = await adminService.GetDriversByComapnyId(companyId);
-                return Ok(drivers);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
         [HttpGet]
-        [Route("geLogsByDriverId")]
+        [Route("getLogsByDriverId")]
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetLogsByDriverId([FromQuery] int driverId)
         {
-
+            int companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
+            
+            //var role = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "role").Value);
             try
             {
-                var drivers = await adminService.GetLogsByDriverId(driverId);
+                var drivers = await  managerService.GetLogsByDriver(driverId);
                 return Ok(drivers);
             }
             catch (InvalidOperationException ex)
@@ -283,14 +264,13 @@ namespace truckPRO_api.Controllers
             try
             {
                 var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-                string? cIdString = User.FindFirst("companyId").Value;
+                int cId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
+            
+                Console.WriteLine("companyid:  "+cId);
 
-                Console.WriteLine("companyid:  "+cIdString);
-
-                if (cIdString != null) 
+                if (cId != 0) 
                 {
-                    var companyId = int.Parse(cIdString);
-                    var drivers = await managerService.GetAllDriversByCompany(companyId);
+                    var drivers = await managerService.GetAllDriversByCompany(cId);
                     if (drivers == null || drivers.Count == 0)
                     {
                         return NotFound("Sorry, no drivers found in your company!");
@@ -306,26 +286,6 @@ namespace truckPRO_api.Controllers
             }
         }
 
-        [HttpGet]
-        [Authorize(Roles = "Manager")]
-        [Route("allLogsByDriver")]
-        public async Task<IActionResult> GetAllLogsByDriver([FromQuery] int driverId)
-        {
-            try
-            {
-                var companyId = int.Parse(User.FindFirst("companyId").Value);
-                var allLogs = await managerService.GetLogsByDriver(driverId, companyId);
-                if (allLogs == null || allLogs.Count == 00)
-                {
-                    return NotFound("Sorry, driver has no logs at this moment!");
-                }
-                return Ok(allLogs);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
         [HttpPost]
         [Authorize(Roles = "Manager")]
