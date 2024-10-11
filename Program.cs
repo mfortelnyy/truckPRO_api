@@ -95,7 +95,6 @@ builder.Services.AddAuthorization(auth =>
 // Build the application
 var app = builder.Build();
 
-app.UseCors();
 
 // Enable HTTPS redirection
 app.UseHttpsRedirection();
