@@ -93,18 +93,24 @@ namespace truckPRO_api.Services
 
         public async Task<string> UpdatePassword(int userId, string oldPassword, string newPassword)
         {
-            var driver = await context.User.FirstOrDefaultAsync(u => u.Id == userId) ??
+            Console.WriteLine($"userid: {userId}  oldpasswd: {oldPassword}  newpass {newPassword}");
+            var driver = await context.User.Where(u => u.Id == userId).FirstOrDefaultAsync() ??
                        throw new InvalidOperationException("No driver found!");
-            //Console.WriteLine("Driver found!");
-            if(driver.Password == _passwordHasher.HashPassword(driver, oldPassword))
+
+            var paswordVerification = _passwordHasher.VerifyHashedPassword(driver, driver.Password, oldPassword);
+
+            //if user provided incorrect password then return same message
+            if(paswordVerification == PasswordVerificationResult.Failed)
             {
-                driver.Password = _passwordHasher.HashPassword(driver, newPassword);
-                await _context.SaveChangesAsync();
-                return "Password for driver successfully updated!";
+                Console.WriteLine("old pswd is incorredct");
+                throw new InvalidOperationException("Old Password is incorrect");
             }
             else
             {
-                throw new Exception("Old Password is incorrect");
+                Console.WriteLine("Driver found! to upd passwrd");
+                driver.Password = _passwordHasher.HashPassword(driver, newPassword);
+                await _context.SaveChangesAsync();
+                return "Password for user successfully updated!";
             }
         }
 
