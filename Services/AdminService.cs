@@ -77,5 +77,15 @@ namespace truckPRO_api.Services
             if (res > 0) return true;
             return false;
         }
+
+        public async Task<bool> DeleteManager(int userId)
+        {
+            var user = await context.User.Where(u=> u.Id == userId && u.Role==UserRole.Manager).FirstOrDefaultAsync() 
+                                            ?? throw new InvalidOperationException("Manager not found");
+            context.User.Remove(user);
+            var res = await context.SaveChangesAsync();
+            if (res > 0) return true;
+            return false;
+        }
     }
 }
