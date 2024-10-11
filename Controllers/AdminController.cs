@@ -16,7 +16,7 @@ namespace truckPRO_api.Controllers
         {
             if ((SignUpDTO.Role == 1 || SignUpDTO.Role == 2) && !SignUpDTO.CompanyId.HasValue)
             {
-                return BadRequest("CompanyId is required for drivers.");
+                return BadRequest("CompanyId is required for drivers and managers.");
             }
 
             //if model is not valid then the request is bad - 400
