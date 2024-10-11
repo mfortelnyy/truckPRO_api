@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
@@ -90,33 +91,29 @@ namespace truckPRO_api.Controllers
 
         }
 
-
+        [EnableCors("AllowPATCH")]
         [HttpPatch]
         [Route("updatePassword")]
-        [Authorize(Roles = "Driver")]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> UpdatePassword([FromBody] int userId, string oldPassword, string newPassword, string confirmPassword)
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDTO updDTO)
         {
-            if (newPassword != confirmPassword) return BadRequest("Password did not match!");
+            //if (newPassword != confirmPassword) return BadRequest(new { message = "Password did not match!"});
             try
             {
                 var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
-                //Console.WriteLine($"{oldpassword}");
-                var res = await _userService.UpdatePassword(userId, oldPassword, newPassword);
-                return Ok(res);
+                Console.WriteLine($"oldpassword from controller: {updDTO.oldPassword}");
+                var res = await _userService.UpdatePassword(requestUserId, updDTO.oldPassword, updDTO.newPassword);
+                return Ok(new {message = res});
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return Conflict(new {message = ex.Message});
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new {message = ex.Message});
             }
         }
-       
-
-
 
     }
 }
