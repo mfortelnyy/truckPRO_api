@@ -40,23 +40,26 @@ namespace truckPRO_api.Services
             return logs;
         }
 
-        public async Task<string> CreateCompany(CompanyDTO companyDTO)
+        public async Task<bool> CreateCompany(CompanyDTO companyDTO)
         {
             var newCompany = new Company()
             { 
                 Name = companyDTO.Name,
 
             };
-            //Console.WriteLine(newCompany.Name);
-
+            
+            var c = await context.Company.Where(c => c.Name == newCompany.Name).FirstOrDefaultAsync();
+            if(c != null) throw new InvalidOperationException($"Company with {newCompany.Name} already exists");
             await context.Company.AddAsync(newCompany);
            
-            await context.SaveChangesAsync();
-
+            var res = await context.SaveChangesAsync();
+            if (res > 0) return true;
+            return false;
             //var addedCompany = await context.Company.Where(comp => comp.Name == newCompany.Name ).FirstOrDefaultAsync();
-            return newCompany.Id == 0
+            /*return res <= 0
                 ? throw new InvalidOperationException("Company can not be added!")
-                : $"Company with id {newCompany.Id} added";
+                : $"Company '{newCompany.Name}' added";
+            */
         }
 
         public async Task<List<User>> GetAllManagers()
