@@ -118,5 +118,16 @@ namespace truckPRO_api.Controllers
             return Ok(new { message = "Company deleted successfully!" });
         }
 
+        [HttpDelete]
+        [Route("/adm/deleteManager")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteManagrt([FromQuery] int userId)
+        {
+            var res = await adminService.DeleteManager(userId);
+            if (!res) return NotFound(new { message = "Manager cannot be deleted!" });
+            return Ok(new { message = "Manager deleted successfully!" });
+        }
+
+
     }
 }
