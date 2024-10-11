@@ -22,16 +22,19 @@ namespace truckPRO_api.Services
 
         public async Task<string> CreateUserAsync(SignUpDTO signUpDTO)
         {
+            
             var userExists = await _context.User.AnyAsync(u => u.Email == signUpDTO.Email);
             var pendingDriver = await _context.PendingUser.FirstOrDefaultAsync(pd => pd.Email == signUpDTO.Email);
             if (userExists)
             {
                 throw new InvalidOperationException("User already exists.");
             }
-            if (pendingDriver == null)
+            
+            if (pendingDriver == null && signUpDTO.Role == 2)
             {
                 throw new InvalidOperationException($"Email {signUpDTO.Email} was not added by the manager.");
             }
+            
 
             User newUser = _mapper.Map<User>(signUpDTO);
             newUser.EmailVerified = false;
@@ -93,7 +96,7 @@ namespace truckPRO_api.Services
 
         public async Task<string> UpdatePassword(int userId, string oldPassword, string newPassword)
         {
-            Console.WriteLine($"userid: {userId}  oldpasswd: {oldPassword}  newpass {newPassword}");
+            //Console.WriteLine($"userid: {userId}  oldpasswd: {oldPassword}  newpass {newPassword}");
             var driver = await context.User.Where(u => u.Id == userId).FirstOrDefaultAsync() ??
                        throw new InvalidOperationException("No driver found!");
 
@@ -102,7 +105,7 @@ namespace truckPRO_api.Services
             //if user provided incorrect password then return same message
             if(paswordVerification == PasswordVerificationResult.Failed)
             {
-                Console.WriteLine("old pswd is incorredct");
+                //Console.WriteLine("old pswd is incorredct");
                 throw new InvalidOperationException("Old Password is incorrect");
             }
             else
