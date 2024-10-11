@@ -94,8 +94,8 @@ namespace truckPRO_api.Controllers
                 return BadRequest(ModelState);
             }
             var res = await adminService.CreateCompany(companyDTO);
-            if (res == null) return NotFound("Company can not be created at this moment!");
-            return Ok(res);
+            if (!res) return NotFound(new { message = "Company can not be created at this moment!" });
+            return Ok(new { message = "Company created successfully!" });
         }
 
         [HttpGet]
@@ -114,8 +114,8 @@ namespace truckPRO_api.Controllers
         public async Task<IActionResult> DeleteCompany([FromQuery] int companyId)
         {
             var res = await adminService.DeleteCompany(companyId);
-            if (!res) return NotFound("Managers can not be found!");
-            return Ok("Company deleted succesfully!");
+            if (!res) return NotFound(new { message = "Managers cannot be found!" });
+            return Ok(new { message = "Company deleted successfully!" });
         }
 
     }
