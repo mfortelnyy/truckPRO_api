@@ -255,5 +255,33 @@ namespace truckPRO_api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+
+        [HttpGet]
+        [Route("getActiveLogEntries")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> GetActiveLogEntries()
+        {
+            try
+            {
+                var driverId = User.FindFirst("userId").Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+                var result = await _logEntryService.getActiveLogEntries(int.Parse(userId));
+                return Ok(result);
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

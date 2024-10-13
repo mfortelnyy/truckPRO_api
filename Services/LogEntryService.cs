@@ -44,11 +44,7 @@ namespace truckPRO_api.Services
             return logEntry.Id.ToString();
         }
 
-        public Task<string> CreateCycleLog(LogEntry logEntry)
-        {
-            throw new NotImplementedException();
-        }
-
+    
         public async Task<string> CreateDrivingLog(LogEntry logEntry)
         {
             var userId = logEntry.UserId;
@@ -155,6 +151,19 @@ namespace truckPRO_api.Services
 
             return $"Off Duty Log with {activeOffDutyLog.Id} Ended";
         }
+
+        // Fetch active log entries for the driver
+        private async Task<List<LogEntry>> GetActiveLogEntries(int driverId)
+        {
+            var activeLogs = await context.LogEntry
+                                        .Where(log => log.UserId == driverId && log.EndTime == null)
+                                        .ToListAsync() ?? throw new InvalidOperationException("No active logs available!");
+
+            return activeLogs;
+        }
+
+ 
+
 
 
 
