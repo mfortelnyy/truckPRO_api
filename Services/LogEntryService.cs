@@ -328,6 +328,17 @@ namespace truckPRO_api.Services
             return false;
         }
 
+        private async Task<List<LogEntry>?> GetActiveLogs(int userId)
+        {
+            var activeLogs = await context.LogEntry
+                                  .Where(u => u.UserId == userId && u.EndTime == null)
+                                  .OrderByAscending(u => u.StartTime)
+                                  .ToList() ?? throw new InvalidOperationException("No active logs found!");
+            return activeLogs;
+ 
+        }
+        
+
         private async Task<bool> HasActiveOffDutyLog(int userId)
         {
             return await context.LogEntry.AnyAsync(u => u.UserId == userId &&
