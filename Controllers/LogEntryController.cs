@@ -310,8 +310,10 @@ namespace truckPRO_api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+
         [HttpGet]
-        [Route("getTotalOnDutyHoursLastWeekk")]
+        [Route("getTotalOnDutyHoursLastWeek")]
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> GetTotalOnDutyHoursLastWeek()
         {
@@ -324,6 +326,34 @@ namespace truckPRO_api.Controllers
                 }
 
                 var result = await _logEntryService.getTotalOnDutyHoursLastWeekk(int.Parse(userId));
+                return Ok(result);
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet]
+        [Route("getTotalOffDutyHoursLastWeek")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> GetTotalOffDutyHoursLastWeek()
+        {
+            try
+            {
+                var driverId = User.FindFirst("userId").Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+                var result = await _logEntryService.getTotalOffDutyHoursLastWeek(int.Parse(userId));
                 return Ok(result);
 
             }

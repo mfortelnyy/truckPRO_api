@@ -205,6 +205,28 @@ namespace truckPRO_api.Services
             return TimeSpan.FromHours(totalDrivingTime);
         }
 
+         // Fetch total off duty hours for the driver in the last week (starting from the most recent Monday)
+        private async Task<TimeSpan> GetTotalOffDutyHoursLastWeek(int userId)
+        {
+        
+            var currentDate = DateTime.UtcNow;
+            // find the most recent Monday
+            var daysSinceMonday = (int)currentDate.DayOfWeek - (int)DayOfWeek.Monday;
+            var startOfWeek = currentDate.AddDays(-daysSinceMonday).Date;
+
+            // fetch driving logs for the user from the most recent Monday
+            var drivingLogs = await context.LogEntry
+                                        .Where(log => log.UserId == userId 
+                                                    && log.LogEntryType == LogEntryType.OffDuty 
+                                                    && log.EndTime != null
+                                                    && log.StartTime >= startOfWeek)
+                                        .ToList() ?? throw new InvalidOperationException("No Off Duty logs available!");;
+
+            var totalDrivingTime = drivingLogs.Sum(log => (log.EndTime.Value - log.StartTime).TotalHours);
+
+            return TimeSpan.FromHours(totalDrivingTime);
+        }
+
 
         //Validation Methods
         //Checks to validate if the log can be added
