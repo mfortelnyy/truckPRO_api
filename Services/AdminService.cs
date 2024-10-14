@@ -16,7 +16,7 @@ namespace truckPRO_api.Services
         public async Task<List<User>> GetAllDrivers()
         {
             Console.WriteLine("getting all drivers!");
-            var allDrivers = context.User.Where(u => u.Role == UserRole.Driver).ToList(); 
+            var allDrivers = await context.User.Where(u => u.Role == UserRole.Driver).ToListAsync(); 
             return allDrivers;
            
         }
