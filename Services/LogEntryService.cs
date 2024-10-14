@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Graph.Models;
+﻿using Microsoft.EntityFrameworkCore;
 using truckPRO_api.Data;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
@@ -152,18 +150,30 @@ namespace truckPRO_api.Services
             return $"Off Duty Log with {activeOffDutyLog.Id} Ended";
         }
 
-        // Fetch active log entries for the driver
-        private async Task<List<LogEntry>> GetActiveLogEntries(int driverId)
+        
+        public async Task<List<LogEntry>> GetActiveLogEntries(int driverId)
         {
+            Console.WriteLine($"driverId={driverId}");
+
+            
             var activeLogs = await context.LogEntry
-                                        .Where(log => log.UserId == driverId && log.EndTime == null)
-                                        .ToListAsync() ?? throw new InvalidOperationException("No active logs available!");
+                .Where(log => log.UserId == driverId && log.EndTime == null)
+                .ToListAsync(); 
+
+          
+            Console.WriteLine($"Number of active logs: {activeLogs.Count}");
+            
+            if (activeLogs.Count == 0)
+            {
+                throw new InvalidOperationException("No active logs available!");
+            }
 
             return activeLogs;
         }
 
+
         // Fetch total driving hours for the driver in the last week (starting from the most recent Monday)
-        private async Task<TimeSpan> GetTotalDrivingHoursLastWeek(int userId)
+        public async Task<TimeSpan> GetTotalDrivingHoursLastWeek(int userId)
         {
         
             var currentDate = DateTime.UtcNow;
@@ -177,14 +187,14 @@ namespace truckPRO_api.Services
                                                     && log.LogEntryType == LogEntryType.Driving 
                                                     && log.EndTime != null
                                                     && log.StartTime >= startOfWeek)
-                                        .ToList() ?? throw new InvalidOperationException("No driving logs available!");;
+                                        .ToListAsync() ?? throw new InvalidOperationException("No driving logs available!");;
             var totalDrivingTime = drivingLogs.Sum(log => (log.EndTime.Value - log.StartTime).TotalHours);
 
             return TimeSpan.FromHours(totalDrivingTime);
         }
 
          // Fetch total on duty hours for the driver in the last week (starting from the most recent Monday)
-        private async Task<TimeSpan> GetTotalOnDutyHoursLastWeek(int userId)
+        public async Task<TimeSpan> GetTotalOnDutyHoursLastWeek(int userId)
         {
         
             var currentDate = DateTime.UtcNow;
@@ -198,7 +208,7 @@ namespace truckPRO_api.Services
                                                     && log.LogEntryType == LogEntryType.OnDuty 
                                                     && log.EndTime != null
                                                     && log.StartTime >= startOfWeek)
-                                        .ToList() ?? throw new InvalidOperationException("No On Duty logs available!");;
+                                        .ToListAsync() ?? throw new InvalidOperationException("No On Duty logs available!");;
 
             var totalDrivingTime = drivingLogs.Sum(log => (log.EndTime.Value - log.StartTime).TotalHours);
 
@@ -206,7 +216,7 @@ namespace truckPRO_api.Services
         }
 
          // Fetch total off duty hours for the driver in the last week (starting from the most recent Monday)
-        private async Task<TimeSpan> GetTotalOffDutyHoursLastWeek(int userId)
+        public async Task<TimeSpan> GetTotalOffDutyHoursLastWeek(int userId)
         {
         
             var currentDate = DateTime.UtcNow;
@@ -220,7 +230,7 @@ namespace truckPRO_api.Services
                                                     && log.LogEntryType == LogEntryType.OffDuty 
                                                     && log.EndTime != null
                                                     && log.StartTime >= startOfWeek)
-                                        .ToList() ?? throw new InvalidOperationException("No Off Duty logs available!");;
+                                        .ToListAsync() ?? throw new InvalidOperationException("No Off Duty logs available!");;
 
             var totalDrivingTime = drivingLogs.Sum(log => (log.EndTime.Value - log.StartTime).TotalHours);
 
@@ -286,7 +296,7 @@ namespace truckPRO_api.Services
         }
 
         //new driving log can not be added because an active driving log is in the system
-        private async Task<bool> HasActiveDriving(int userId)
+        public async Task<bool> HasActiveDriving(int userId)
         {
             return await context.LogEntry.AnyAsync(u => u.UserId == userId &&
                                                                         u.LogEntryType == LogEntryType.Driving &&
@@ -294,7 +304,7 @@ namespace truckPRO_api.Services
         }
 
         //gets the last log entry for the user
-        private async Task<bool> ValidLastLogEntryTimeFrame(int userId)
+        public async Task<bool> ValidLastLogEntryTimeFrame(int userId)
         {
             var lastLogEntry = await context.LogEntry
                                   .Where(u => u.UserId == userId)
@@ -328,12 +338,12 @@ namespace truckPRO_api.Services
             return false;
         }
 
-        private async Task<List<LogEntry>?> GetActiveLogs(int userId)
+        public async Task<List<LogEntry>> GetActiveLogs(int userId)
         {
             var activeLogs = await context.LogEntry
                                   .Where(u => u.UserId == userId && u.EndTime == null)
-                                  .OrderByAscending(u => u.StartTime)
-                                  .ToList() ?? throw new InvalidOperationException("No active logs found!");
+                                  .OrderByDescending(u => u.StartTime)
+                                  .ToListAsync() ?? throw new InvalidOperationException("No active logs found!");
             return activeLogs;
  
         }
