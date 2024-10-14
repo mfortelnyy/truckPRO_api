@@ -46,6 +46,7 @@ namespace truckPRO_api.Controllers
             {
                 //Get userid form token
                 var userId = User.FindFirst("userId").Value;
+                Console.WriteLine("userid:  ", userId);
 
                 if (string.IsNullOrEmpty(userId))
                 {
@@ -258,19 +259,20 @@ namespace truckPRO_api.Controllers
 
 
         [HttpGet]
-        [Route("getActiveLogEntries")]
+        [Route("getActive")]
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> GetActiveLogEntries()
         {
             try
             {
-                var driverId = User.FindFirst("userId").Value;
-                if (string.IsNullOrEmpty(userId))
+                var driverId =  User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
+       
+                if (string.IsNullOrEmpty(driverId))
                 {
                     return Unauthorized("User ID not found in the token.");
                 }
 
-                var result = await _logEntryService.getActiveLogEntries(int.Parse(userId));
+                var result = await _logEntryService.GetActiveLogEntries(int.Parse(driverId));
                 return Ok(result);
 
             }
@@ -291,13 +293,13 @@ namespace truckPRO_api.Controllers
         {
             try
             {
-                var driverId = User.FindFirst("userId").Value;
-                if (string.IsNullOrEmpty(userId))
+                var driverId =  User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
+                if (string.IsNullOrEmpty(driverId))
                 {
                     return Unauthorized("User ID not found in the token.");
                 }
 
-                var result = await _logEntryService.getTotalDrivingHoursLastWeek(int.Parse(userId));
+                var result = await _logEntryService.GetTotalDrivingHoursLastWeek(int.Parse(driverId));
                 return Ok(result);
 
             }
@@ -319,13 +321,14 @@ namespace truckPRO_api.Controllers
         {
             try
             {
-                var driverId = User.FindFirst("userId").Value;
-                if (string.IsNullOrEmpty(userId))
+                var driverId =  User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
+
+                if (string.IsNullOrEmpty(driverId))
                 {
                     return Unauthorized("User ID not found in the token.");
                 }
 
-                var result = await _logEntryService.getTotalOnDutyHoursLastWeekk(int.Parse(userId));
+                var result = await _logEntryService.GetTotalOnDutyHoursLastWeek(int.Parse(driverId));
                 return Ok(result);
 
             }
@@ -347,13 +350,14 @@ namespace truckPRO_api.Controllers
         {
             try
             {
-                var driverId = User.FindFirst("userId").Value;
-                if (string.IsNullOrEmpty(userId))
+                var driverId =  User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
+
+                if (string.IsNullOrEmpty(driverId))
                 {
                     return Unauthorized("User ID not found in the token.");
                 }
 
-                var result = await _logEntryService.getTotalOffDutyHoursLastWeek(int.Parse(userId));
+                var result = await _logEntryService.GetTotalOffDutyHoursLastWeek(int.Parse(driverId));
                 return Ok(result);
 
             }
@@ -374,13 +378,14 @@ namespace truckPRO_api.Controllers
         {
             try
             {
-                var driverId = User.FindFirst("userId").Value;
-                if (string.IsNullOrEmpty(userId))
+                var driverId = User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
+
+                if (string.IsNullOrEmpty(driverId))
                 {
                     return Unauthorized("User ID not found in the token.");
                 }
 
-                var result = await _logEntryService.getActiveLogs(int.Parse(userId));
+                var result = await _logEntryService.GetActiveLogEntries(int.Parse(driverId));
                 return Ok(result);
 
             }
