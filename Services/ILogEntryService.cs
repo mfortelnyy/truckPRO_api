@@ -11,7 +11,11 @@ namespace truckPRO_api.Services
         public Task<string> StopDrivingLog(int userId);
         public Task<string> StopOnDutyLog(int userId);
         public Task<string> StopOffDutyLog(int userId);
-
+        public Task<List<LogEntry>> GetActiveLogEntries(int driverId);
+        public Task<TimeSpan> GetTotalDrivingHoursLastWeek(int userId);
+        public Task<TimeSpan> GetTotalOnDutyHoursLastWeek(int userId);
+        public Task<TimeSpan> GetTotalOffDutyHoursLastWeek(int userId);
+        
 
     }
 }
