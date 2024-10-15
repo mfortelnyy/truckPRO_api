@@ -25,14 +25,14 @@ namespace truckPRO_api.Controllers
         {
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
-            List<string> imageUrls = await _s3Service.UploadFileAsync(image);
-            if (imageUrls.Count == 0)
+            String imageUrl = await _s3Service.UploadFileAsync(image);
+            if (imageUrl == null)
             {
                 return Conflict("Api failed");
             }
             else
             {
-                return Ok(imageUrls);
+                return Ok(imageUrl);
             }
         }
 
@@ -406,6 +406,35 @@ namespace truckPRO_api.Controllers
                 }
 
                 var result = await _logEntryService.GetActiveLogEntries(int.Parse(driverId));
+                return Ok(result);
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        [HttpGet]
+        [Route("getAllLogs")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> GetAllLogs()
+        {
+            try
+            {
+                var driverId = User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
+
+                if (string.IsNullOrEmpty(driverId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+                var result = await _logEntryService.GetAllLogs(int.Parse(driverId));
                 return Ok(result);
 
             }
