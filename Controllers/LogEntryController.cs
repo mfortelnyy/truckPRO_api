@@ -19,6 +19,26 @@ namespace truckPRO_api.Controllers
 
         //test endpoint
         [HttpPost]
+        [Route("uploadPhoto")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> UploadPhoto([FromForm] IFormFile image)
+        {
+            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+
+            List<string> imageUrls = await _s3Service.UploadFileAsync(image);
+            if (imageUrls.Count == 0)
+            {
+                return Conflict("Api failed");
+            }
+            else
+            {
+                return Ok(imageUrls);
+            }
+        }
+
+
+
+        [HttpPost]
         [Route("uploadPhotos")]
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> UploadPhotos([FromForm] List<IFormFile> images)
