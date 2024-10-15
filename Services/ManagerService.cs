@@ -56,7 +56,7 @@ namespace truckPRO_api.Services
             var drivingLogs = await context.LogEntry
                 .Include(log => log.User)
                 .Where(predicate: log => log.User.CompanyId == companyId && 
-                                                                log.LogEntryType == LogEntryType.Driving &&
+                                                                (log.LogEntryType == LogEntryType.Driving || log.LogEntryType == LogEntryType.OnDuty) &&
                                                                 log.EndTime == null).ToListAsync();
 
             if (drivingLogs == null || drivingLogs.Count == 0) throw new InvalidOperationException("No active drivers driving");
