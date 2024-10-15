@@ -11,10 +11,6 @@ namespace truckPRO_api.Services
         {
             var userId = logEntry.UserId;
 
-            if (!await HasActiveOnDutyOrDrivingLog(userId))
-            {
-                throw new InvalidOperationException("Cannot create a Duty Off log. The user does not have an active on-duty or driving log.");
-            }
             if (await HasActiveOffDutyLog(userId))
             {
                 throw new InvalidOperationException("Cannot create a Duty Off log. The user is currently OFF Duty");
