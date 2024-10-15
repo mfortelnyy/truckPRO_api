@@ -343,6 +343,16 @@ namespace truckPRO_api.Services
             return activeLogs;
  
         }
+
+        public async Task<List<LogEntry>> GetAllLogs(int driverId)
+        {
+            var allLogs = await context.LogEntry
+                                  .Where(u => u.UserId == driverId)
+                                  .OrderByDescending(u => u.StartTime)
+                                  .ToListAsync() ?? throw new InvalidOperationException("No history of logs!");
+            return allLogs;
+ 
+        }
         
 
         private async Task<bool> HasActiveOffDutyLog(int userId)
