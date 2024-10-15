@@ -15,7 +15,7 @@ namespace truckPRO_api.Services
         public Task<TimeSpan> GetTotalDrivingHoursLastWeek(int userId);
         public Task<TimeSpan> GetTotalOnDutyHoursLastWeek(int userId);
         public Task<TimeSpan> GetTotalOffDutyHoursLastWeek(int userId);
-        
+        public Task<List<LogEntry>> GetAllLogs(int driverId);
 
     }
 }
