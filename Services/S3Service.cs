@@ -1,5 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
+using Amazon.Runtime;
+
 
 namespace truckPRO_api.Services
 {
@@ -8,9 +10,18 @@ namespace truckPRO_api.Services
         private readonly IAmazonS3 _amazonS3;
         private readonly string _bucketName;
 
-        public S3Service(IAmazonS3 amazonS3, IConfiguration configuration)
+        public S3Service(IConfiguration configuration)
         {
-            _amazonS3 = amazonS3;
+            var awsOptions = new AmazonS3Config
+            {
+                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(configuration["AWS:Region"])
+            };
+            
+            var credentials = new BasicAWSCredentials(
+                configuration["AWS:AccessKey"], 
+                configuration["AWS:SecretKey"]);
+            
+            _amazonS3 = new AmazonS3Client(credentials, awsOptions);
             _bucketName = configuration["AWS:BucketName"];
         }
 
@@ -32,6 +43,7 @@ namespace truckPRO_api.Services
         public async Task<string> UploadFileAsync(IFormFile file)
         {
             var fileName = Guid.NewGuid() + "_" + file.FileName;
+            //Console.WriteLine($"{fileName} {file.FileName}");
 
             using var stream = new MemoryStream();
             await file.CopyToAsync(stream);
@@ -44,9 +56,10 @@ namespace truckPRO_api.Services
             };
 
             var response = await _amazonS3.PutObjectAsync(request);
-
+            
             if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
             {
+                Console.WriteLine($"successssssssssss - 'https://{_bucketName}.s3.amazonaws.com/{fileName}'");
                 return $"https://{_bucketName}.s3.amazonaws.com/{fileName}";
             }
             else
