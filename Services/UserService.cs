@@ -117,6 +117,28 @@ namespace truckPRO_api.Services
             }
         }
 
+        public String GenerateTemporaryPassword()
+        {
+            private const string LowercaseChars = "abcdefghijklmnopqrstuvwxyz";
+            private const string UppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            private const string DigitChars = "0123456789";
+            private const string SpecialChars = "!@#$%^&*()_-+=<>?";
+            
+            string allChars = LowercaseChars + UppercaseChars + DigitChars + SpecialChars;
+            StringBuilder password = new StringBuilder();
+            using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+            {
+                byte[] randomBytes = new byte[1];
+                for (int i = 0; i < length; i++)
+                {
+                    rng.GetBytes(randomBytes);
+                    int randomIndex = randomBytes[0] % allChars.Length;
+                    password.Append(allChars[randomIndex]);
+                }
+            }
+            return password.ToString();
+        }
+
 
         private string GenerateJwtToken(User user)
         {
