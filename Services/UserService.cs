@@ -8,6 +8,7 @@ using truckPRO_api.Models;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace truckPRO_api.Services
 {
@@ -117,13 +118,15 @@ namespace truckPRO_api.Services
             }
         }
 
-        private String GenerateTemporaryPassword()
+
+        public static string GenerateTemporaryPassword(int length = 12)
         {
-            private const string LowercaseChars = "abcdefghijklmnopqrstuvwxyz";
-            private const string UppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            private const string DigitChars = "0123456789";
-            private const string SpecialChars = "!@#$%^&*()_-+=<>?";
+            const string LowercaseChars = "abcdefghijklmnopqrstuvwxyz";
+            const string UppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string DigitChars = "0123456789";
+            const string SpecialChars = "!@#$%^&*()_-+=<>?"; 
             
+            // Combine the character sets for password generation
             string allChars = LowercaseChars + UppercaseChars + DigitChars + SpecialChars;
             StringBuilder password = new StringBuilder();
             using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
@@ -140,6 +143,8 @@ namespace truckPRO_api.Services
         }
 
 
+
+    
         private String GenerateJwtToken(User user)
         {
             //Console.WriteLine(_config["Jwt:Key"]);
@@ -177,7 +182,7 @@ namespace truckPRO_api.Services
 
         public async Task<string> ForgetPassword(String email)
         {
-            var user = await context.User.Where(u => u.email == email).FirstOrDefaultAsync() ??
+            var user = await context.User.Where(u => u.Email == email).FirstOrDefaultAsync() ??
                        throw new InvalidOperationException("No user found!");
 
             String tempPassword = GenerateTemporaryPassword();
@@ -186,6 +191,5 @@ namespace truckPRO_api.Services
         }
 
         
-
     }
 }
