@@ -8,7 +8,7 @@ namespace truckPRO_api.Services
         Task<string> LoginUserAsync(LoginDTO lDTO);
         Task<string> VerifyEmail(string emailToken);
         Task<string> UpdatePassword(int driverId, string oldPassword, string newPassword);
-        Task<string> UpdatePasswordAsync(String email, String password);
+        Task<string> ForgetPassword(String email);
         
     }
 }
