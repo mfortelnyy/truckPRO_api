@@ -181,11 +181,11 @@ namespace truckPRO_api.Services
             var drivingLogs = await context.LogEntry
                                         .Where(log => log.UserId == userId 
                                                     && log.LogEntryType == LogEntryType.Driving 
-                                                    && log.EndTime != null
                                                     && log.StartTime >= startOfWeek)
                                         .ToListAsync() ?? throw new InvalidOperationException("No driving logs available!");;
-            var totalDrivingTime = drivingLogs.Sum(log => (log.EndTime.Value - log.StartTime).TotalHours);
-
+            var totalDrivingTime = drivingLogs.Sum(log => log.EndTime != null 
+                                ? (log.EndTime.Value - log.StartTime).TotalHours 
+                                : (DateTime.UtcNow - log.StartTime).TotalHours);
             return TimeSpan.FromHours(totalDrivingTime);
         }
 
@@ -199,16 +199,16 @@ namespace truckPRO_api.Services
             var startOfWeek = currentDate.AddDays(-daysSinceMonday).Date;
 
             // fetch driving logs for the user from the most recent Monday
-            var drivingLogs = await context.LogEntry
+            var onDutyLogs = await context.LogEntry
                                         .Where(log => log.UserId == userId 
                                                     && log.LogEntryType == LogEntryType.OnDuty 
-                                                    && log.EndTime != null
                                                     && log.StartTime >= startOfWeek)
                                         .ToListAsync() ?? throw new InvalidOperationException("No On Duty logs available!");;
 
-            var totalDrivingTime = drivingLogs.Sum(log => (log.EndTime.Value - log.StartTime).TotalHours);
-
-            return TimeSpan.FromHours(totalDrivingTime);
+            var totalOnDutyTime = onDutyLogs.Sum(log => log.EndTime != null 
+                                ? (log.EndTime.Value - log.StartTime).TotalHours 
+                                : (DateTime.UtcNow - log.StartTime).TotalHours);
+            return TimeSpan.FromHours(totalOnDutyTime);
         }
 
          // Fetch total off duty hours for the driver in the last week (starting from the most recent Monday)
@@ -221,16 +221,17 @@ namespace truckPRO_api.Services
             var startOfWeek = currentDate.AddDays(-daysSinceMonday).Date;
 
             // fetch driving logs for the user from the most recent Monday
-            var drivingLogs = await context.LogEntry
+            var offDutyLogs = await context.LogEntry
                                         .Where(log => log.UserId == userId 
                                                     && log.LogEntryType == LogEntryType.OffDuty 
-                                                    && log.EndTime != null
                                                     && log.StartTime >= startOfWeek)
                                         .ToListAsync() ?? throw new InvalidOperationException("No Off Duty logs available!");;
 
-            var totalDrivingTime = drivingLogs.Sum(log => (log.EndTime.Value - log.StartTime).TotalHours);
+            var totalOffDutyTime = offDutyLogs.Sum(log => log.EndTime != null 
+                                ? (log.EndTime.Value - log.StartTime).TotalHours 
+                                : (DateTime.UtcNow - log.StartTime).TotalHours);
 
-            return TimeSpan.FromHours(totalDrivingTime);
+            return TimeSpan.FromHours(totalOffDutyTime);
         }
 
 
