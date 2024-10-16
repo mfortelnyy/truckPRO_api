@@ -46,7 +46,15 @@ namespace truckPRO_api.Services
             //if there is no on duty log 
             if (!await HasActiveOnDuty(userId))
             {
-                throw new InvalidOperationException( "Cannot create a driving log. The user does not have an active on-duty log. ");
+                //if there is no on duty log then create one
+                await CreateOnDutyLog(new LogEntry
+                {
+                    UserId = userId,
+                    LogEntryType = LogEntryType.OnDuty,
+                    StartTime = DateTime.Now
+                });
+                
+                //throw new InvalidOperationException( "Cannot create a driving log. The user does not have an active on-duty log. ");
             }
 
             //if there is already a driving log
@@ -56,7 +64,7 @@ namespace truckPRO_api.Services
 
             }
 
-            if (!await ValidLastLogEntryTimeFrame(userId)) throw new InvalidOperationException("Cannot create a driving log. The user does not have an active on-duty log.");
+            //if (!await ValidLastLogEntryTimeFrame(userId)) throw new InvalidOperationException("Cannot create a driving log. The user does not have an active on-duty log.");
             else
             {
                 context.Add(logEntry);
@@ -304,24 +312,24 @@ namespace truckPRO_api.Services
         public async Task<bool> ValidLastLogEntryTimeFrame(int userId)
         {
             var lastLogEntry = await context.LogEntry
-                                  .Where(u => u.UserId == userId)
-                                  .OrderByDescending(u => u.StartTime)
-                                  .FirstOrDefaultAsync();
+                                  .Where(u => u.UserId == userId && u.LogEntryType == LogEntryType.Driving)
+                                  .OrderByDescending(u => u.StartTime).ToListAsync();
+                                  
 
-            if (lastLogEntry == null) return false;
+            if (lastLogEntry == null) return true;
 
             
 
-            if (lastLogEntry.LogEntryType == LogEntryType.OnDuty)
+            if (lastLogEntry[0].LogEntryType == LogEntryType.OnDuty || lastLogEntry[0].LogEntryType == LogEntryType.Driving) 
             {
-                var LogDuration = lastLogEntry.EndTime - lastLogEntry.StartTime;
-                //if on duty log was active more than 14 hours update the endtime and return false
+                var LogDuration = lastLogEntry[0].EndTime - lastLogEntry[0].StartTime;
+                //testing -> if on duty log was active more than 14 hours update the endtime and return false
                 if (LogDuration > TimeSpan.FromHours(14))
                 {
                     //end on duty log and does not allow new driving log
-                    lastLogEntry.EndTime = lastLogEntry.StartTime + TimeSpan.FromHours(14);
-                    context.Update(lastLogEntry);
-                    await context.SaveChangesAsync();
+                    // lastLogEntry.EndTime = lastLogEntry.StartTime + TimeSpan.FromHours(14);
+                    // context.Update(lastLogEntry);
+                    // await context.SaveChangesAsync();
                     return false;
                 }
                 //if on duty log duration is less than 14 hrs -> allow addding driving log
