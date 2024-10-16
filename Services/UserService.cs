@@ -153,5 +153,17 @@ namespace truckPRO_api.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        public async Task<string> ForgetPassword(String email)
+        {
+            var user = await context.User.Where(u => u.email == email).FirstOrDefaultAsync() ??
+                       throw new InvalidOperationException("No user found!");
+
+            String tempPassword = GenerateTemporaryPassword();
+            user.Password = _passwordHasher.HashPassword(user, tempPassword);
+            return tempPassword;
+        }
+
+        
+
     }
 }
