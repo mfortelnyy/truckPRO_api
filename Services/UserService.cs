@@ -117,7 +117,7 @@ namespace truckPRO_api.Services
             }
         }
 
-        public String GenerateTemporaryPassword()
+        private String GenerateTemporaryPassword()
         {
             private const string LowercaseChars = "abcdefghijklmnopqrstuvwxyz";
             private const string UppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -140,7 +140,7 @@ namespace truckPRO_api.Services
         }
 
 
-        private string GenerateJwtToken(User user)
+        private String GenerateJwtToken(User user)
         {
             //Console.WriteLine(_config["Jwt:Key"]);
             //symmetric security key is created using a secret key stored in appsetings.json
