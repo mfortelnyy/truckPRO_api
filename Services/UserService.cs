@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
+using truckapi.DTOs;
 
 namespace truckPRO_api.Services
 {
@@ -182,16 +183,22 @@ namespace truckPRO_api.Services
 
         public async Task<string> ForgetPassword(String email)
         {
-            Console.WriteLine($"user found: {email}");
+            //Console.WriteLine($"user found: {email}");
             var user = await context.User.Where(u => u.Email == email).FirstOrDefaultAsync() ??
                        throw new InvalidOperationException("No user found!");
-            Console.WriteLine($"user found: {user.Email}");
+            //Console.WriteLine($"user found: {user.Email}");
             String tempPassword = GenerateTemporaryPassword();
             user.Password = _passwordHasher.HashPassword(user, tempPassword);
             await _context.SaveChangesAsync();
             return tempPassword;
         }
 
-        
+        public async Task<UserDTO> GetUserById(int userId)
+        {
+            var user = await _context.User.Where(u => u.Id == userId).FirstOrDefaultAsync() ??
+                       throw new InvalidOperationException("No user found!");
+            return _mapper.Map<UserDTO>(user);
+            
+        }
     }
 }
