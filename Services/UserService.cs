@@ -182,11 +182,13 @@ namespace truckPRO_api.Services
 
         public async Task<string> ForgetPassword(String email)
         {
+            Console.WriteLine($"user found: {email}");
             var user = await context.User.Where(u => u.Email == email).FirstOrDefaultAsync() ??
                        throw new InvalidOperationException("No user found!");
-
+            Console.WriteLine($"user found: {user.Email}");
             String tempPassword = GenerateTemporaryPassword();
             user.Password = _passwordHasher.HashPassword(user, tempPassword);
+            await _context.SaveChangesAsync();
             return tempPassword;
         }
 
