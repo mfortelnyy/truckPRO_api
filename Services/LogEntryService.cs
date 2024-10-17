@@ -207,7 +207,7 @@ namespace truckPRO_api.Services
                                         .ToListAsync() ?? throw new InvalidOperationException("No driving logs available!");;
             var totalDrivingTime = drivingLogs.Sum(log => log.EndTime != null 
                                 ? (log.EndTime.Value - log.StartTime).TotalHours 
-                                : (DateTime.UtcNow - log.StartTime).TotalHours);
+                                : (DateTime.Now - log.StartTime).TotalHours);
             return TimeSpan.FromHours(totalDrivingTime);
         }
 
@@ -255,7 +255,7 @@ namespace truckPRO_api.Services
 
             var totalOffDutyTime = offDutyLogs.Sum(log => log.EndTime != null 
                                 ? (log.EndTime.Value - log.StartTime).TotalHours 
-                                : (DateTime.UtcNow - log.StartTime).TotalHours);
+                                : (DateTime.Now - log.StartTime).TotalHours);
 
             return TimeSpan.FromHours(totalOffDutyTime);
         }
