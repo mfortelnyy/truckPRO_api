@@ -137,5 +137,27 @@ namespace truckPRO_api.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("getUserbyToken")]
+        [Authorize(Roles = "Manager, Driver, Admin")]
+        public async Task<IActionResult> GetUserByToken([FromForm] String email)
+        {
+            try
+            {
+                var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
+                var userDTO = await _userService.GetUserById(requestUserId);
+               
+                return Ok(userDTO);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new {message = ex.Message});
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new {message = ex.Message});
+            }
+        }
+
     }
 }
