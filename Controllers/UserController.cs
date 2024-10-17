@@ -100,8 +100,9 @@ namespace truckPRO_api.Controllers
             //if (newPassword != confirmPassword) return BadRequest(new { message = "Password did not match!"});
             try
             {
+                if(updDTO.oldPassword == updDTO.newPassword) return BadRequest(new {message = "New password can not be the same as old password!"});
                 var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
-                Console.WriteLine($"oldpassword from controller: {updDTO.oldPassword}");
+                //Console.WriteLine($"oldpassword from controller: {updDTO.oldPassword}");
                 var res = await _userService.UpdatePassword(requestUserId, updDTO.oldPassword, updDTO.newPassword);
                 return Ok(new {message = res});
             }
