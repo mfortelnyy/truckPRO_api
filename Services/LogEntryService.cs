@@ -92,6 +92,20 @@ namespace truckPRO_api.Services
                 throw new InvalidOperationException("On-duty log entry cannot start before completing the required off duty period. (10 hours)");
             }
 
+            if(await HasActiveOffDutyLog(userId))
+            {
+                try
+                {
+                    //if there is an active off duty log then end it
+                    var stopped = await StopOffDutyLog(userId);
+                   
+                }catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    throw new InvalidOperationException("Cannot create a new on-duty log.");
+                }
+            }
+
             //if all checks are passed then create and save logentry to db
             context.LogEntry.Add(logEntry);
             await context.SaveChangesAsync();
@@ -204,7 +218,9 @@ namespace truckPRO_api.Services
             var currentDate = DateTime.UtcNow;
             // find the most recent Monday
             var daysSinceMonday = (int)currentDate.DayOfWeek - (int)DayOfWeek.Monday;
+
             var startOfWeek = currentDate.AddDays(-daysSinceMonday).Date;
+            Console.WriteLine($"startOfWeek=   {startOfWeek}");
 
             // fetch driving logs for the user from the most recent Monday
             var onDutyLogs = await context.LogEntry
@@ -215,7 +231,9 @@ namespace truckPRO_api.Services
 
             var totalOnDutyTime = onDutyLogs.Sum(log => log.EndTime != null 
                                 ? (log.EndTime.Value - log.StartTime).TotalHours 
-                                : (DateTime.UtcNow - log.StartTime).TotalHours);
+                                : (DateTime.Now - log.StartTime).TotalHours);
+                Console.WriteLine($"totalOnDutyTime=   {totalOnDutyTime}");
+                                
             return TimeSpan.FromHours(totalOnDutyTime);
         }
 
