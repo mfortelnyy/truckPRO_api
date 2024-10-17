@@ -91,10 +91,10 @@ namespace truckPRO_api.Controllers
 
         }
 
-        [EnableCors("AllowPATCH")]
-        [HttpPatch]
+        //[EnableCors("AllowPATCH")]
+        [HttpPost]
         [Route("updatePassword")]
-        [Authorize(Roles = "Manager")]
+        [Authorize(Roles = "Manager,Driver")]
         public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDTO updDTO)
         {
             //if (newPassword != confirmPassword) return BadRequest(new { message = "Password did not match!"});
