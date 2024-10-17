@@ -118,11 +118,10 @@ namespace truckPRO_api.Controllers
 
         [HttpPost]
         [Route("forgetPassword")]
-        public async Task<IActionResult> ForgetPassword([FromBody] String email)
+        public async Task<IActionResult> ForgetPassword([FromForm] String email)
         {
             try
             {
-                var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
                 var tempPassword = await _userService.ForgetPassword(email);
                 await emailService.SendEmailAsync(email, "Temporary Password", $"Your temporary password is: {tempPassword} \nPlease Sign in and update your password!"); 
                 return Ok(new {message = "Temp Password sent successfully!"});
