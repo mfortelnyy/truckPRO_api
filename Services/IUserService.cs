@@ -1,4 +1,5 @@
-﻿using truckPRO_api.DTOs;
+﻿using truckapi.DTOs;
+using truckPRO_api.DTOs;
 
 namespace truckPRO_api.Services
 {
@@ -9,6 +10,7 @@ namespace truckPRO_api.Services
         Task<string> VerifyEmail(string emailToken);
         Task<string> UpdatePassword(int driverId, string oldPassword, string newPassword);
         Task<string> ForgetPassword(String email);
+        Task<UserDTO> GetUserById(int userId);
         
     }
 }
