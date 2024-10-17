@@ -293,13 +293,34 @@ namespace truckPRO_api.Services
                 }
                 else
                 {
-                    // update the end time of the break log to now
-                    activeOffDuty.EndTime = DateTime.Now;
-                    context.LogEntry.Update(activeOffDuty);
-                    await context.SaveChangesAsync();
-                    // break duration is ended when on duty is strated
-                    return true; 
+                    return true;
+                    // // update the end time of the break log to now
+                    // activeOffDuty.EndTime = DateTime.Now;
+                    // context.LogEntry.Update(activeOffDuty);
+                    // await context.SaveChangesAsync();
+                    // // break duration is ended when on duty is strated
+                    // return true; 
                 }
+
+            }
+            else if (activeOffDuty == null) {
+                var lastLog = await context.LogEntry
+                                          .Where(logEntry => logEntry.UserId == userId && logEntry.EndTime == null)
+                                          .OrderByDescending(logEntry => logEntry.EndTime)
+                                          .ToListAsync();
+                if(lastLog[0].LogEntryType == LogEntryType.OffDuty)
+                {  
+                    var breakDuration = DateTime.Now - lastLog[0].StartTime;
+                    if (breakDuration < TimeSpan.FromHours(10))
+                    {
+                        return false; //"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.";
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                return false;
 
             }
             //enusres new drivers can start the log
