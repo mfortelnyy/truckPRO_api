@@ -124,7 +124,7 @@ namespace truckPRO_api.Controllers
             {
                 var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
                 var tempPassword = await _userService.ForgetPassword(email);
-                emailService.SendEmailAsync(email, "Temporary Password", $"Your temporary password is: {tempPassword} \nPlease Sign in and update your password!"); 
+                await emailService.SendEmailAsync(email, "Temporary Password", $"Your temporary password is: {tempPassword} \nPlease Sign in and update your password!"); 
                 return Ok(new {message = "Temp Password sent successfully!"});
             }
             catch (InvalidOperationException ex)
