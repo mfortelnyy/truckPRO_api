@@ -146,15 +146,15 @@ namespace truckPRO_api.Controllers
             try
             {
                 var res = await managerService.ApproveDrivingLogById(logEntryId);
-                return Ok(res);
+                return Ok(new {message = res});
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return Conflict(new {message = ex.Message});
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new {message = ex.Message});
             }
         }
 
