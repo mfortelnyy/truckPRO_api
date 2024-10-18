@@ -68,8 +68,8 @@ namespace truckPRO_api.Services
             var logEntry = await context.LogEntry.FirstOrDefaultAsync(log => log.Id == logEntryId && log.LogEntryType == LogEntryType.Driving);
             if (logEntry == null) throw new InvalidOperationException("Log could not be found!");
             logEntry.IsApprovedByManager = true;
-            await context.SaveChangesAsync(true);
-            return "Log was successfully approved!";
+            var res = await context.SaveChangesAsync(true);
+            return res != 0 ?"Log was successfully approved!" : "";
         }
 
         public async Task<List<string>> GetImagesOfDrivingLog(int logId)
