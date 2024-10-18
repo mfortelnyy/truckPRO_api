@@ -106,7 +106,7 @@ namespace truckPRO_api.Controllers
 
 
 
-        [HttpPost]
+  /*      [HttpPost]
         [Route("createDrivingLog")]
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> CreateDrivingLog([FromForm] List<IFormFile> images, [FromForm] String promptImages)
@@ -158,43 +158,95 @@ namespace truckPRO_api.Controllers
             return Ok($"DrivingLogEntry with id {res} was added");
         }
 
-
+*/
         [HttpPost]
-        [Route("createOffDutyLog")]
+        [Route("createDrivingLog")]
         [Authorize(Roles = "Driver")]
-        public async Task<IActionResult> CreateOffDutyLog()
+public async Task<IActionResult> CreateDrivingLog([FromForm] List<IFormFile> images, [FromForm] string promptImages)
+{
+    try
+    {
+        string res = "";
+        var userId = User.FindFirst("userId").Value;
+        // Deserialize the promptImages JSON string into a List of PromptImage objects
+        var promptImagesList = JsonConvert.DeserializeObject<List<PromptImage>>(promptImages);
+        Console.WriteLine(promptImages);
+        // Upload the images and get their URLs
+        List<string> imageUrls = await _s3Service.UploadPhotos(images, promptImagesList);
+        foreach (var item in imageUrls)
         {
-            try
-            {
-                var userId = User.FindFirst("userId").Value;
-
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User ID not found in the token.");
-                }
-
-                LogEntry logEntry = new()
-                {
-                    UserId = int.Parse(userId),
-                    StartTime = DateTime.Now,
-                    EndTime = null,
-                    LogEntryType = LogEntryType.OffDuty,
-                    ImageUrls = null,
-                };
-
-                var res = await _logEntryService.CreateOffDutyLog(logEntry);
-                return Ok($"Off Duty log with id {res} was added");
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            Console.WriteLine(item);
         }
+        if (imageUrls.Count == 0)
+        {
+            return Conflict("Image upload failed");
+        }
+
+        // Validate and process the driving log entry
+
+        LogEntry logEntry = new()
+        {
+            UserId = int.Parse(userId),
+            StartTime = DateTime.Now,
+            EndTime = null,
+            LogEntryType = LogEntryType.Driving,
+            ImageUrls = imageUrls,
+
+        };
+
+        res = await _logEntryService.CreateDrivingLog(logEntry);
+        // Return success with the uploaded URLs
+        return Ok($"Off Duty log with id {res} was added");
+        
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Conflict(ex.Message);
+    }
+
+    catch (Exception ex)
+    {
+        // Log the error and return a bad request
+        return BadRequest(new { message = ex.Message });
+    }
+}
+
+    [HttpPost]
+    [Route("createOffDutyLog")]
+    [Authorize(Roles = "Driver")]
+    public async Task<IActionResult> CreateOffDutyLog()
+    {
+        try
+        {
+            var userId = User.FindFirst("userId").Value;
+
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found in the token.");
+            }
+
+            LogEntry logEntry = new()
+            {
+                UserId = int.Parse(userId),
+                StartTime = DateTime.Now,
+                EndTime = null,
+                LogEntryType = LogEntryType.OffDuty,
+                ImageUrls = null,
+            };
+
+            var res = await _logEntryService.CreateOffDutyLog(logEntry);
+            return Ok($"Off Duty log with id {res} was added");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+    }
 
 
         [HttpPost]
