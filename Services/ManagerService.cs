@@ -13,16 +13,29 @@ namespace truckPRO_api.Services
             return AllDrivers;
         }
 
+        
         public async Task<List<LogEntry>> GetLogsByDriver(int driverId)
         {
             var user = await context.User.Where(u => u.Id == driverId).FirstOrDefaultAsync();
             int? cid = user.CompanyId;
-            //ensure that companyid for manager and user is the same
-            var AllLogs = context.LogEntry.Where(log=> log.UserId == driverId)
-                                          .OrderByDescending(log=> log.EndTime).ToList() ?? throw new InvalidOperationException("No Logs found!");
+            
+            // logs that are in-progress 
+            var inProgressLogs = await context.LogEntry
+                .Where(log => log.UserId == driverId && log.EndTime == null)
+                .ToListAsync();
 
-            return AllLogs;
+            // logs that are completed  and order them by endtime descending
+            var finishedLogs = await context.LogEntry
+                .Where(log => log.UserId == driverId && log.EndTime != null)
+                .OrderByDescending(log => log.EndTime)
+                .ToListAsync();
+
+            // combine in-progress logs with finished logs
+            var allLogs = inProgressLogs.Concat(finishedLogs).ToList();
+
+            return allLogs;
         }
+
 
         public async Task<string> AddDriverToCompany(PendingUser pendingUser)
         {
