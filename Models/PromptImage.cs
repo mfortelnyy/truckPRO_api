@@ -7,8 +7,8 @@ namespace truckapi.Models
 {
     public class PromptImage
     {
-        public string OriginalPath { get; set; } // Original file path
-        public int PromptIndex { get; set; } // The prompt index associated with the image
+        public string path { get; set; } // Original file path
+        public int promptIndex { get; set; } // The prompt index associated with the image
 
     }
 }
