@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.Runtime;
+using truckapi.Models;
 
 
 namespace truckPRO_api.Services
@@ -25,25 +26,37 @@ namespace truckPRO_api.Services
             _bucketName = configuration["AWS:BucketName"];
         }
 
-        public async Task<List<string>> UploadPhotos(List<IFormFile> files)
+        public async Task<List<string>> UploadPhotos(List<IFormFile> files, List<PromptImage> promptImages)
         {
             var urls = new List<string>();
             Console.WriteLine($"In Uploading {files.Count}");
             foreach (var file in files)
             {
-                
-                var url = await UploadFileAsync(file);
-                Console.WriteLine(url);
-                urls.Add(url);
+                Console.WriteLine(file.FileName);
+                // Find the corresponding PromptImage for the current file
+                var promptImage = promptImages.FirstOrDefault(pi => pi.OriginalPath.Contains(file.FileName));
+                Console.WriteLine(promptImage?.PromptIndex);
+                if (promptImage != null)
+                {
+                    // If found, get the index
+                    int index = promptImage.PromptIndex;
+                    var url = await UploadFileAsync(file, index); 
+                    Console.WriteLine(url);
+                    urls.Add(url);
+                }
+                else
+                {
+                    Console.WriteLine($"No matching prompt image found for file: {file.FileName}");
+                }
 
             }
             return urls;
         }
 
-        public async Task<string> UploadFileAsync(IFormFile file)
+        public async Task<string> UploadFileAsync(IFormFile file, int index)
         {
-            var fileName = Guid.NewGuid() + "_" + file.FileName;
-            //Console.WriteLine($"{fileName} {file.FileName}");
+            var fileName = Guid.NewGuid() + "_" + file.FileName + "promptId"+index;
+            Console.WriteLine($"{fileName} {file.FileName}");
 
             using var stream = new MemoryStream();
             await file.CopyToAsync(stream);
