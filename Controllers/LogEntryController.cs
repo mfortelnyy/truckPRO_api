@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Graph.Models;
+using Newtonsoft.Json;
 using System.Security.Claims;
+using truckapi.Models;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
 using truckPRO_api.Services;
@@ -25,7 +26,7 @@ namespace truckPRO_api.Controllers
         {
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
-            String imageUrl = await _s3Service.UploadFileAsync(image);
+            String imageUrl = await _s3Service.UploadFileAsync(image, 0);
             if (imageUrl == null)
             {
                 return Conflict("Api failed");
@@ -45,7 +46,7 @@ namespace truckPRO_api.Controllers
         {
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
-            List<string> imageUrls = await _s3Service.UploadPhotos(images);
+            List<string> imageUrls = await _s3Service.UploadPhotos(images, []);
             if (imageUrls.Count == 0)
             {
                 return Conflict("Api failed");
@@ -108,11 +109,13 @@ namespace truckPRO_api.Controllers
         [HttpPost]
         [Route("createDrivingLog")]
         [Authorize(Roles = "Driver")]
-        public async Task<IActionResult> CreateDrivingLog([FromForm] List<IFormFile> images)
+        public async Task<IActionResult> CreateDrivingLog([FromForm] List<IFormFile> images, [FromForm] String promptImages)
         {
             string res = "";
             try
             {
+                var imageInfoList = JsonConvert.DeserializeObject<List<PromptImage>>(promptImages) ?? throw new Exception("Wrong format!");
+       
                 var userId = User.FindFirst("userId").Value;
                 
 
@@ -123,7 +126,7 @@ namespace truckPRO_api.Controllers
                     return Unauthorized("User ID not found in the token.");
                 }
 
-                List<string> imageUrls = await _s3Service.UploadPhotos(images);
+                List<string> imageUrls = await _s3Service.UploadPhotos(images, imageInfoList);
                 if (imageUrls.Count == 0)
                 {
                     return Conflict("Image upload failed");
