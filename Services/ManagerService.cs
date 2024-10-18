@@ -18,8 +18,8 @@ namespace truckPRO_api.Services
             var user = await context.User.Where(u => u.Id == driverId).FirstOrDefaultAsync();
             int? cid = user.CompanyId;
             //ensure that companyid for manager and user is the same
-            var AllLogs = context.LogEntry.Where(log=> log.UserId == driverId
-                                                              ).ToList() ?? throw new InvalidOperationException("No Logs found!");
+            var AllLogs = context.LogEntry.Where(log=> log.UserId == driverId)
+                                          .OrderByDescending(log=> log.EndTime).ToList() ?? throw new InvalidOperationException("No Logs found!");
 
             return AllLogs;
         }
