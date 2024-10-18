@@ -25,7 +25,7 @@ namespace truckPRO_api.Services
             _amazonS3 = new AmazonS3Client(credentials, awsOptions);
             _bucketName = configuration["AWS:BucketName"];
         }
-
+/*
         public async Task<List<string>> UploadPhotos(List<IFormFile> files, List<PromptImage> promptImages)
         {
             var urls = new List<string>();
@@ -51,6 +51,33 @@ namespace truckPRO_api.Services
 
             }
             return urls;
+        }
+*/
+        public async Task<List<string>> UploadPhotos(List<IFormFile> files, List<PromptImage> promptImages)
+        {
+        var urls = new List<string>();
+
+        foreach (var file in files)
+        {
+            // match the uploaded file with its corresponding PromptImage metadata
+            var promptImage = promptImages.FirstOrDefault(pi => pi.path.Contains(file.FileName));
+
+            if (promptImage != null)
+            {
+                //when found a match save index of the section
+                int index = promptImage.promptIndex;
+
+                // upload the file with the associated prompt index which will be added to filename upload image
+                var url = await UploadFileAsync(file, index);
+                urls.Add(url);
+            }
+            else
+            {
+                Console.WriteLine($"No matching prompt image found for file: {file.FileName}");
+            }
+        }
+
+        return urls;
         }
 
         public async Task<string> UploadFileAsync(IFormFile file, int index)
