@@ -25,14 +25,15 @@ namespace truckPRO_api.Services
            
             
             //ends all active logs
-            foreach (var le in activeLogEntryDriving)
+            if (activeLogEntryDriving.Count != 0)
             {
-             le.EndTime = DateTime.Now;
-             context.LogEntry.Update(le);  
-                
+                foreach (var le in activeLogEntryDriving)
+                {
+                le.EndTime = DateTime.Now;
+                context.LogEntry.Update(le);  
+                    
+                }
             }
-
-
             context.Add(logEntry);
             await context.SaveChangesAsync();
             return logEntry.Id.ToString();
@@ -283,7 +284,6 @@ namespace truckPRO_api.Services
                                           .OrderByDescending(logEntry => logEntry.StartTime)
                                           .FirstOrDefaultAsync();
 
-            //ensures that new drivers can start their shift
             if (activeOffDuty != null)
             {
                 var breakDuration = DateTime.Now - activeOffDuty.StartTime;
@@ -307,10 +307,12 @@ namespace truckPRO_api.Services
                 var lastLog = await context.LogEntry
                                           .Where(logEntry => logEntry.UserId == userId && logEntry.EndTime == null)
                                           .OrderByDescending(logEntry => logEntry.EndTime)
-                                          .ToListAsync();
-                if(lastLog[0].LogEntryType == LogEntryType.OffDuty)
+                                          .FirstOrDefaultAsync();
+                if (lastLog == null) return true;
+                
+                if(lastLog!=null && lastLog.LogEntryType == LogEntryType.OffDuty)
                 {  
-                    var breakDuration = DateTime.Now - lastLog[0].StartTime;
+                    var breakDuration = DateTime.Now - lastLog.StartTime;
                     if (breakDuration < TimeSpan.FromHours(10))
                     {
                         return false; //"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.";
@@ -324,7 +326,7 @@ namespace truckPRO_api.Services
 
             }
             //enusres new drivers can start the log
-            else if(activeOffDuty == null && allOffDuty == null) return true;
+            else if(activeOffDuty == null && allOffDuty.Count ==0) return true;
             else return false;
         }
 
@@ -404,10 +406,11 @@ namespace truckPRO_api.Services
         
 
         private async Task<bool> HasActiveOffDutyLog(int userId)
-        {
-            return await context.LogEntry.AnyAsync(u => u.UserId == userId &&
+        { 
+            var offDuty = await context.LogEntry.Where(u => u.UserId == userId &&
                                                 u.LogEntryType == LogEntryType.OffDuty &&
-                                                u.EndTime == null); 
+                                                u.EndTime == null).FirstOrDefaultAsync();
+            return offDuty == null ? false : true;
         }
 
     }
