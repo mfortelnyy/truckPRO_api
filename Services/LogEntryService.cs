@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Docker.DotNet.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using truckPRO_api.Data;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
@@ -88,7 +90,7 @@ namespace truckPRO_api.Services
             }
 
             //check if on duty is started after the 10 hour off-duty
-            if (await IsValidStartTimeAfterBreak(userId))
+            if (!await IsValidStartTimeAfterBreak(userId))
             {
                 throw new InvalidOperationException("On-duty log entry cannot start before completing the required off duty period. (10 hours)");
             }
@@ -284,37 +286,46 @@ namespace truckPRO_api.Services
                                           .OrderByDescending(logEntry => logEntry.StartTime)
                                           .FirstOrDefaultAsync();
 
-            if (activeOffDuty != null)
-            {
-                var breakDuration = DateTime.Now - activeOffDuty.StartTime;
-                if (breakDuration < TimeSpan.FromHours(10))
-                {
-                    return false; //"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.";
-                }
-                else
-                {
-                    return true;
-                    // // update the end time of the break log to now
-                    // activeOffDuty.EndTime = DateTime.Now;
-                    // context.LogEntry.Update(activeOffDuty);
-                    // await context.SaveChangesAsync();
-                    // // break duration is ended when on duty is strated
-                    // return true; 
-                }
+            // if (activeOffDuty != null)
+            // {
+            //     var breakDuration = DateTime.Now - activeOffDuty.StartTime;
+            //     if (breakDuration < TimeSpan.FromHours(10))
+            //     {
+            //         return false; //"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.";
+            //     }
+            //     else
+            //     {
+            //         return true;
+            //         // // update the end time of the break log to now
+            //         // activeOffDuty.EndTime = DateTime.Now;
+            //         // context.LogEntry.Update(activeOffDuty);
+            //         // await context.SaveChangesAsync();
+            //         // // break duration is ended when on duty is strated
+            //         // return true; 
+            //     }
 
-            }
-            else if (activeOffDuty == null) {
-                var lastLog = await context.LogEntry
-                                          .Where(logEntry => logEntry.UserId == userId && logEntry.EndTime == null)
+            // }
+            // else --  active off duty is iirelevant 
+            //since time after last on duty matters
+            if (activeOffDuty == null) {
+                var lastOnDutyLog = await context.LogEntry
+                                          .Where(logEntry => logEntry.UserId == userId && logEntry.EndTime != null && logEntry.LogEntryType == LogEntryType.OnDuty)
                                           .OrderByDescending(logEntry => logEntry.EndTime)
                                           .FirstOrDefaultAsync();
-                if (lastLog == null) return true;
-                
-                if(lastLog!=null && lastLog.LogEntryType == LogEntryType.OffDuty)
+                //if (lastOffDutyLog == null) return true;
+
+                if(lastOnDutyLog!=null)
                 {  
-                    var breakDuration = DateTime.Now - lastLog.StartTime;
-                    if (breakDuration < TimeSpan.FromHours(10))
+                    Console.WriteLine("last on duty ont null");
+                    var sinceLastOnDutyDuration = DateTime.Now - lastOnDutyLog.EndTime;
+                    Console.WriteLine($"since last {sinceLastOnDutyDuration} {sinceLastOnDutyDuration < TimeSpan.FromHours(10)}");
+
+                    if (sinceLastOnDutyDuration < TimeSpan.FromHours(10))
                     {
+                        var hoursLeft = TimeSpan.FromHours(10) - sinceLastOnDutyDuration;
+                        var message  = $"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty. You need {hoursLeft.ToString} hours Off duty.";
+                        
+                        //throw new InvalidOperationException("Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.");
                         return false; //"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.";
                     }
                     else
