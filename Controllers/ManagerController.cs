@@ -20,11 +20,11 @@ namespace truckPRO_api.Controllers
        
             if (file == null || file.Length == 0)
             {
-                return BadRequest("No File Uploaded!");
+                return BadRequest(new {message = "No File Uploaded!"});
             }
             if (!Path.GetExtension(file.FileName).Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase))
             {
-                return BadRequest("Invalid file type. Please upload an Excel file.");
+                return BadRequest(new {message = "Invalid file type. Please upload an Excel file."});
 
             }
 
@@ -65,15 +65,15 @@ namespace truckPRO_api.Controllers
 
                 }
 
-                return Ok("File processed and drivers added successfully!");
+                return Ok(new {message = "File processed and drivers added successfully!"});
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return Conflict(new {message = ex.Message});
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new {message = "failed to upload driver"});
             }
             
         }
