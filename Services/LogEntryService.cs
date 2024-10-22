@@ -12,6 +12,8 @@ namespace truckPRO_api.Services
         public async Task<string> CreateOffDutyLog(LogEntry logEntry)
         {
             var userId = logEntry.UserId;
+            var user = await context.User.Where(u => u.Id == userId).FirstOrDefaultAsync();
+            logEntry.User = user;
 
             if (await HasActiveOffDutyLog(userId))
             {
@@ -31,8 +33,9 @@ namespace truckPRO_api.Services
             {
                 foreach (var le in activeLogEntryDriving)
                 {
-                le.EndTime = DateTime.Now;
-                context.LogEntry.Update(le);  
+                    
+                    le.EndTime = DateTime.Now;
+                    context.LogEntry.Update(le);  
                     
                 }
             }
@@ -45,6 +48,7 @@ namespace truckPRO_api.Services
         public async Task<string> CreateDrivingLog(LogEntry logEntry)
         {
             var userId = logEntry.UserId;
+            var user = await context.User.Where(u => u.Id == userId).FirstOrDefaultAsync();
 
             //if there is no on duty log 
             if (!await HasActiveOnDuty(userId))
@@ -52,6 +56,7 @@ namespace truckPRO_api.Services
                 //if there is no on duty log then create one
                 await CreateOnDutyLog(new LogEntry
                 {
+                    User = user,
                     UserId = userId,
                     LogEntryType = LogEntryType.OnDuty,
                     StartTime = DateTime.Now
@@ -82,6 +87,8 @@ namespace truckPRO_api.Services
         {
 
             var userId = logEntry.UserId;
+            var user = await context.User.Where(u => u.Id == userId).FirstOrDefaultAsync();
+            logEntry.User = user;
 
             //check for existing logs that may conflict
             if(await HasActiveOnDutyOrDrivingLog(userId)) 
