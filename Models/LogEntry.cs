@@ -13,7 +13,7 @@ namespace truckPRO_api.Models
         [Required]
         [ForeignKey("UserId")]
         public int UserId { get; set; }
-        public User User { get; set; }
+        public User? User { get; set; }
 
         [Required]
         public DateTime StartTime { get; set; }
