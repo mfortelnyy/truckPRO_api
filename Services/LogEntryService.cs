@@ -318,9 +318,10 @@ namespace truckPRO_api.Services
                 {  
                     Console.WriteLine("last on duty ont null");
                     var sinceLastOnDutyDuration = DateTime.Now - lastOnDutyLog.EndTime;
-                    Console.WriteLine($"since last {sinceLastOnDutyDuration} {sinceLastOnDutyDuration < TimeSpan.FromHours(10)}");
+                    var onDutyDuration = lastOnDutyLog.EndTime - lastOnDutyLog.StartTime;
+                    Console.WriteLine($"last on duty dureation - {onDutyDuration}   since last {sinceLastOnDutyDuration} {sinceLastOnDutyDuration < TimeSpan.FromHours(10)}");
 
-                    if (sinceLastOnDutyDuration < TimeSpan.FromHours(10))
+                    if (sinceLastOnDutyDuration < TimeSpan.FromHours(10) && onDutyDuration > TimeSpan.FromHours(13))
                     {
                         var hoursLeft = TimeSpan.FromHours(10) - sinceLastOnDutyDuration;
                         var message  = $"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty. You need {hoursLeft.ToString} hours Off duty.";
