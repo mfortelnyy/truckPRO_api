@@ -19,6 +19,7 @@ namespace truckPRO_api.Services
             {
                 throw new InvalidOperationException("Cannot create a Duty Off log. The user is currently OFF Duty");
             }
+
             var activeLogEntryDriving = await context.LogEntry
                                                      .Where(logEntry => userId == logEntry.UserId &&
                                                                         
@@ -293,6 +294,11 @@ namespace truckPRO_api.Services
                                           .OrderByDescending(logEntry => logEntry.StartTime)
                                           .FirstOrDefaultAsync();
 
+            var lastOnDutyLog = await context.LogEntry
+                                          .Where(logEntry => logEntry.UserId == userId && logEntry.EndTime != null && logEntry.LogEntryType == LogEntryType.OnDuty)
+                                          .OrderByDescending(logEntry => logEntry.EndTime)
+                                          .FirstOrDefaultAsync();
+
             // if (activeOffDuty != null)
             // {
             //     var breakDuration = DateTime.Now - activeOffDuty.StartTime;
@@ -314,39 +320,35 @@ namespace truckPRO_api.Services
             // }
             // else --  active off duty is iirelevant 
             //since time after last on duty matters
-            if (activeOffDuty == null) {
-                var lastOnDutyLog = await context.LogEntry
-                                          .Where(logEntry => logEntry.UserId == userId && logEntry.EndTime != null && logEntry.LogEntryType == LogEntryType.OnDuty)
-                                          .OrderByDescending(logEntry => logEntry.EndTime)
-                                          .FirstOrDefaultAsync();
-                //if (lastOffDutyLog == null) return true;
 
-                if(lastOnDutyLog!=null)
-                {  
-                    Console.WriteLine("last on duty ont null");
-                    var sinceLastOnDutyDuration = DateTime.Now - lastOnDutyLog.EndTime;
-                    var onDutyDuration = lastOnDutyLog.EndTime - lastOnDutyLog.StartTime;
-                    Console.WriteLine($"last on duty dureation - {onDutyDuration}   since last {sinceLastOnDutyDuration} {sinceLastOnDutyDuration < TimeSpan.FromHours(10)}");
+            if(lastOnDutyLog!=null)
+            {  
+                Console.WriteLine("last on duty ont null");
+                var sinceLastOnDutyDuration = DateTime.Now - lastOnDutyLog.EndTime;
+                var onDutyDuration = lastOnDutyLog.EndTime - lastOnDutyLog.StartTime;
+                Console.WriteLine($"last on duty dureation - {onDutyDuration}   since last {sinceLastOnDutyDuration} {sinceLastOnDutyDuration < TimeSpan.FromHours(10)}");
 
-                    if (sinceLastOnDutyDuration < TimeSpan.FromHours(10) && onDutyDuration > TimeSpan.FromHours(13))
-                    {
-                        var hoursLeft = TimeSpan.FromHours(10) - sinceLastOnDutyDuration;
-                        var message  = $"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty. You need {hoursLeft.ToString} hours Off duty.";
-                        
-                        //throw new InvalidOperationException("Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.");
-                        return false; //"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.";
-                    }
-                    else
-                    {
-                        return true;
-                    }
+                if (sinceLastOnDutyDuration < TimeSpan.FromHours(10) && onDutyDuration > TimeSpan.FromHours(13))
+                {
+                    var hoursLeft = TimeSpan.FromHours(10) - sinceLastOnDutyDuration;
+                    var message  = $"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty. You need {hoursLeft.ToString} hours Off duty.";
+                    
+                    //throw new InvalidOperationException("Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.");
+                    return false; //"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.";
                 }
-                return false;
-
+                else
+                {
+                    return true;
+                }
             }
             //enusres new drivers can start the log
-            else if(activeOffDuty == null && allOffDuty.Count ==0) return true;
-            else return false;
+            else if(lastOnDutyLog == null ) 
+            {
+                Console.WriteLine("last on duty and off duty are null");
+                return true;
+            } 
+            Console.WriteLine($"{activeOffDuty == null} {lastOnDutyLog != null} {lastOnDutyLog?.Id}");
+            return false;     
         }
 
         //driving log entry can be added after starting the shift (on duty) 
