@@ -424,6 +424,14 @@ namespace truckPRO_api.Services
             return allLogs;
  
         }
+
+        public async Task<bool> NotifyManagers(int userId)
+        {
+            var user = await context.User.Where(u => u.Id == userId).FirstOrDefaultAsync();
+            if (user == null) return false;
+            var managers = await context.User.Where(u => u.Role == UserRole.Manager && u.CompanyId == user.CompanyId).ToListAsync();
+            return false;
+        }
         
 
         private async Task<bool> HasActiveOffDutyLog(int userId)
