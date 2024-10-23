@@ -39,7 +39,8 @@ namespace truckPRO_api.Services
 
         public async Task<string> AddDriverToCompany(PendingUser pendingUser)
         {
-            
+            var pUserExists = await context.PendingUser.Where(pu => pu.Email == pendingUser.Email).FirstOrDefaultAsync();
+            if(pUserExists != null) throw new InvalidOperationException($"Driver can not be created! Pending User already exists {pUserExists.Email}");
             var pUser = await context.PendingUser.AddAsync(pendingUser);
             await context.SaveChangesAsync();
 
