@@ -76,9 +76,10 @@ namespace truckPRO_api.Controllers
         {
             try
             {
+                var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
                 //Console.WriteLine($"email token: {emailToken}");
 
-                var result = await _userService.VerifyEmail(EmailCode);
+                var result = await _userService.VerifyEmail(requestUserId, EmailCode);
                 return Ok(new {message = result});
             }
             catch (InvalidOperationException ex)
