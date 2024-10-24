@@ -168,9 +168,16 @@ namespace truckPRO_api.Controllers
             try
             {
                 var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
+                var em = User.Claims.FirstOrDefault( c => c.Type == "sub").Value;
                 var newCode = await _userService.ReSendEmailVerificationCode(requestUserId);
-                _emailService.SendEmailAsync()
-                return Ok(result);
+                var sent = await _emailService.SendEmailAsync(em, "Verification Code", $"Your new verification token is {newCode}.");
+                if(sent)
+                {
+                    return Ok("Email sent successfully!");
+                }
+                else{
+                    return BadRequest("Email not sent!");
+                }
             }
             catch (InvalidOperationException ex)
             {
