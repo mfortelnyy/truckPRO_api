@@ -71,6 +71,7 @@ namespace truckPRO_api.Controllers
 
         [HttpPost]
         [Route("verifyEmail")]
+        [Authorize(Roles = "Driver,Manager,Admin")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string emailToken)
         {
             try
