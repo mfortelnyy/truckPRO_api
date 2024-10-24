@@ -160,5 +160,27 @@ namespace truckPRO_api.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("reSendEmailVerificationCode")]
+        [Authorize(Roles = "Manager, Driver, Admin")]
+        public async Task<IActionResult> ReSendEmailVerificationCode(=)
+        {
+            try
+            {
+                var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
+                var result = await _userService.ReSendEmailVerificationCode(requestUserId);
+               
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new {message = ex.Message});
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new {message = ex.Message});
+            }
+        }
+
     }
 }
