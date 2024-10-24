@@ -75,18 +75,18 @@ namespace truckPRO_api.Controllers
         {
             try
             {
-                Console.WriteLine($"email token: {emailToken}");
+                //Console.WriteLine($"email token: {emailToken}");
 
                 var result = await _userService.VerifyEmail(emailToken);
-                return Ok(result);
+                return Ok(new {message = result});
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new {message = ex.Message});
             }
             catch (Exception ex)
             {
-                return Conflict(ex.Message);
+                return Conflict(new {message = ex.Message});
             }
 
         }
