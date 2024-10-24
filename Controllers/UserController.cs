@@ -173,10 +173,10 @@ namespace truckPRO_api.Controllers
                 var sent = await _emailService.SendEmailAsync(em, "Verification Code", $"Your new verification token is {newCode}.");
                 if(sent)
                 {
-                    return Ok("Email sent successfully!");
+                    return Ok(new {message = "Email sent successfully!"});
                 }
                 else{
-                    return BadRequest("Email not sent!");
+                    return BadRequest(new {message = "Email not sent!"});
                 }
             }
             catch (InvalidOperationException ex)
