@@ -71,14 +71,14 @@ namespace truckPRO_api.Controllers
 
         [HttpPost]
         [Route("verifyEmail")]
-        [Authorize(Roles = "Driver,Manager,Admin")]
-        public async Task<IActionResult> VerifyEmail([FromQuery] string emailToken)
+        [Authorize(Roles = "Driver, Manager, Admin")]
+        public async Task<IActionResult> VerifyEmail([FromHeader] string EmailCode)
         {
             try
             {
                 //Console.WriteLine($"email token: {emailToken}");
 
-                var result = await _userService.VerifyEmail(emailToken);
+                var result = await _userService.VerifyEmail(EmailCode);
                 return Ok(new {message = result});
             }
             catch (InvalidOperationException ex)
@@ -160,17 +160,20 @@ namespace truckPRO_api.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("reSendEmailVerificationCode")]
         [Authorize(Roles = "Manager, Driver, Admin")]
-        public async Task<IActionResult> ReSendEmailVerificationCode()
+        public async Task<IActionResult> ReSendEmailVerificationCode([FromHeader]string Email)
         {
             try
             {
                 var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
-                var em = User.Claims.FirstOrDefault( c => c.Type == "sub").Value;
+                //var em = User.Claims.FirstOrDefault(c => c.Type == "sub").Value;
+                Console.WriteLine($"req id: {requestUserId}");
+
                 var newCode = await _userService.ReSendEmailVerificationCode(requestUserId);
-                var sent = await _emailService.SendEmailAsync(em, "Verification Code", $"Your new verification token is {newCode}.");
+                var sent = await _emailService.SendEmailAsync(Email, "Verification Code", $"Your new verification token is {newCode}.");
+                Console.WriteLine($"new code: {newCode}");
                 if(sent)
                 {
                     return Ok(new {message = "Email sent successfully!"});
