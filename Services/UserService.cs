@@ -92,8 +92,22 @@ namespace truckPRO_api.Services
             user.EmailVerificationToken = null;
             await _context.SaveChangesAsync();
             return "Email verfied Sucefully!";
+        }
 
-
+        public async Task<string> ReSendEmailVerificationCode(int userId)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.Id == userId);
+    
+            if (user == null)
+            {
+                throw new InvalidOperationException("user not found!");
+            }
+            user.EmailVerified = false;
+            String newCode = GenerateVerificationToken();
+        
+            user.EmailVerificationToken = newCode;
+            await _context.SaveChangesAsync();
+            return newCode;
         }
 
         public async Task<string> UpdatePassword(int userId, string oldPassword, string newPassword)
