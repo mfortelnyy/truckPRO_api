@@ -94,14 +94,10 @@ namespace truckPRO_api.Services
             return "Email verfied Sucefully!";
         }
 
-        public async Task<string> ReSendEmailVerificationCode(int userId)
+        public async Task<String> ReSendEmailVerificationCode(int userId)
         {
-            var user = await _context.User.FirstOrDefaultAsync(u => u.Id == userId);
-    
-            if (user == null)
-            {
-                throw new InvalidOperationException("user not found!");
-            }
+            var user = await _context.User.Where(u => u.Id == userId).FirstOrDefaultAsync() ?? throw new InvalidOperationException("user not found!");
+            
             user.EmailVerified = false;
             String newCode = GenerateVerificationToken();
         
