@@ -80,11 +80,12 @@ namespace truckPRO_api.Services
             return $"User with {driver.Email} succefully signed in. Token: {token}";
         }
 
-        public async Task<string> VerifyEmail(string emailToken)
+        public async Task<string> VerifyEmail(int userId, string emailToken)
         {
-            var user = await _context.User.FirstOrDefaultAsync(u => u.EmailVerificationToken == emailToken);
+            var user = await _context.User.FirstOrDefaultAsync(u => u.Id == userId);
+
             Console.WriteLine($"email token: {emailToken}");
-            if (user == null)
+            if (user == null || user.EmailVerificationToken != emailToken)
             {
                 throw new InvalidOperationException("Invalid token!");
             }
