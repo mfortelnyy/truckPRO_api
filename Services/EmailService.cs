@@ -3,6 +3,7 @@ using FluentEmail.Smtp;
 using System.Net.Mail;
 using FluentEmail.Core;
 using System.Net;
+using Microsoft.Graph.Education.Classes.Item.Assignments.Item.Submissions.Item.Return;
 
 
 namespace truckPRO_api.Services
@@ -10,7 +11,7 @@ namespace truckPRO_api.Services
     public class EmailService(IConfiguration configuration) : IEmailService
     {
 
-        public async Task SendEmailAsync(string recieverEmail, string subject, string message)
+        public async Task<bool> SendEmailAsync(string recieverEmail, string subject, string message)
         {
             //Console.WriteLine($"Here is {configuration["SmtpSettings:Host"]}, {configuration["SmtpSettings:Port"]}, {configuration["SmtpSettings:Username"]}");
              
@@ -43,6 +44,14 @@ namespace truckPRO_api.Services
                 .Subject(subject)
                 .Body(message)
                 .SendAsync();
+            if(email.Successful)
+            {
+                return true;
+            }  
+            else
+            {
+                return false;
+            }
             //Console.WriteLine($"Email Successfull:  {email.ErrorMessages.ToString()}");
 
         }
