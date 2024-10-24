@@ -163,13 +163,13 @@ namespace truckPRO_api.Controllers
         [HttpGet]
         [Route("reSendEmailVerificationCode")]
         [Authorize(Roles = "Manager, Driver, Admin")]
-        public async Task<IActionResult> ReSendEmailVerificationCode(=)
+        public async Task<IActionResult> ReSendEmailVerificationCode()
         {
             try
             {
                 var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
-                var result = await _userService.ReSendEmailVerificationCode(requestUserId);
-               
+                var newCode = await _userService.ReSendEmailVerificationCode(requestUserId);
+                _emailService.SendEmailAsync()
                 return Ok(result);
             }
             catch (InvalidOperationException ex)
