@@ -174,12 +174,12 @@ namespace truckPRO_api.Controllers
         [Authorize(Roles = "Manager, Admin")]
         public async Task<IActionResult> GetLogsByDriverId([FromQuery] int driverId)
         {
-            int companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
+            //int companyId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "companyId").Value);
             
             //var role = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "role").Value);
             try
             {
-                var drivers = await  managerService.GetLogsByDriver(driverId);
+                var drivers = await managerService.GetLogsByDriver(driverId);
                 return Ok(drivers);
             }
             catch (InvalidOperationException ex)
