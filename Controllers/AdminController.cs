@@ -14,20 +14,21 @@ namespace truckPRO_api.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SignUpManager([FromBody] SignUpDTO SignUpDTO)
         {
+            if(SignUpDTO.Role != 1) return BadRequest("Invalid role for this endpoint.");
             if ((SignUpDTO.Role == 1 || SignUpDTO.Role == 2) && !SignUpDTO.CompanyId.HasValue)
             {
-                return BadRequest("CompanyId is required for drivers and managers.");
+                return BadRequest(new { message ="CompanyId is required for drivers and managers."});
             }
 
             //if model is not valid then the request is bad - 400
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(new { message = ModelState});
             }
 
             string result = await userService.CreateUserAsync(SignUpDTO);
-            if (result != null) return Ok(result);
-            return BadRequest();
+            if (result != null) return Ok(new { message = $"{result}" });
+            return BadRequest(new { message = "Error creating manager!"});
 
         }
 

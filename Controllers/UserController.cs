@@ -50,19 +50,19 @@ namespace truckPRO_api.Controllers
 
                     string emailVerificarionToken = await _userService.CreateUserAsync(SignUpDTO);
                     await _emailService.SendEmailAsync(email: SignUpDTO.Email, subject: "Registration", message: $"You are registered!\nHere is your verification code: {emailVerificarionToken}");
-                    if (emailVerificarionToken != null) return Ok(emailVerificarionToken);
-                    return BadRequest();
+                    if (emailVerificarionToken != null) return Ok(new {message = emailVerificarionToken});
+                    return BadRequest(new {message = "Failed to register"});
                 }
                 //ensures admin can not be created
                 else return Unauthorized($"User with role {role.ToString()} can not be created");
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return Conflict(new {message = ex.Message});
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new {message = ex.Message});
             }
 
 
