@@ -20,10 +20,14 @@ namespace truckPRO_api.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            string result = await _userService.LoginUserAsync(LoginDTO);
-            if (result != null) return Ok(result);
+            try{
+                string result = await _userService.LoginUserAsync(LoginDTO);
+                if (result != null) return Ok(result);
+            } catch (Exception ex){
+                return Conflict(new {message = ex.Message});
+            }
             return BadRequest();
+
         }
 
 
