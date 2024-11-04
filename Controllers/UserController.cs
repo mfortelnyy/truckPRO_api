@@ -38,7 +38,7 @@ namespace truckPRO_api.Controllers
             try
             {
                 var role = (UserRole)SignUpDTO.Role;
-                if ((role == UserRole.Admin || role == UserRole.Manager) && !SignUpDTO.CompanyId.HasValue)
+                if ((role == UserRole.Driver || role == UserRole.Manager) && !SignUpDTO.CompanyId.HasValue)
                 {
                     return BadRequest("CompanyId is required for drivers.");
                 }
