@@ -22,9 +22,9 @@ namespace truckPRO_api.Services
                 Port = int.Parse(configuration["SmtpSettings:Port"]),
                 Timeout = 600000, //600 seconds to ensure all emails are sent 
                 EnableSsl = true,
-                UseDefaultCredentials = false,
+                UseDefaultCredentials = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
-                Credentials = new NetworkCredential(configuration["SmtpSettings:Username"], configuration["SmtpSettings:Password"])
+                //Credentials = new NetworkCredential(configuration["SmtpSettings:Username"], configuration["SmtpSettings:Password"])
                 
                 /*
                 //testing

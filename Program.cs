@@ -10,6 +10,7 @@ using truckPRO_api.Models;
 using truckPRO_api.Services;
 using Microsoft.EntityFrameworkCore;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add console logging
