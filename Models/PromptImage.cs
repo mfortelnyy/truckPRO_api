@@ -8,7 +8,8 @@ namespace truckapi.Models
     public class PromptImage
     {
         //CI/CD pipeline test-2s
-        //CI/CD pipeline MAC test
+        //CI/CD pipeline MAC test2
+        
         public string path { get; set; } // Original file path
         public int promptIndex { get; set; } // The prompt index associated with the image
 
