@@ -15,9 +15,13 @@ jobs:
 
       - name: Run deployment script
         env:
-          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # key from secrets
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Accessing the private key from secrets
         run: |
           echo "$SSH_KEY" > key
-          chmod 600 key  # Ensure the key has the correct permissions
+          # Set permissions for the key file
+          icacls key /inheritance:r  # Remove inherited permissions
+          icacls key /grant:r "$env:USERNAME":F  # Grant full access to the current user
+          icacls key /remove "BUILTIN\Users"  # Remove access for other users
+          
           ssh -o StrictHostKeyChecking=no -i key Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy.bat"
-          rm key
+          del key  # Use del to delete the key on Windows
