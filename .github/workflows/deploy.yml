@@ -3,16 +3,21 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - master # Trigger the workflow on pushes to the main branch
+      - master  # Trigger the workflow on pushes to the master branch
 
 jobs:
   deploy:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Deploy publish folder to VPS
-      run: |
-        ssh Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy.bat" 
+      - name: Run deployment script
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # key from secrets
+        run: |
+          echo "$SSH_KEY" > key
+          chmod 600 key  # Ensure the key has the correct permissions
+          ssh -o StrictHostKeyChecking=no -i key Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy.bat"
+          rm key
