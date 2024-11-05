@@ -7,41 +7,18 @@ on:
 
 jobs:
   deploy:
-    runs-on: windows-latest
+    runs-on: windows-latest  # Using a Windows runner
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Verify SSH Key Availability
-        env:
-          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          if [ -z "$SSH_KEY" ]; then
-            echo "SSH_KEY is not available."
-            exit 1
-          else
-            echo "SSH_KEY is available."
-          fi
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Set up SSH Key
-        env:
-          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Run deploy script
+        shell: pwsh  
         run: |
-          # Create the key file
-          $keyFilePath = "key"
-          echo "$SSH_KEY" | Out-File -FilePath $keyFilePath -Encoding ascii
-
-          # Set permissions for the key file
-          $username = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-          icacls $keyFilePath /inheritance:r
-          icacls $keyFilePath /grant:r "$username:(R,W)"
-          icacls $keyFilePath /remove "BUILTIN\Users"
-
-      - name: Deploy to VPS
-        run: |
-          ssh -o StrictHostKeyChecking=no -i key Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy.bat"
-
-      - name: Clean up
-        run: |
-          Remove-Item key -Force
+          ssh -o StrictHostKeyChecking=no user@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy"
