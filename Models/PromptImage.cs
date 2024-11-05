@@ -7,7 +7,7 @@ namespace truckapi.Models
 {
     public class PromptImage
     {
-        //CI/CD pipeline test-5
+        //CI/CD pipeline test-6
         //CI/CD pipeline Mac-5       
         
         public string path { get; set; } // Original file path
