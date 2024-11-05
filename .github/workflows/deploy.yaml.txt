@@ -15,4 +15,4 @@ jobs:
 
     - name: Deploy publish folder to VPS
       run: |
-        ssh Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckProApi\\deploy.bat" 
+        ssh Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy.bat" 
