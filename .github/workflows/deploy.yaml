@@ -14,15 +14,22 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Deploy publish folder to VPS
-      shell: pwsh  
+      shell: pwsh 
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  
       run: |
-        # Write the SSH key to a file
-        echo $env:SSH_PRIVATE_KEY > key
-        # Set permissions for the SSH key file (optional but recommended for security)
-        icacls key /inheritance:r /grant:r "$($env:USERNAME):(R)"
-        # Use SSH to execute the deploy script on the VPS
-        ssh -i key Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy.bat"
-        # Clean up by removing the key file
-        del key
+        # Write the SSH private key to a file
+        echo $env:SSH_PRIVATE_KEY | Out-File -FilePath key -Encoding ascii
+        
+        # Optional: Print the contents of the key file (for debugging)
+        Write-Host "SSH Private Key Contents:"
+        Get-Content key | Write-Host
+        
+        # Set permissions for the key file
+        icacls .\key /inheritance:r /grant:r "$($env:USERNAME):(R)"
+        
+        # Run the SSH command to deploy
+        ssh -i ./key Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy.bat"
+        
+        # Clean up by deleting the key file after usage
+        Remove-Item key
