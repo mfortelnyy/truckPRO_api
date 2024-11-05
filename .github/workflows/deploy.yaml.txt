@@ -1,0 +1,27 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - master  # Trigger the workflow on pushes to the master branch
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run deployment script
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # From secrets
+        run: |
+          echo "$SSH_KEY" > key
+          # Set permissions for the key file
+          icacls key /inheritance:r  # Remove inherited permissions
+          icacls key /grant:r "$env:USERNAME":F  # Grant full access to the current user
+          icacls key /remove "BUILTIN\Users"  # Remove access for other users
+          
+          ssh -o StrictHostKeyChecking=no -i key Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy.bat"
+          del key  # Use del to delete the key on Windows
