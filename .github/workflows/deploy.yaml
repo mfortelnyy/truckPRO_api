@@ -16,4 +16,4 @@ jobs:
       - name: Run deploy script
         shell: pwsh  
         run: |
-          ssh -o StrictHostKeyChecking=no Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy"
+          ssh Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy"
