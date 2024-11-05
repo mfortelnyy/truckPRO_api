@@ -18,5 +18,5 @@ jobs:
         SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  
       run: |
         echo "$SSH_KEY" > key
-        ssh -i key Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckProApi\\deploy.bat" 
+        ssh -i key Administrator@174.138.184.240 'C:\\Users\\Administrator\\Documents\\truckProRepo\\truckProApi\\deploy.bat'
         rm key
