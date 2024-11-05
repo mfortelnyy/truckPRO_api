@@ -1,0 +1,47 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Verify SSH Key Availability
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          if [ -z "$SSH_KEY" ]; then
+            echo "SSH_KEY is not available."
+            exit 1
+          else
+            echo "SSH_KEY is available."
+          fi
+
+      - name: Set up SSH Key
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          # Create the key file
+          $keyFilePath = "key"
+          echo "$SSH_KEY" | Out-File -FilePath $keyFilePath -Encoding ascii
+
+          # Set permissions for the key file
+          $username = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+          icacls $keyFilePath /inheritance:r
+          icacls $keyFilePath /grant:r "$username:(R,W)"
+          icacls $keyFilePath /remove "BUILTIN\Users"
+
+      - name: Deploy to VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no -i key Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy.bat"
+
+      - name: Clean up
+        run: |
+          Remove-Item key -Force
