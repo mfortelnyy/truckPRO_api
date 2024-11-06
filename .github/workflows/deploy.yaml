@@ -22,6 +22,6 @@ jobs:
           command_timeout: 30m
           script: 
             echo 'Starting deployment on Windows VPS...'
-            cd"C:\Users\Administrator\Documents\truckProRepo\truckPRO_api"
+            cd "C:\Users\Administrator\Documents\truckProRepo\truckPRO_api"
             dir
             deploy.bat
