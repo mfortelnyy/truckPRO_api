@@ -1,9 +1,9 @@
-name: Deploy to VPS
+name: Deploy to VPS - Test SSH Connection
 
 on:
   push:
     branches:
-      - master  # Trigger the workflow on pushes to the master branch
+      - master 
 
 jobs:
   deploy:
@@ -13,23 +13,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Deploy publish folder to VPS
-      shell: pwsh 
+    - name: Test SSH Connection and Run Deployment Script on VPS
+      shell: pwsh
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
-        # Write the SSH private key to a file
+        # Write SSH private key to a file
         echo $env:SSH_PRIVATE_KEY | Out-File -FilePath key -Encoding ascii
-        
-        # Optional: Print the contents of the key file (for debugging)
-        Write-Host "SSH Private Key Contents:"
-        Get-Content key | Write-Host
         
         # Set permissions for the key file
         icacls .\key /inheritance:r /grant:r "$($env:USERNAME):(R)"
         
-        # Run the SSH command to deploy
-        ssh -i SSH_PRIVATE_KEY Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\truckProRepo\\truckPRO_api\\deploy.bat"
+        # Run the SSH command to execute the test deployment script on the server
+        ssh -i ./key Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\deploy_test.bat"
         
         # Clean up by deleting the key file after usage
         Remove-Item key
