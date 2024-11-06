@@ -19,13 +19,11 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
-          command_timeout: 30m
-          script: 
-            echo 'Starting deployment on Windows VPS...'
-            cd "C:\Users\Administrator\Documents\truckProRepo\truckPRO_api"
-            dir
-            deploy.bat
-  # Check if the bat file ran successfully
+          command_timeout: 30m            
+          script: |
+                    C:\Users\Administrator\Documents\truckProRepo\truckPRO_api\deploy.bat
+  
+                    # Check if the bat file ran successfully
   check:
     runs-on: ubuntu-latest
     needs: deploy
