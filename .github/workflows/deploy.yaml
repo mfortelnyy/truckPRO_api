@@ -1,4 +1,4 @@
-name: Deploy to VPS - Test SSH Connection
+name: Test SSH Connection and Deployment
 
 on:
   push:
@@ -8,24 +8,18 @@ on:
 jobs:
   deploy:
     runs-on: windows-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Test SSH Connection and Run Deployment Script on VPS
-      shell: pwsh
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      run: |
-        # Write SSH private key to a file
-        echo $env:SSH_PRIVATE_KEY | Out-File -FilePath key -Encoding ascii
-        
-        # Set permissions for the key file
-        icacls .\key /inheritance:r /grant:r "$($env:USERNAME):(R)"
-        
-        # Run the SSH command to execute the test deployment script on the server
-        ssh -i ./key Administrator@174.138.184.240 "C:\\Users\\Administrator\\Documents\\deploy_test.bat"
-        
-        # Clean up by deleting the key file after usage
-        Remove-Item key
+      - name: Test SSH Connection on VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            echo "SSH Connection Established!"
+            echo "Running test script on VPS..."
+            C:\Users\Administrator\Documents\test
