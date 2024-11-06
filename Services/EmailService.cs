@@ -19,10 +19,10 @@ namespace truckPRO_api.Services
         public async Task<bool> SendEmailAsync(string recieverEmail, string subject, string message)
         {
             
-            var sender = new SmtpSender(() => new SmtpClient("localhost")
+            var sender = new SmtpSender(() => new SmtpClient("174.138.184.240")
             {
                 DeliveryMethod = SmtpDeliveryMethod.PickupDirectoryFromIis, 
-                UseDefaultCredentials = true, 
+                UseDefaultCredentials = false, 
                 EnableSsl = false, 
                 Timeout = 200, 
             });

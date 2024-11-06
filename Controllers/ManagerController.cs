@@ -92,12 +92,14 @@ namespace truckPRO_api.Controllers
                 var pendingDrivers = await managerService.GetNotRegisteredFromPending(int.Parse(companyId));
                 foreach (var driver in pendingDrivers)
                 {
+                    
                     var sent = await emailService.SendEmailAsync(
                         email: driver.Email,
                         subject: "TruckPro Registration",
                         message: $"Dear Driver, Please register with the following email - {driver.Email} to our system. " +
                         $"\nFollow this link - {link}"
                         );
+                    Console.WriteLine($"email sent: {sent}");
                     if(sent)
                     {
                         //email was sent then change flag to true
