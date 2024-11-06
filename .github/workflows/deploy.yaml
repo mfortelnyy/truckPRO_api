@@ -20,6 +20,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
           command_timeout: 30m
-          script: |
+          script: 
             echo 'Starting deployment on Windows VPS...'
             cmd /c "C:\Users\Administrator\Documents\truckProRepo\truckPRO_api\deploy.bat"
