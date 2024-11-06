@@ -1,25 +1,25 @@
-name: Test SSH Connection and Deployment
+name: Deploy to Windows VPS
 
 on:
   push:
     branches:
-      - master 
+      - master
 
 jobs:
   deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Test SSH Connection on VPS
-        uses: appleboy/ssh-action@master
+      - name: Run SSH Commands on VPS
+        uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.HOST }}
+          host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
+          command_timeout: 30m
           script: |
-            echo "SSH Connection Established!"
-            echo "Running test script on VPS..."
-            C:\Users\Administrator\Documents\test
+            echo 'Starting deployment on Windows VPS...'
+            C:\Users\Administrator\Documents\truckProRepo\truckPRO_api\deploy.bat
