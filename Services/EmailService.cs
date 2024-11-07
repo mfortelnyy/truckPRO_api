@@ -1,59 +1,47 @@
 ﻿using System;
+using System.Net;
+using System.Net.Mail;
+using System.Threading.Tasks;
 using FluentEmail.Smtp;
 using FluentEmail.Core;
-using System.Net.Mail;
-
+using Microsoft.Extensions.Configuration;
 
 namespace truckPRO_api.Services
 {
-    public class EmailService(IConfiguration configuration) : IEmailService
+    public class EmailService : IEmailService
     {
+        private readonly IConfiguration _configuration;
 
-        public async Task<bool> SendEmailAsync(string recieverEmail, string subject, string message)
+        public EmailService(IConfiguration configuration)
         {
-            //Console.WriteLine($"Here is {configuration["SmtpSettings:Host"]}, {configuration["SmtpSettings:Port"]}, {configuration["SmtpSettings:Username"]}");
-             
-            var sender = new SmtpSender(() => new SmtpClient("localhost")
-            {
-                Host = configuration["SmtpSettings:Host"],
+            _configuration = configuration;
+        }
 
-                Port = int.Parse(configuration["SmtpSettings:Port"]),
-                Timeout = 600, //600 seconds to ensure all emails are sent. 
-                EnableSsl = false,
-                UseDefaultCredentials = true,
+        public async Task<bool> SendEmailAsync(string receiverEmail, string subject, string message)
+        {
+            // Set up SMTP sender with configuration from settings
+            var sender = new SmtpSender(() => new SmtpClient()
+            {
+                Host = _configuration["SmtpSettings:Host"],
+                Port = int.Parse(_configuration["SmtpSettings:Port"]),
+                EnableSsl = bool.Parse(_configuration["SmtpSettings:EnableSsl"]),
                 DeliveryMethod = SmtpDeliveryMethod.Network,
-                //Credentials = new NetworkCredential(configuration["SmtpSettings:Username"], configuration["SmtpSettings:Password"])
-                
-                /*
-                //testing
-                EnableSsl = false,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                Port = 567
-                
-                //DeliveryMethod = SmtpDeliveryMethod.SpecifiedPickupDirectory,
-                //PickupDirectoryLocation = @"C:\Games"
-                */
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(
+                    _configuration["SmtpSettings:Username"],
+                    _configuration["SmtpSettings:Password"])
             });
 
             Email.DefaultSender = sender;
+
             var email = await Email
-                .From("do_not_reply@truckcheck.org")
-                .To(recieverEmail, "")
+                .From(_configuration["SmtpSettings:Username"]) 
+                .To(receiverEmail)
                 .Subject(subject)
                 .Body(message)
                 .SendAsync();
-            if(email.Successful)
-            {
-                return true;
-            }  
-            else
-            {
-                return false;
-            }
-            //Console.WriteLine($"Email Successfull:  {email.ErrorMessages.ToString()}");
 
+            return email.Successful;
         }
-        
-
     }
 }
