@@ -41,6 +41,7 @@ namespace truckPRO_api.Services
                 .Body(message)
                 .SendAsync();
 
+
             return email.Successful;
         }
     }
