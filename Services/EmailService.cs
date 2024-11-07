@@ -1,9 +1,7 @@
 ﻿using System;
 using FluentEmail.Smtp;
-using System.Net.Mail;
 using FluentEmail.Core;
-using System.Net;
-using Microsoft.Graph.Education.Classes.Item.Assignments.Item.Submissions.Item.Return;
+using System.Net.Mail;
 
 
 namespace truckPRO_api.Services
@@ -20,7 +18,7 @@ namespace truckPRO_api.Services
                 Host = configuration["SmtpSettings:Host"],
 
                 Port = int.Parse(configuration["SmtpSettings:Port"]),
-                Timeout = 600000, //600 seconds to ensure all emails are sent 
+                Timeout = 600, //600 seconds to ensure all emails are sent 
                 EnableSsl = true,
                 UseDefaultCredentials = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
@@ -39,7 +37,7 @@ namespace truckPRO_api.Services
 
             Email.DefaultSender = sender;
             var email = await Email
-                .From("mfortelnyy1@gmail.com")
+                .From("do_not_reply@truckcheck.org")
                 .To(recieverEmail, "")
                 .Subject(subject)
                 .Body(message)
