@@ -1,38 +1,61 @@
 ﻿using System;
+using FluentEmail.Smtp;
 using System.Net.Mail;
-using System.Text;
+using FluentEmail.Core;
+using System.Net;
+using Microsoft.Graph.Education.Classes.Item.Assignments.Item.Submissions.Item.Return;
 
-public class EmailService
+
+namespace truckPRO_api.Services
 {
-    public bool SendEmail(string fromAddress, string toAddress, string subject, string body)
+    public class EmailService(IConfiguration configuration) : IEmailService
     {
-        try
-        {
-            
-            MailMessage mail = new MailMessage(fromAddress, toAddress)
-            {
-                Subject = subject,
-                Body = body,
-                BodyEncoding = Encoding.UTF8,
-                IsBodyHtml = true
-            };
 
-            
-            SmtpClient smtpClient = new("174.138.184.240")
+        public async Task<bool> SendEmailAsync(string recieverEmail, string subject, string message)
+        {
+            //Console.WriteLine($"Here is {configuration["SmtpSettings:Host"]}, {configuration["SmtpSettings:Port"]}, {configuration["SmtpSettings:Username"]}");
+             
+            var sender = new SmtpSender(() => new SmtpClient("localhost")
             {
-                Port = 25,                  
+                Host = configuration["SmtpSettings:Host"],
+
+                Port = int.Parse(configuration["SmtpSettings:Port"]),
+                Timeout = 600000, //600 seconds to ensure all emails are sent 
+                EnableSsl = true,
+                UseDefaultCredentials = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = true // No authentication
-            };
+                //Credentials = new NetworkCredential(configuration["SmtpSettings:Username"], configuration["SmtpSettings:Password"])
+                
+                /*
+                //testing
+                EnableSsl = false,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Port = 567
+                
+                //DeliveryMethod = SmtpDeliveryMethod.SpecifiedPickupDirectory,
+                //PickupDirectoryLocation = @"C:\Games"
+                */
+            });
 
-            smtpClient.Send(mail);
+            Email.DefaultSender = sender;
+            var email = await Email
+                .From("mfortelnyy1@gmail.com")
+                .To(recieverEmail, "")
+                .Subject(subject)
+                .Body(message)
+                .SendAsync();
+            if(email.Successful)
+            {
+                return true;
+            }  
+            else
+            {
+                return false;
+            }
+            //Console.WriteLine($"Email Successfull:  {email.ErrorMessages.ToString()}");
 
-            return true;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-            return false;
-        }
+        
+
     }
 }
