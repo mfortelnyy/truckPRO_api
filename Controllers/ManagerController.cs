@@ -99,7 +99,7 @@ namespace truckPRO_api.Controllers
                         message: $"Dear Driver, Please register with the following email - {driver.Email} to our system. " +
                         $"\nFollow this link - {link}"
                         );
-                    Console.WriteLine($"email sent: {sent}");
+                    //Console.WriteLine($"email sent: {sent}");
                     if(sent)
                     {
                         //email was sent then change flag to true
@@ -121,7 +121,7 @@ namespace truckPRO_api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return Accepted(ex.Message);
             }
         }
 
@@ -164,7 +164,7 @@ namespace truckPRO_api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new {message = ex.Message});
+                return Accepted(new {message = ex.Message});
             }
         }
 
