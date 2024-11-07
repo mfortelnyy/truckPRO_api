@@ -1,43 +1,38 @@
 ﻿using System;
-using FluentEmail.Smtp;
-using FluentEmail.Core;
-using System.Net;
 using System.Net.Mail;
-using Microsoft.Extensions.Configuration;
+using System.Text;
 
-namespace truckPRO_api.Services
+public class EmailService
 {
-    public class EmailService : IEmailService
+    public bool SendEmail(string fromAddress, string toAddress, string subject, string body)
     {
-        private readonly IConfiguration _configuration;
-
-        public EmailService(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
-        public async Task<bool> SendEmailAsync(string recieverEmail, string subject, string message)
+        try
         {
             
-            var sender = new SmtpSender(() => new SmtpClient("174.138.184.240")
+            MailMessage mail = new MailMessage(fromAddress, toAddress)
             {
-                DeliveryMethod = SmtpDeliveryMethod.PickupDirectoryFromIis, 
-                UseDefaultCredentials = false, 
-                EnableSsl = false, 
-                Timeout = 200, 
-            });
+                Subject = subject,
+                Body = body,
+                BodyEncoding = Encoding.UTF8,
+                IsBodyHtml = true
+            };
 
-            Email.DefaultSender = sender;
+            
+            SmtpClient smtpClient = new("174.138.184.240")
+            {
+                Port = 25,                  
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = true // No authentication
+            };
 
-            // Send the email
-            var email = await Email
-                .From("mfortelnyy1@gmail.com") 
-                .To(recieverEmail, "")         
-                .Subject(subject)              
-                .Body(message)                              
-                .SendAsync();
+            smtpClient.Send(mail);
 
-            return email.Successful;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            return false;
         }
     }
 }
