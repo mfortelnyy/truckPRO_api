@@ -108,20 +108,21 @@ namespace truckPRO_api.Controllers
                     }
                     else //if email failed to send
                     {
-                        return BadRequest($"Failed to send email to pending user: {driver.Email}. \nAll Emails prior to this were added!");
+                        return BadRequest(new {message = $"Failed to send email to pending user: {driver.Email}"+
+                                                                         "\nAll Emails prior to this were added!"});
                     }
                     
 
                 }
-                return Ok("Emails sent successfully!");
+                return Ok(new {message = "Emails sent successfully!"});
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return Conflict(new {message = ex.Message});
             }
             catch (Exception ex)
             {
-                return Accepted(ex.Message);
+                return Accepted(new {message = ex.Message});
             }
         }
 
