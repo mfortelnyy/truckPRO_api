@@ -38,6 +38,13 @@ namespace truckPRO_api.Services
                 .From(_configuration["SmtpSettings:Username"]) 
                 .To(receiverEmail)
                 .Subject("TruckPro Registration Invitation")
+                .Attach(new FluentEmail.Core.Models.Attachment
+                {
+                    Data = new FileStream("Assets/email_logo.png", FileMode.Open),
+                    ContentType = "image/png",
+                    Filename = "logo.png",
+                    ContentId = "logo"
+                })
                 .Body($@"
                     <html>
                     <body>
@@ -49,13 +56,6 @@ namespace truckPRO_api.Services
                         <p>Best regards,<br/>The TruckPro Team</p>
                     </body>
                     </html>", isHtml: true)
-                .Attach(new FluentEmail.Core.Models.Attachment
-                {
-                    Data = new FileStream("Assets/email_logo.png", FileMode.Open),
-                    ContentType = "image/png",
-                    Filename = "logo.png",
-                    ContentId = "logo" 
-                })
                 .SendAsync();
 
 
