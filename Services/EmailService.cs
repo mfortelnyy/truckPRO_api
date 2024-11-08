@@ -51,7 +51,7 @@ namespace truckPRO_api.Services
                     </html>", isHtml: true)
                 .Attach(new FluentEmail.Core.Models.Attachment
                 {
-                    Data = new FileStream("path/to/your/logo.png", FileMode.Open),
+                    Data = new FileStream("Assets/email_logo.png", FileMode.Open),
                     ContentType = "image/png",
                     Filename = "logo.png",
                     ContentId = "logo" 
