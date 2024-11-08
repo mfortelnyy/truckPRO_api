@@ -95,7 +95,7 @@ namespace truckPRO_api.Services
             return "Email verfied Sucefully!";
         }
 
-        public async Task<String> ReSendEmailVerificationCode(int userId)
+        public async Task<String> SaveNewVerificationCode(int userId)
         {
             var user = await _context.User.Where(u => u.Id == userId).FirstOrDefaultAsync() ?? throw new InvalidOperationException("user not found!");
             

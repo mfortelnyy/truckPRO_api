@@ -176,7 +176,7 @@ namespace truckPRO_api.Controllers
                 //var em = User.Claims.FirstOrDefault(c => c.Type == "sub").Value;
                 //Console.WriteLine($"req id: {requestUserId}");
 
-                var newCode = await _userService.ReSendEmailVerificationCode(requestUserId);
+                var newCode = await _userService.SaveNewVerificationCode(requestUserId);
                 var sent = await _emailService.ReSendVerification(Email, newCode);
                 //Console.WriteLine($"new code: {newCode}");
                 if(sent)
