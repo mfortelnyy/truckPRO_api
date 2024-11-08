@@ -197,5 +197,23 @@ namespace truckPRO_api.Controllers
             }
         }
 
+
+        [HttpPost("ValidateToken")]
+        [Authorize(Roles = "Admin, Manager, Driver")]
+        public IActionResult ValidateToken()
+        {
+            // If the request reaches this point, it means the token is valid and
+            // the user has one of the authorized roles.
+
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
+            if(userId == null) return NotFound();
+
+            return Ok(new
+            {
+                Message = "Token is valid",
+                UserId = userId,
+            });
+        }
+
     }
 }
