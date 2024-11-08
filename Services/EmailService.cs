@@ -37,9 +37,28 @@ namespace truckPRO_api.Services
             var email = await Email
                 .From(_configuration["SmtpSettings:Username"]) 
                 .To(receiverEmail)
-                .Subject(subject)
-                .Body(message)
+                .Subject("TruckPro Registration Invitation")
+                .Body($@"
+                    <html>
+                    <body>
+                        <p>Dear Driver,</p>
+                        <p>Welcome to TruckPro! Please complete your registration using the link below:</p>
+                        <a href=''>Register Here</a>
+                        <br/>
+                        <img src='cid:logo' alt='TruckPro Logo' width='150'/>
+                        <p>Best regards,<br/>The TruckPro Team</p>
+                    </body>
+                    </html>", isHtml: true)
+                .Attach(new FluentEmail.Core.Models.Attachment
+                {
+                    Data = new FileStream("path/to/your/logo.png", FileMode.Open),
+                    ContentType = "image/png",
+                    Filename = "logo.png",
+                    ContentId = "logo" 
+                })
                 .SendAsync();
+
+
 
 
             return email.Successful;

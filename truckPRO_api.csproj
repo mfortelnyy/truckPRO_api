@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <Folder Include="ModelValidations\" />
+    <Folder Include="Assets\" />
   </ItemGroup>
 
 </Project>
