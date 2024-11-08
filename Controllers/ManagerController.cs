@@ -93,12 +93,8 @@ namespace truckPRO_api.Controllers
                 foreach (var driver in pendingDrivers)
                 {
                     
-                    var sent = await emailService.SendEmailAsync(
-                        email: driver.Email,
-                        subject: "TruckPro Registration",
-                        message: $"Dear Driver, Please register with the following email - {driver.Email} to our system. " +
-                        $"\nFollow this link - {link}"
-                        );
+                    var sent = await emailService.SendWelcomeEmailAsync(
+                        receiverEmail: driver.Email);
                     //Console.WriteLine($"email sent: {sent}");
                     if(sent)
                     {

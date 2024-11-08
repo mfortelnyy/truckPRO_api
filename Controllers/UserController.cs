@@ -53,7 +53,7 @@ namespace truckPRO_api.Controllers
 
 
                     string emailVerificarionToken = await _userService.CreateUserAsync(SignUpDTO);
-                    await _emailService.SendEmailAsync(email: SignUpDTO.Email, subject: "Registration", message: $"You are registered!\nHere is your verification code: {emailVerificarionToken}");
+                    await _emailService.ReSendVerification(receiverEmail: SignUpDTO.Email, emailVerificarionToken);
                     if (emailVerificarionToken != null) return Ok(new {message = emailVerificarionToken});
                     return BadRequest(new {message = "Failed to register"});
                 }
@@ -130,7 +130,7 @@ namespace truckPRO_api.Controllers
             try
             {
                 var tempPassword = await _userService.ForgetPassword(email);
-                await emailService.SendEmailAsync(email, "Temporary Password", $"Your temporary password is: {tempPassword} \nPlease Sign in and update your password!"); 
+                await emailService.SendTemporaryPassword(email, tempPassword); 
                 return Ok(new {message = "Temp Password sent successfully!"});
             }
             catch (InvalidOperationException ex)
