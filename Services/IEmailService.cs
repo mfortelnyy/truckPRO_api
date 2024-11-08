@@ -2,6 +2,8 @@
 {
     public interface IEmailService
     {
-        Task<bool> SendEmailAsync(string email, string subject, string message);
+      Task<bool> SendWelcomeEmailAsync(string receiverEmail);
+      Task<bool> ReSendVerification(string receiverEmail, string verificationCode);
+
     }
 }

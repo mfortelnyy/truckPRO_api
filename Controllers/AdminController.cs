@@ -32,7 +32,6 @@ namespace truckPRO_api.Controllers
 
         }
 
-
         [HttpGet]
         [Route("/getAllCompanies")]
         //[Authorize(Roles = "Admin")]
@@ -42,6 +41,7 @@ namespace truckPRO_api.Controllers
             if (companies == null) return Conflict("No Companies found!");
             return Ok(companies);
         }
+
 
         [HttpGet]
         [Route("/adm/getAllDrivers")]

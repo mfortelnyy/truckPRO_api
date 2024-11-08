@@ -174,11 +174,11 @@ namespace truckPRO_api.Controllers
             {
                 var requestUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "userId").Value);
                 //var em = User.Claims.FirstOrDefault(c => c.Type == "sub").Value;
-                Console.WriteLine($"req id: {requestUserId}");
+                //Console.WriteLine($"req id: {requestUserId}");
 
                 var newCode = await _userService.ReSendEmailVerificationCode(requestUserId);
-                var sent = await _emailService.SendEmailAsync(Email, "Verification Code", $"Your new verification token is {newCode}.");
-                Console.WriteLine($"new code: {newCode}");
+                var sent = await _emailService.ReSendVerification(Email, newCode);
+                //Console.WriteLine($"new code: {newCode}");
                 if(sent)
                 {
                     return Ok(new {message = "Email sent successfully!"});
