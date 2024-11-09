@@ -19,9 +19,7 @@ namespace truckPRO_api.Services
 
         public async Task<bool> SendWelcomeEmailAsync(string receiverEmail)
         {
-            // load the image file into a byte array for shared access of image to avoid conflict during proccesing of multiple emails
-            var logoBytes = await File.ReadAllBytesAsync("C:\\inetpub\\wwwroot\\truckProApi\\Assets\\email_logo.png");
-            var base64Logo = Convert.ToBase64String(logoBytes); // for html embedding
+            var logoUrl = "https://truckphotos.s3.us-east-2.amazonaws.com/email_logo.png";
 
 
             // Set up SMTP sender with configuration from settings
@@ -51,7 +49,7 @@ namespace truckPRO_api.Services
                         <a href=''>Register Here</a>
                         <p>Best regards,<br/>The TruckPro Team</p>
                         <br/>
-                        <img src='data:image/png;base64,{base64Logo}' alt='TruckPro Logo' width='150'/>
+                        <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                     </body>
                     </html>", isHtml: true)
                 .SendAsync();
