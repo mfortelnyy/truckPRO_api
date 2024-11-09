@@ -19,6 +19,9 @@ namespace truckPRO_api.Services
 
         public async Task<bool> SendWelcomeEmailAsync(string receiverEmail)
         {
+            // load the image file into a byte array for shared access of image to avoid conflict during proccesing of multiple emails
+            var logoBytes = await File.ReadAllBytesAsync("C:\\inetpub\\wwwroot\\truckProApi\\Assets\\email_logo.png");
+
             // Set up SMTP sender with configuration from settings
             var sender = new SmtpSender(() => new SmtpClient()
             {
@@ -40,7 +43,7 @@ namespace truckPRO_api.Services
                 .Subject("TruckPro Registration Invitation")
                 .Attach(new FluentEmail.Core.Models.Attachment
                 {
-                    Data = new FileStream("Assets/email_logo.png", FileMode.Open),
+                    Data = new MemoryStream(logoBytes),
                     ContentType = "image/png",
                     Filename = "logo.png",
                     ContentId = "logo"
