@@ -49,9 +49,9 @@ namespace truckPRO_api.Services
                         <p>Dear Driver,</p>
                         <p>Welcome to TruckPro! Please complete your registration using the link below:</p>
                         <a href=''>Register Here</a>
+                        <p>Best regards,<br/>The TruckPro Team</p>
                         <br/>
                         <img src='data:image/png;base64,{base64Logo}' alt='TruckPro Logo' width='150'/>
-                        <p>Best regards,<br/>The TruckPro Team</p>
                     </body>
                     </html>", isHtml: true)
                 .SendAsync();
