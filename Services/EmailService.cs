@@ -21,6 +21,8 @@ namespace truckPRO_api.Services
         {
             // load the image file into a byte array for shared access of image to avoid conflict during proccesing of multiple emails
             var logoBytes = await File.ReadAllBytesAsync("C:\\inetpub\\wwwroot\\truckProApi\\Assets\\email_logo.png");
+            var base64Logo = Convert.ToBase64String(logoBytes); // for html embedding
+
 
             // Set up SMTP sender with configuration from settings
             var sender = new SmtpSender(() => new SmtpClient()
@@ -41,13 +43,6 @@ namespace truckPRO_api.Services
                 .From(_configuration["SmtpSettings:Username"]) 
                 .To(receiverEmail)
                 .Subject("TruckPro Registration Invitation")
-                .Attach(new FluentEmail.Core.Models.Attachment
-                {
-                    Data = new MemoryStream(logoBytes),
-                    ContentType = "image/png",
-                    Filename = "logo.png",
-                    ContentId = "logo"
-                })
                 .Body($@"
                     <html>
                     <body>
@@ -55,7 +50,7 @@ namespace truckPRO_api.Services
                         <p>Welcome to TruckPro! Please complete your registration using the link below:</p>
                         <a href=''>Register Here</a>
                         <br/>
-                        <img src='cid:logo' alt='TruckPro Logo' width='150'/>
+                        <img src='data:image/png;base64,{base64Logo}' alt='TruckPro Logo' width='150'/>
                         <p>Best regards,<br/>The TruckPro Team</p>
                     </body>
                     </html>", isHtml: true)
