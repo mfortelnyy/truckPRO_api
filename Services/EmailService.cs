@@ -94,11 +94,11 @@ namespace truckPRO_api.Services
                             <h1 style='background-color: #f2f2f2; padding: 10px; text-align: center; border-radius: 4px; color: #333;'>{verificationCode}</h1>
                             <p>If you did not request this code, please ignore this email.</p>
                             <p style='color: #888;'>Best regards,<br/>The TruckPro Team</p>
+                            <br/>
+                            <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                             <hr style='border: none; border-top: 1px solid #e0e0e0; margin-top: 20px;'/>
                             <p style='font-size: 12px; color: #999; text-align: center;'>
                                 TruckPro Inc.<br/>
-                                <br/>
-                                <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                                  <br/>
                                 <a href='mailto:support@truckpro.com' style='color: #999;'>support@truckpro.com</a>
                             </p>
@@ -147,11 +147,11 @@ namespace truckPRO_api.Services
                             <h1 style='background-color: #f2f2f2; padding: 10px; text-align: center; border-radius: 4px; color: #333;'>{temporaryPassword}</h1>
                             <p>If you did not request a password reset, please ignore this email or contact support.</p>
                             <p style='color: #888;'>Best regards,<br/>The TruckPro Team</p>
+                            <br/>
+                                <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                             <hr style='border: none; border-top: 1px solid #e0e0e0; margin-top: 20px;'/>
                             <p style='font-size: 12px; color: #999; text-align: center;'>
                                 TruckPro Inc.<br/>
-                                <br/>
-                                <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                                  <br/>
                                 <a href='mailto:support@truckpro.com' style='color: #999;'>support@truckpro.com</a>
                             </p>
