@@ -20,9 +20,6 @@ namespace truckPRO_api.Services
 
         public async Task<bool> SendWelcomeEmailAsync(string receiverEmail)
         {
-            
-
-
             // Set up SMTP sender with configuration from settings
             var sender = new SmtpSender(() => new SmtpClient()
             {
