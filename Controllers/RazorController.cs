@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 
 namespace truckapi.Controllers
 {
-    [Route("[controller]")]
     public class RazorController : Controller
     {
         private readonly ILogger<RazorController> _logger;
