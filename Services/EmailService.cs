@@ -45,12 +45,19 @@ namespace truckPRO_api.Services
                 .Body($@"
                     <html>
                     <body>
-                        <p>Dear Driver,</p>
-                        <p>Welcome to TruckPro! Please complete your registration using the link below:</p>
-                        <a href=''>Register Here</a>
-                        <p>Best regards,<br/>The TruckPro Team</p>
-                        <br/>
-                        <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
+                        <div style='max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
+                            <table width='100%'>
+                                <tr>
+                                    <td style='text-align: center;'>
+                                        <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p>Dear Driver,</p>
+                            <p>Welcome to TruckPro! Please complete your registration using the link below:</p>
+                            <a href=''>Register Here</a>
+                            <p>Best regards,<br/>The TruckPro Team</p>
+                        </div>
                     </body>
                     </html>", isHtml: true)
                 .SendAsync();
@@ -85,7 +92,7 @@ namespace truckPRO_api.Services
                             <table width='100%'>
                                 <tr>
                                     <td style='text-align: center;'>
-                                        <img src='cid:logo' alt='TruckPro Logo' width='150' style='margin-bottom: 20px;'/>
+                                        <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                                     </td>
                                 </tr>
                             </table>
@@ -94,8 +101,6 @@ namespace truckPRO_api.Services
                             <h1 style='background-color: #f2f2f2; padding: 10px; text-align: center; border-radius: 4px; color: #333;'>{verificationCode}</h1>
                             <p>If you did not request this code, please ignore this email.</p>
                             <p style='color: #888;'>Best regards,<br/>The TruckPro Team</p>
-                            <br/>
-                            <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                             <hr style='border: none; border-top: 1px solid #e0e0e0; margin-top: 20px;'/>
                             <p style='font-size: 12px; color: #999; text-align: center;'>
                                 TruckPro Inc.<br/>
@@ -137,7 +142,7 @@ namespace truckPRO_api.Services
                             <table width='100%'>
                                 <tr>
                                     <td style='text-align: center;'>
-                                        <img src='cid:logo' alt='TruckPro Logo' width='150' style='margin-bottom: 20px;'/>
+                                        <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                                     </td>
                                 </tr>
                             </table>
@@ -147,8 +152,6 @@ namespace truckPRO_api.Services
                             <h1 style='background-color: #f2f2f2; padding: 10px; text-align: center; border-radius: 4px; color: #333;'>{temporaryPassword}</h1>
                             <p>If you did not request a password reset, please ignore this email or contact support.</p>
                             <p style='color: #888;'>Best regards,<br/>The TruckPro Team</p>
-                            <br/>
-                                <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                             <hr style='border: none; border-top: 1px solid #e0e0e0; margin-top: 20px;'/>
                             <p style='font-size: 12px; color: #999; text-align: center;'>
                                 TruckPro Inc.<br/>
