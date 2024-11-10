@@ -129,13 +129,6 @@ namespace truckPRO_api.Services
                 .From(_configuration["SmtpSettings:Username"]) 
                 .To(receiverEmail)
                 .Subject("TruckPro Password Reset")
-                .Attach(new FluentEmail.Core.Models.Attachment
-                {
-                    Data = new FileStream("Assets/email_logo.png", FileMode.Open),
-                    ContentType = "image/png",
-                    Filename = "logo.png",
-                    ContentId = "logo"
-                })
                 .Body($@"
                     <html>
                     <body style='font-family: Arial, sans-serif; color: #333;'>
@@ -156,8 +149,8 @@ namespace truckPRO_api.Services
                             <hr style='border: none; border-top: 1px solid #e0e0e0; margin-top: 20px;'/>
                             <p style='font-size: 12px; color: #999; text-align: center;'>
                                 TruckPro Inc.<br/>
-                                1234 Truck Lane, Suite 500<br/>
-                                City, State, ZIP<br/>
+                                <br/>
+                                <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                                 <a href='mailto:support@truckpro.com' style='color: #999;'>support@truckpro.com</a>
                             </p>
                         </div>
