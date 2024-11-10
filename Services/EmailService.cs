@@ -99,6 +99,7 @@ namespace truckPRO_api.Services
                                 TruckPro Inc.<br/>
                                 <br/>
                                 <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
+                                 <br/>
                                 <a href='mailto:support@truckpro.com' style='color: #999;'>support@truckpro.com</a>
                             </p>
                         </div>
@@ -151,6 +152,7 @@ namespace truckPRO_api.Services
                                 TruckPro Inc.<br/>
                                 <br/>
                                 <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
+                                 <br/>
                                 <a href='mailto:support@truckpro.com' style='color: #999;'>support@truckpro.com</a>
                             </p>
                         </div>
