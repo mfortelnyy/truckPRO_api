@@ -16,6 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add console logging
 builder.Logging.AddConsole();
 
+//Add Razor pages
+builder.Services.AddControllersWithViews();
+
+
 // Add services to the container
 builder.Services.AddControllers();
 
