@@ -36,6 +36,11 @@ namespace truckPRO_api.Services
             {
                 throw new InvalidOperationException($"Email {signUpDTO.Email} was not added by the manager.");
             }
+
+            if(signUpDTO.CompanyId != pendingDriver!.CompanyId)
+            {
+                throw new InvalidOperationException("Company Id does not match with the one provided by the manager.");
+            }
             
 
             User newUser = _mapper.Map<User>(signUpDTO);
