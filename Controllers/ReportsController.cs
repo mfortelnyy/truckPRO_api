@@ -20,6 +20,11 @@ namespace truckPRO_api.Controllers
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> GetDrivingRecordsPdf([FromForm] DateTime startDate, DateTime endDate)
         {
+            if (startDate > endDate)
+            {
+                return BadRequest("Start date must be before end date.");
+            }
+
             var userId = int.Parse(User.Claims.Where(x => x.Type == "userId").FirstOrDefault().Value);
             try
             {
