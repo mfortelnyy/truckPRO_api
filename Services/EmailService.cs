@@ -12,6 +12,9 @@ namespace truckPRO_api.Services
     {
         private readonly IConfiguration _configuration;
         private readonly string logoUrl = "https://truckphotos.s3.us-east-2.amazonaws.com/email_logo.png";
+        private readonly string fromAddress = "TruckPro <no_reply>";
+
+
 
         public EmailService(IConfiguration configuration)
         {
@@ -36,7 +39,7 @@ namespace truckPRO_api.Services
             Email.DefaultSender = sender;
 
             var email = await Email
-                .From( $"TruckPro < {_configuration["SmtpSettings:Username"]}>") 
+                .From(fromAddress) 
                 .To(receiverEmail)
                 .Subject("TruckPro Registration Invitation")
                 .Body($@"
@@ -79,7 +82,7 @@ namespace truckPRO_api.Services
             Email.DefaultSender = sender;
 
             var email = await Email
-                .From($"TruckPro < {_configuration["SmtpSettings:Username"]}>") 
+                .From(fromAddress) 
                 .To(receiverEmail)
                 .Subject("TruckPro Registration Verification Code")
                 .Body($@"
@@ -129,7 +132,7 @@ namespace truckPRO_api.Services
             Email.DefaultSender = sender;
 
             var email = await Email
-                .From($"TruckPro < {_configuration["SmtpSettings:Username"]}>") 
+                .From(fromAddress) 
                 .To(receiverEmail)
                 .Subject("TruckPro Password Reset")
                 .Body($@"
