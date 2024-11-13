@@ -36,7 +36,7 @@ namespace truckPRO_api.Services
             Email.DefaultSender = sender;
 
             var email = await Email
-                .From(_configuration["SmtpSettings:Username"]) 
+                .From( $"TruckPro < {_configuration["SmtpSettings:Username"]}>") 
                 .To(receiverEmail)
                 .Subject("TruckPro Registration Invitation")
                 .Body($@"
@@ -79,7 +79,7 @@ namespace truckPRO_api.Services
             Email.DefaultSender = sender;
 
             var email = await Email
-                .From(_configuration["SmtpSettings:Username"]) 
+                .From($"TruckPro < {_configuration["SmtpSettings:Username"]}>") 
                 .To(receiverEmail)
                 .Subject("TruckPro Registration Verification Code")
                 .Body($@"
@@ -129,7 +129,7 @@ namespace truckPRO_api.Services
             Email.DefaultSender = sender;
 
             var email = await Email
-                .From(_configuration["SmtpSettings:Username"]) 
+                .From($"TruckPro < {_configuration["SmtpSettings:Username"]}>") 
                 .To(receiverEmail)
                 .Subject("TruckPro Password Reset")
                 .Body($@"
