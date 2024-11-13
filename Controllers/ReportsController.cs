@@ -17,19 +17,19 @@ namespace truckPRO_api.Controllers
         }
 
         [HttpGet("getdrivingRecordsPDF")]
-        [Authorize(Roles = "Driver")]
-        public async Task<IActionResult> GetDrivingRecordsPdf([FromForm] DateTime startDate, DateTime endDate)
+        [Authorize(Roles = "Driver, Admin, Manager")]
+        public async Task<IActionResult> GetDrivingRecordsPdf([FromForm] DateTime startDate, DateTime endDate, int driverId)
         {
             if (startDate > endDate)
             {
                 return BadRequest("Start date must be before end date.");
             }
 
-            var userId = int.Parse(User.Claims.Where(x => x.Type == "userId").FirstOrDefault().Value);
+            //var userId = int.Parse(User.Claims.Where(x => x.Type == "userId").FirstOrDefault().Value);
             try
             {
-                var pdfBytes = await _pdfService.GenerateDrivingRecordsPdfAsync(userId, startDate, endDate);
-                return File(pdfBytes, "application/pdf", $"DrivingRecords_{userId}_{DateTime.Now:yyyyMMdd}.pdf");
+                var pdfBytes = await _pdfService.GenerateDrivingRecordsPdfAsync(driverId, startDate, endDate);
+                return File(pdfBytes, "application/pdf", $"DrivingRecords_{driverId}_{DateTime.Now:yyyyMMdd}.pdf");
             }
             catch (Exception ex)
             {
