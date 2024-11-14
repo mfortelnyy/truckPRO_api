@@ -18,7 +18,7 @@ namespace truckPRO_api.Controllers
 
         [HttpGet("getdrivingRecordsPDF")]
         [Authorize(Roles = "Driver, Admin, Manager")]
-        public async Task<IActionResult> GetDrivingRecordsPdf([FromForm] DateTime startDate, DateTime endDate, int driverId)
+        public async Task<IActionResult> GetDrivingRecordsPdf([FromQuery] DateTime startDate, DateTime endDate, int driverId)
         {
             if (startDate > endDate)
             {
