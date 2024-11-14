@@ -26,7 +26,7 @@ namespace truckPRO_api.Services
             _mapper = mapper;
         }
 
-        public async Task<byte[]> GenerateDrivingRecordsPdfAsync(int driverId, DateTime startDate, DateTime endDate)
+        public async Task<byte[]> GenerateDrivingRecordsPdfAsync(int driverId, DateTime startDate, DateTime endDate, List<LogEntryType> selectedLogTypes)
         {
             var user = await _context.User.FindAsync(driverId);
             if (user == null)
@@ -35,7 +35,10 @@ namespace truckPRO_api.Services
             }
 
             var records = await _context.LogEntry
-                .Where(le => le.UserId == driverId && le.StartTime >= startDate && (le.EndTime <= endDate || le.EndTime == null))
+                .Where(le => le.UserId == driverId 
+                            && le.StartTime >= startDate 
+                            && (le.EndTime <= endDate || le.EndTime == null)
+                            && selectedLogTypes.Contains(le.LogEntryType))
                 .ToListAsync();
 
             if (records.Count == 0)
@@ -46,8 +49,8 @@ namespace truckPRO_api.Services
             using var pdfDoc = new PdfDocument();
             pdfDoc.Info.Title = "Driving Records";
 
-            var titleFont = new XFont("Verdana", 14, XFontStyleEx.Bold);
-            var font = new XFont("Verdana", 10);
+            var titleFont = new XFont("Verdana", 16, XFontStyleEx.Bold);
+            var font = new XFont("Verdana", 12);
 
             PdfPage page = null;
             XGraphics gfx = null;
