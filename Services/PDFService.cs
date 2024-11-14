@@ -5,11 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using truckPRO_api.Data;
-using truckPRO_api.DTOs;
-using truckPRO_api.Models;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
+using truckPRO_api.Data;
+using truckPRO_api.Models;
+using PdfSharp.UniversalAccessibility.Drawing;
+using PdfSharp.Pdf.Annotations;
+
 
 namespace truckPRO_api.Services
 {
@@ -26,11 +28,14 @@ namespace truckPRO_api.Services
 
         public async Task<byte[]> GenerateDrivingRecordsPdfAsync(int driverId, DateTime startDate, DateTime endDate)
         {
-            var user = await _context.User.Where(u => u.Id == driverId).FirstOrDefaultAsync();
-            
-            // egt driving records based on date range and driver id
+            var user = await _context.User.FindAsync(driverId);
+            if (user == null)
+            {
+                throw new Exception("Driver not found.");
+            }
+
             var records = await _context.LogEntry
-                .Where(le => le.UserId == driverId && le.StartTime >= startDate && le.EndTime <= endDate)
+                .Where(le => le.UserId == driverId && le.StartTime >= startDate && (le.EndTime <= endDate || le.EndTime == null))
                 .ToListAsync();
 
             if (records.Count == 0)
@@ -41,19 +46,53 @@ namespace truckPRO_api.Services
             using var pdfDoc = new PdfDocument();
             pdfDoc.Info.Title = "Driving Records";
 
-            var page = pdfDoc.AddPage();
-            using var gfx = XGraphics.FromPdfPage(page);
-            var font = new XFont("Verdana", 12);
+            var titleFont = new XFont("Verdana", 14, XFontStyleEx.Bold);
+            var font = new XFont("Verdana", 10);
 
-            int yPosition = 50;
-            gfx.DrawString("Driving Records Report", font, XBrushes.Black, new XPoint(40, yPosition));
-            yPosition += 30;
+            PdfPage page = null;
+            XGraphics gfx = null;
+            int yPosition = 40;
+
+            //start with the first page
+            page = pdfDoc.AddPage();
+            gfx = XGraphics.FromPdfPage(page);
+
+            gfx.DrawString("Driving Records Report", titleFont, XBrushes.Black, new XPoint(40, yPosition));
+            gfx.DrawString($"Driver: {user.FirstName} {user.LastName}", font, XBrushes.Black, new XPoint(40, yPosition + 20));
+            gfx.DrawString($"Date Range: {startDate:yyyy-MM-dd} to {endDate:yyyy-MM-dd}", font, XBrushes.Black, new XPoint(40, yPosition + 40));
+            yPosition += 70;
 
             foreach (var record in records)
             {
-                gfx.DrawString($"Start Date: {record.StartTime.ToShortDateString()}", font, XBrushes.Black, new XPoint(40, yPosition));
-                gfx.DrawString($"End Date: {record.EndTime} miles", font, XBrushes.Black, new XPoint(200, yPosition));
+                //add a new page is needed
+                if (yPosition > page.Height - 100) 
+                {
+                    page = pdfDoc.AddPage();
+                    gfx = XGraphics.FromPdfPage(page);
+                    yPosition = 40;
+                }
+
+                //log entry separator
+                gfx.DrawLine(XPens.Black, 40, yPosition, page.Width - 40, yPosition);
+                yPosition += 10;
+
+                //log details: Start Time and End Time
+                gfx.DrawString($"Start Time: {record.StartTime:G}", font, XBrushes.Black, new XPoint(40, yPosition));
+                gfx.DrawString($"End Time: {(record.EndTime?.ToString("G") ?? "In Progress")}", font, XBrushes.Black, new XPoint(300, yPosition));
                 yPosition += 20;
+
+                //log Type
+                gfx.DrawString($"Log Type: {record.LogEntryType}", font, XBrushes.Black, new XPoint(40, yPosition));
+
+                //display ApprovedbyManager only for Driving type
+                if (record.LogEntryType == LogEntryType.Driving)  
+                {
+                    gfx.DrawString($"Approved by Manager: {(record.IsApprovedByManager ? "Yes" : "No")}", font, XBrushes.Black, new XPoint(300, yPosition));
+                    yPosition += 20;  
+                }
+
+                //space after each log entry 
+                yPosition += 20; 
             }
 
             using var stream = new MemoryStream();
