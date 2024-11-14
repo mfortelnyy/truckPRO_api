@@ -78,7 +78,17 @@ namespace truckPRO_api.Services
 
                 //log details: Start Time and End Time
                 gfx.DrawString($"Start Time: {record.StartTime:G}", font, XBrushes.Black, new XPoint(40, yPosition));
-                gfx.DrawString($"End Time: {(record.EndTime?.ToString("G") ?? "In Progress")}", font, XBrushes.Black, new XPoint(300, yPosition));
+                
+                if(record.EndTime != null)
+                {
+                    gfx.DrawString($"End Time: {record.EndTime?.ToString("G")}", font, XBrushes.Black, new XPoint(300, yPosition));
+
+                }
+                else
+                {
+                    gfx.DrawString("In Progress", font, XBrushes.Black, new XPoint(300, yPosition));
+
+                }
                 yPosition += 20;
 
                 //log Type
