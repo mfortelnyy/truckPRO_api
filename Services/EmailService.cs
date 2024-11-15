@@ -99,6 +99,8 @@ namespace truckPRO_api.Services
                             <h2 style='color: #555;'>Dear Driver,</h2>
                             <p>Welcome to TruckPro! To complete your registration, please enter the verification code below:</p>
                             <h1 style='background-color: #f2f2f2; padding: 10px; text-align: center; border-radius: 4px; color: #333;'>{verificationCode}</h1>
+                            <p>Please verify your email using the link below:</p>
+                            <a href='https://truckcheck.org:443/verify-email'>Verify</a>
                             <p>If you did not request this code, please ignore this email.</p>
                             <p style='color: #888;'>Best regards,<br/>The TruckPro Team</p>
                             <hr style='border: none; border-top: 1px solid #e0e0e0; margin-top: 20px;'/>

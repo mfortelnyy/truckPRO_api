@@ -22,10 +22,10 @@ namespace truckapi.Controllers
             return View();
         }
 
-        [HttpGet("generate-page")]
+        [HttpGet("verify-email")]
         public IActionResult GenerateHtmlPage()
         {
-            return View("GeneratedPage"); 
+            return View("VerifyEmail"); 
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
