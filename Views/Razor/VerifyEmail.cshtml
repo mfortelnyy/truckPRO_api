@@ -1,0 +1,137 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #FFF7E5; 
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            color: #FF6600; 
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .instructions {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            padding: 10px;
+            width: 100%;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .btn {
+            background-color: #FF6600; 
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #e65c00; 
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Email Verification</h1>
+    <div class="container">
+        <p class="instructions">We have sent a verification code to your email. Please enter it below to verify your email address.</p>
+        <div class="input-group">
+            <label for="emailCode">Verification Code</label>
+            <input type="text" id="emailCode" placeholder="Enter verification code" />
+        </div>
+        <button class="btn" onclick="verifyEmail()">Verify</button>
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        function verifyEmail() {
+            var emailCode = document.getElementById("emailCode").value.trim();
+
+            if (!emailCode) {
+                document.getElementById("message").innerHTML = "Please enter the verification code.";
+                document.getElementById("message").className = "message error";
+                return;
+            }
+
+            //POST request to the verifyEmail endpoint
+            fetch('/api/user/verifyEmail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('authToken') 
+                },
+                body: JSON.stringify({
+                    EmailCode: emailCode
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === "Success") {
+                    document.getElementById("message").innerHTML = "Email successfully verified!";
+                    document.getElementById("message").className = "message success";
+                } else {
+                    document.getElementById("message").innerHTML = "Failed to verify email: " + data.message;
+                    document.getElementById("message").className = "message error";
+                }
+            })
+            .catch(error => {
+                document.getElementById("message").innerHTML = "An error occurred while verifying email.";
+                document.getElementById("message").className = "message error";
+                console.error("Error verifying email:", error);
+            });
+        }
+    </script>
+</body>
+</html>
