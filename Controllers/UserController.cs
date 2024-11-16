@@ -168,7 +168,7 @@ namespace truckPRO_api.Controllers
         [HttpPost]
         [Route("reSendEmailVerificationCode")]
         [Authorize(Roles = "Manager, Driver, Admin")]
-        public async Task<IActionResult> ReSendEmailVerificationCode([FromHeader]string Email)
+        public async Task<IActionResult> ReSendEmailVerificationCode([FromHeader] string Email)
         {
             try
             {
