@@ -38,40 +38,42 @@ namespace truckPRO_api.Pages
             {
                 IsError = true;
                 ErrorMessage = "Please fill out all required fields.";
-                return RedirectToPage("/Registration"); 
+                return RedirectToPage("/Registration");
             }
-            else if(ModelState.IsValid)
+            else if (ModelState.IsValid)
             {
                 if (SignUpDTO.Password != SignUpDTO.ConfirmPassword)
                 {
                     IsError = true;
                     ErrorMessage = "Passwords do not match.";
-                    return RedirectToPage("/Registration"); 
+                    return RedirectToPage("/Registration");
                 }
-            }
-  
-            var role = (UserRole)SignUpDTO.Role;
-            if ((role == UserRole.Driver || role == UserRole.Manager) && !SignUpDTO.CompanyId.HasValue)
-            {
-                IsError = true;
-                ErrorMessage = "CompanyId is required for drivers.";
-                return RedirectToPage("/Registration");
-            }
-            
-            try{
-                // call the SignUp endpoint to register the user
-                var result = await _userService.CreateUserAsync(SignUpDTO);
 
-                if (result.Length == 6)
+
+                var role = (UserRole)SignUpDTO.Role;
+                if ((role == UserRole.Driver || role == UserRole.Manager) && !SignUpDTO.CompanyId.HasValue)
                 {
-                    return RedirectToPage("/Success"); 
+                    IsError = true;
+                    ErrorMessage = "CompanyId is required for drivers.";
+                    return RedirectToPage("/Registration");
                 }
-            }
-            catch (Exception ex)
-            {
-                IsError = true;
-                ErrorMessage = ex.Message;
-                return RedirectToPage("/Register");
+
+                try
+                {
+                    // call the SignUp endpoint to register the user
+                    var result = await _userService.CreateUserAsync(SignUpDTO);
+
+                    if (result.Length == 6)
+                    {
+                        return RedirectToPage("/Success");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    IsError = true;
+                    ErrorMessage = ex.Message;
+                    return RedirectToPage("/Register");
+                }
             }
                 
             IsError = true;
