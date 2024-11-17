@@ -59,6 +59,8 @@ builder.Services.AddScoped<ISmsService, SmsService>();
 
 builder.Services.AddScoped<IPdfService, PdfService>();
 
+builder.Services.AddScoped<IUserValidationService, UserValidationService>();
+
 
 
 // Retrieve the JWT key from configuration
