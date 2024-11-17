@@ -55,10 +55,9 @@
     document.querySelector("form").addEventListener("submit", function(event) {
         var password = document.getElementById("Password").value;
         var confirmPassword = document.getElementById("ConfirmPassword").value;
-        TempData.Clear();
 
         if (password !== confirmPassword) {
-            event.prevent(); 
+            event.preventDefault();
             alert("Passwords do not match. Please try again.");
         }
     });
@@ -71,3 +70,8 @@
         <strong>Error:</strong> @TempData["ErrorMessage"]
     </div>
 }
+
+
+
+
+
