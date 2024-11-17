@@ -3,7 +3,7 @@ using truckPRO_api.Models;
 
 namespace truckPRO_api.Services
 {
-    public class UserValidationService :IUserValidationService
+    public class UserValidationService : IUserValidationService
     {
         public (bool isValid, string errorMessage) Validate(SignUpDTO dto)
         {
@@ -16,7 +16,7 @@ namespace truckPRO_api.Services
             var role = (UserRole)dto.Role;
             if ((role == UserRole.Driver || role == UserRole.Manager) && !dto.CompanyId.HasValue)
                 return (false, "CompanyId is required for drivers and managers.");
-
+            Console.WriteLine("User is valid");
             return (true, string.Empty);
         }
     }
