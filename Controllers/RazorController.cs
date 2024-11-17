@@ -19,7 +19,7 @@ namespace truckapi.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return RedirectToPage("/Register");
         }
 
         [HttpGet("verify-email")]
@@ -28,11 +28,11 @@ namespace truckapi.Controllers
             return View("VerifyEmail"); 
         }
 
-        [HttpGet("signup-page")]
-        public IActionResult SignUpPage()
-        {
-            return View("Register");
-        }
+        // [HttpGet("signup-page")]
+        // public IActionResult SignUpPage()
+        // {
+        //     return View("Register");
+        // }
 
 
 
