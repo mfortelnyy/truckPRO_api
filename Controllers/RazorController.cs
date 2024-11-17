@@ -28,6 +28,14 @@ namespace truckapi.Controllers
             return View("VerifyEmail"); 
         }
 
+        [HttpGet("signup-page")]
+        public IActionResult SignUpPage()
+        {
+            return View("Register");
+        }
+
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
