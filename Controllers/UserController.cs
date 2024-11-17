@@ -109,19 +109,18 @@ namespace truckPRO_api.Controllers
                                 var firstError = modelStateEntry.Errors.FirstOrDefault()?.ErrorMessage;
                                 foreach (var error in modelStateEntry.Errors)
                                 {
-      
+
                                     string errorMessage = error.ErrorMessage;
                                     Console.WriteLine($"Error for {key}: {errorMessage}");
                                 }
                                 Console.WriteLine("I'm here");
                                 TempData["ErrorMessage"] = $"Model is not valid. Please check the input. {ModelState}";
-                                return RedirectToPage("/Register");                
+                                return RedirectToPage("/Register");
                             }
-                            
+
                         }
-                        
+
                     }
-                    return RedirectToPage("/Success");
                 }
 
                 string emailVerificarionToken = await _userService.CreateUserAsync(SignUpDTO);
