@@ -98,6 +98,8 @@ builder.Services.AddAuthorization(auth =>
             .RequireAuthenticatedUser().Build());
     });
 
+builder.Services.AddRazorPages();
+
 
 
 // Build the application
@@ -115,6 +117,9 @@ app.UseAuthorization();
 
 // Map controller endpoints
 app.MapControllers();
+
+//enable razor ages mapping
+app.MapRazorPages();
 
 // Start the application
 app.Run();

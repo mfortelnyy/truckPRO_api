@@ -25,6 +25,7 @@ namespace truckPRO_api.Services
         public async Task<string> CreateUserAsync(SignUpDTO signUpDTO)
         {
             
+            
             var userExists = await _context.User.AnyAsync(u => u.Email == signUpDTO.Email);
             var pendingDriver = await _context.PendingUser.FirstOrDefaultAsync(pd => pd.Email == signUpDTO.Email);
             if (userExists)
@@ -32,7 +33,7 @@ namespace truckPRO_api.Services
                 throw new InvalidOperationException("User already exists.");
             }
             
-            if (pendingDriver == null && signUpDTO.Role == 2)
+            if (pendingDriver == null || signUpDTO.Role == 0 || signUpDTO.Role == 1)
             {
                 throw new InvalidOperationException($"Email {signUpDTO.Email} was not added by the manager.");
             }
@@ -45,7 +46,24 @@ namespace truckPRO_api.Services
 
             User newUser = _mapper.Map<User>(signUpDTO);
             newUser.EmailVerified = false;
-            newUser.EmailVerificationToken = GenerateVerificationToken();
+            bool duplicate = true;
+            var emailCode = GenerateVerificationToken();
+            var allTokens = await _context.User.Select(x => x.EmailVerificationToken)
+                                                .Where(x=> x != null).ToListAsync();
+            //ensures token is unique 
+            while(duplicate)
+            {
+                if(allTokens.Contains(emailCode))
+                {
+                    emailCode = GenerateVerificationToken();
+                }   
+                else
+                {
+                    duplicate = false;
+                }
+            }
+            newUser.EmailVerificationToken = emailCode;
+
             //hash password from signupDTO to User for db  
             newUser.Password = _passwordHasher.HashPassword(newUser, signUpDTO.Password);
 
