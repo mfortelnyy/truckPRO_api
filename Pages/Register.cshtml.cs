@@ -10,6 +10,7 @@ namespace truckPRO_api.Pages
     {
         private readonly IUserService _userService;
         private readonly IAdminService _adminService;
+        private readonly IUserValidationService _validationService;
 
 
         [BindProperty]
@@ -20,66 +21,46 @@ namespace truckPRO_api.Pages
         public string StackTrace { get; set; } 
         public List<Company> Companies { get; set; }
 
-        public RegisterModel(IUserService userService, IAdminService adminService)
+        public RegisterModel(IUserService userService, IAdminService adminService, IUserValidationService validationService)
         {
             _userService = userService;
             _adminService = adminService;
-            
+            _validationService = validationService;
+
+
+
         }
 
         public async Task OnGetAsync()
         {
             Companies = await _adminService.GetAllComapnies();
         }
-
-        public async Task<IActionResult> OnPost()
+        public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+            var (isValid, errorMessage) = _validationService.Validate(SignUpDTO);
+            if (!isValid)
             {
                 IsError = true;
-                ErrorMessage = "Please fill out all required fields.";
-                return RedirectToPage("/Registration");
+                ErrorMessage = errorMessage;
+                return Page();
             }
-            else if (ModelState.IsValid)
+
+            try
             {
-                if (SignUpDTO.Password != SignUpDTO.ConfirmPassword)
+                var result = await _userService.CreateUserAsync(SignUpDTO);
+                if (result.Length == 6) // returns email verification code -> success
                 {
-                    IsError = true;
-                    ErrorMessage = "Passwords do not match.";
-                    return RedirectToPage("/Registration");
-                }
-
-
-                var role = (UserRole)SignUpDTO.Role;
-                if ((role == UserRole.Driver || role == UserRole.Manager) && !SignUpDTO.CompanyId.HasValue)
-                {
-                    IsError = true;
-                    ErrorMessage = "CompanyId is required for drivers.";
-                    return RedirectToPage("/Registration");
-                }
-
-                try
-                {
-                    // call the SignUp endpoint to register the user
-                    var result = await _userService.CreateUserAsync(SignUpDTO);
-
-                    if (result.Length == 6)
-                    {
-                        return RedirectToPage("/Success");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    IsError = true;
-                    ErrorMessage = ex.Message;
-                    return RedirectToPage("/Register");
+                    return RedirectToPage("/Success");
                 }
             }
-                
-            IsError = true;
-            ErrorMessage = "ERROR!";
-            return RedirectToPage("/Register");
+            catch (Exception ex)
+            {
+                IsError = true;
+                ErrorMessage = ex.Message;
+            }
 
+            return Page();
         }
+
     }
 }
