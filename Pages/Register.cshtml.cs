@@ -38,7 +38,7 @@ namespace truckPRO_api.Pages
             {
                 IsError = true;
                 ErrorMessage = "Please fill out all required fields.";
-                return RedirectToPage("/Success"); 
+                return RedirectToPage("/Registration"); 
             }
             else if(ModelState.IsValid)
             {
@@ -46,7 +46,7 @@ namespace truckPRO_api.Pages
                 {
                     IsError = true;
                     ErrorMessage = "Passwords do not match.";
-                    return RedirectToPage("/Success"); 
+                    return RedirectToPage("/Registration"); 
                 }
             }
   
@@ -55,7 +55,7 @@ namespace truckPRO_api.Pages
             {
                 IsError = true;
                 ErrorMessage = "CompanyId is required for drivers.";
-                return Page();
+                return RedirectToPage("/Registration");
             }
             
             try{
