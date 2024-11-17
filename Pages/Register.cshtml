@@ -1,0 +1,73 @@
+@page
+@using truckPRO_api.Pages
+@model RegisterModel
+@{
+    ViewData["Title"] = "Sign Up";
+}
+
+<h2>Driver Registration</h2>
+
+<form method="post" action="/sign-up-from-page">
+    <div class="form-group">
+        <label for="FirstName">First Name</label>
+        <input type="text" id="FirstName" name="FirstName" class="form-control" value="@Model.SignUpDTO.FirstName" required />
+    </div>
+    <div class="form-group">
+        <label for="LastName">Last Name</label>
+        <input type="text" id="LastName" name="LastName" class="form-control" value="@Model.SignUpDTO.LastName" required />
+    </div>
+    <div class="form-group">
+        <label for="Email">Email</label>
+        <input type="email" id="Email" name="Email" class="form-control" value="@Model.SignUpDTO.Email" required />
+    </div>
+    <div class="form-group">
+        <label for="Phone">Phone Number</label>
+        <input type="text" id="Phone" name="Phone" class="form-control" value="@Model.SignUpDTO.Phone" required />
+    </div>
+    <div class="form-group">
+        <label for="Password">Password</label>
+        <input type="password" id="Password" name="Password" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="ConfirmPassword">Confirm Password</label>
+        <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="Role">Role</label>
+        <select id="Role" name="Role" class="form-control" required>
+            <option value="2" @(Model.SignUpDTO.Role == 2 ? "selected" : "")>Driver</option>
+            <option value="1" @(Model.SignUpDTO.Role == 3 ? "selected" : "")>Manager</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="CompanyId">Select Company</label>
+        <select id="CompanyId" name="CompanyId" class="form-control">
+            @foreach (var company in Model.Companies)
+            {
+                <option value="@company.Id" @(Model.SignUpDTO.CompanyId == company.Id ? "selected" : "")>@company.Name</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Sign Up</button>
+</form>
+
+<script>
+    document.querySelector("form").addEventListener("submit", function(event) {
+        var password = document.getElementById("Password").value;
+        var confirmPassword = document.getElementById("ConfirmPassword").value;
+        TempData.Clear();
+
+        if (password !== confirmPassword) {
+            event.prevent(); 
+            alert("Passwords do not match. Please try again.");
+        }
+    });
+</script>
+
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger mt-3">
+        <strong>Error:</strong> @TempData["ErrorMessage"]
+    </div>
+}
