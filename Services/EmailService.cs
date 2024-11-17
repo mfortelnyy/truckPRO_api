@@ -12,7 +12,7 @@ namespace truckPRO_api.Services
     {
         private readonly IConfiguration _configuration;
         private readonly string logoUrl = "https://truckphotos.s3.us-east-2.amazonaws.com/email_logo.png";
-        private readonly string fromAddress = "TruckPro <no_reply>";
+        private readonly string fromAddress = "do_not_reply@truckcheck.org";
 
 
 
