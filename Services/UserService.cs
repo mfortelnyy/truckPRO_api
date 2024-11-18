@@ -33,12 +33,12 @@ namespace truckPRO_api.Services
                 throw new InvalidOperationException("User already exists.");
             }
             
-            if (pendingDriver == null || signUpDTO.Role == 0 || signUpDTO.Role == 1)
+            else if (pendingDriver == null || signUpDTO.Role == 0 || signUpDTO.Role == 1)
             {
                 throw new InvalidOperationException($"Email {signUpDTO.Email} was not added by the manager.");
             }
 
-            if(signUpDTO.CompanyId != pendingDriver!.CompanyId)
+            else if(signUpDTO.CompanyId != pendingDriver!.CompanyId)
             {
                 throw new InvalidOperationException("Company Id does not match with the one provided by the manager.");
             }
