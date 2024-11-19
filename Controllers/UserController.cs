@@ -78,50 +78,37 @@ namespace truckPRO_api.Controllers
         [Route("sign-up-from-page")]
         public async Task<IActionResult> SignUpFromPage([FromForm] SignUpDTO SignUpDTO)//accepts model from form
         {
-            if(SignUpDTO.Password != SignUpDTO.ConfirmPassword)
-            {
-                TempData["ErrorMessage"] = "Passwords do not match.";
-                return RedirectToPage("/Register");
-            }
             try
             {
                 var role = (UserRole)SignUpDTO.Role;
-                if ((role == UserRole.Driver || role == UserRole.Manager) && !SignUpDTO.CompanyId.HasValue)
-                {
-                    TempData["ErrorMessage"] = "CompanyId is required for drivers.";
-                    return RedirectToPage("/Register");                
-                }
+                
 
-                if (role != UserRole.Admin && role != UserRole.Manager)
+                //if model is not valid then the request is bad - 400
+                if (!ModelState.IsValid)
                 {
-                    Console.WriteLine($"I'm here {ModelState.IsValid}");
-
-                    //if model is not valid then the request is bad - 400
-                    if (!ModelState.IsValid)
+                    TempData["ErrorMessage"] = "Model is not valid. Please check the input.";
+                    foreach (var key in ModelState.Keys)
                     {
-                        TempData["ErrorMessage"] = "Model is not valid. Please check the input.";
-                        foreach (var key in ModelState.Keys)
+                        // check if there are any errors for this field
+                        var modelStateEntry = ModelState[key];
+                        if (modelStateEntry?.Errors != null && modelStateEntry.Errors.Any())
                         {
-                            // check if there are any errors for this field
-                            var modelStateEntry = ModelState[key];
-                            if (modelStateEntry?.Errors != null && modelStateEntry.Errors.Any())
+                            var firstError = modelStateEntry.Errors.FirstOrDefault()?.ErrorMessage;
+                            foreach (var error in modelStateEntry.Errors)
                             {
-                                var firstError = modelStateEntry.Errors.FirstOrDefault()?.ErrorMessage;
-                                foreach (var error in modelStateEntry.Errors)
-                                {
 
-                                    string errorMessage = error.ErrorMessage;
-                                    Console.WriteLine($"Error for {key}: {errorMessage}");
-                                }
-                                Console.WriteLine("I'm here");
-                                TempData["ErrorMessage"] = $"Model is not valid. Please check the input. {ModelState}";
-                                return RedirectToPage("/Register");
+                                string errorMessage = error.ErrorMessage;
+                                Console.WriteLine($"Error for {key}: {errorMessage}");
                             }
-
+                            Console.WriteLine("I'm here");
+                            TempData["ErrorMessage"] = $"Model is not valid. Please check the input. {ModelState}";
+                            return RedirectToPage("/Register");
                         }
 
                     }
+
                 }
+            
 
                 string emailVerificarionToken = await _userService.CreateUserAsync(SignUpDTO);
                 await _emailService.ReSendVerification(receiverEmail: SignUpDTO.Email, emailVerificarionToken);
