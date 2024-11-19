@@ -8,18 +8,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace truckPRO_api.Services
 {
-    public class EmailService : IEmailService
+    public class EmailService(IConfiguration configuration) : IEmailService
     {
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration = configuration;
         private readonly string logoUrl = "https://truckphotos.s3.us-east-2.amazonaws.com/email_logo.png";
         private readonly string fromAddress = "do_not_reply@truckcheck.org";
-
-
-
-        public EmailService(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
 
         public async Task<bool> SendWelcomeEmailAsync(string receiverEmail)
         {
