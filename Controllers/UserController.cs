@@ -96,7 +96,6 @@ namespace truckPRO_api.Controllers
                             var firstError = modelStateEntry.Errors.FirstOrDefault()?.ErrorMessage;
                             foreach (var error in modelStateEntry.Errors)
                             {
-
                                 string errorMessage = error.ErrorMessage;
                                 Console.WriteLine($"Error for {key}: {errorMessage}");
                             }
