@@ -123,5 +123,8 @@ app.MapControllers();
 //enable razor ages mapping
 app.MapRazorPages();
 
+//to enable Assets folder
+app.UseStaticFiles();
+
 // Start the application
 app.Run();
