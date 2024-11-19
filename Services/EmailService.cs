@@ -48,7 +48,7 @@ namespace truckPRO_api.Services
                             </table>
                             <p>Dear Driver,</p>
                             <p>Welcome to TruckPro! Please complete your registration using the link below:</p>
-                            <a href=''>Register Here</a>
+                            <a href='https://truckcheck.org:443/Register'>Register Here</a>
                             <p>Best regards,<br/>The TruckPro Team</p>
                         </div>
                     </body>
