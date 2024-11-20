@@ -38,7 +38,7 @@ namespace truckPRO_api.Services
                 .Body($@"
                     <html>
                     <body>
-                        <div style='max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
+                        <div style='max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; font-family: Arial, sans-serif;'>
                             <table width='100%'>
                                 <tr>
                                     <td style='text-align: center;'>
@@ -46,15 +46,20 @@ namespace truckPRO_api.Services
                                     </td>
                                 </tr>
                             </table>
-                            <p>Dear Driver,</p>
-                            <p>Welcome to TruckPro! Please complete your registration using the link below:</p>
-                            <a href='https://truckcheck.org:443/Register'>Register Here</a>
-                            <p>Best regards,<br/>The TruckPro Team</p>
+                            <p style='font-size: 16px; color: #333;'>Dear Driver,</p>
+                            <p style='font-size: 16px; color: #333;'>Welcome to TruckPro! Please complete your registration using the link below:</p>
+                            <div style='text-align: center; margin: 20px 0;'>
+                                <a href='https://truckcheck.org:443/Register'
+                                style='display: inline-block; background-color: #FF6600; color: white; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; font-weight: bold;'>
+                                    Register Here
+                                </a>
+                            </div>
+                            <p style='font-size: 16px; color: #333;'>Best regards,<br/>The TruckPro Team</p>
                         </div>
                     </body>
                     </html>", isHtml: true)
                 .SendAsync();
-
+                
             return email.Successful;
         }
 
