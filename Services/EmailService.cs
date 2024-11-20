@@ -59,7 +59,7 @@ namespace truckPRO_api.Services
                     </body>
                     </html>", isHtml: true)
                 .SendAsync();
-                
+
             return email.Successful;
         }
 
@@ -98,13 +98,18 @@ namespace truckPRO_api.Services
                             <p>Welcome to TruckPro! To complete your registration, please enter the verification code below:</p>
                             <h1 style='background-color: #f2f2f2; padding: 10px; text-align: center; border-radius: 4px; color: #333;'>{verificationCode}</h1>
                             <p>Please verify your email using the link below:</p>
-                            <a href='https://truckcheck.org:443/verify-email'>Verify</a>
+                            <div style='text-align: center; margin: 20px 0;'>
+                                <a href='https://truckcheck.org:443/verify-email'
+                                style='display: inline-block; background-color: #FF6600; color: white; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; font-weight: bold;'>
+                                    Verify Email
+                                </a>
+                            </div>
                             <p>If you did not request this code, please ignore this email.</p>
                             <p style='color: #888;'>Best regards,<br/>The TruckPro Team</p>
                             <hr style='border: none; border-top: 1px solid #e0e0e0; margin-top: 20px;'/>
                             <p style='font-size: 12px; color: #999; text-align: center;'>
                                 TruckPro Inc.<br/>
-                                 <br/>
+                                <br/>
                                 <a href='mailto:support@truckpro.com' style='color: #999;'>support@truckpro.com</a>
                             </p>
                         </div>
@@ -112,7 +117,8 @@ namespace truckPRO_api.Services
                     </html>", isHtml: true)
                 .SendAsync();
 
-        return email.Successful;
+
+            return email.Successful;
         }
 
         public async Task<bool> SendTemporaryPassword(string receiverEmail, string temporaryPassword)
