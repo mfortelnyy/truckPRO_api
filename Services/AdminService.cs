@@ -18,20 +18,14 @@ namespace truckPRO_api.Services
             
             
             var userExists = await context.User.AnyAsync(u => u.Email == signUpDTO.Email);
-            var pendingDriver = await context.PendingUser.FirstOrDefaultAsync(pd => pd.Email == signUpDTO.Email);
             if (userExists)
             {
                 throw new InvalidOperationException("User already exists.");
             }
             
-            else if (pendingDriver == null || signUpDTO.Role == 0 || signUpDTO.Role == 1)
+            else if (signUpDTO.Role == 0 || signUpDTO.Role == 2)
             {
-                throw new InvalidOperationException($"Email {signUpDTO.Email} was not added by the manager.");
-            }
-
-            else if(signUpDTO.CompanyId != pendingDriver!.CompanyId)
-            {
-                throw new InvalidOperationException("Company Id does not match with the one provided by the manager.");
+                throw new InvalidOperationException($"Wrong {signUpDTO.Email} Role!");
             }
             
 
