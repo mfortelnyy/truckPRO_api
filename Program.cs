@@ -103,7 +103,8 @@ builder.Services.AddAuthorization(auth =>
 
 builder.Services.AddRazorPages();
 
-
+//register signalR for real-time communication with DI
+builder.Services.AddSignalR();
 
 // Build the application
 var app = builder.Build();
