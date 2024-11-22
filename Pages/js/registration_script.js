@@ -13,7 +13,7 @@ document.querySelector("form").addEventListener("submit", function (event) {
         //add delay to simulate submission
         setTimeout(function() {
             event.target.submit();
-        }, 2000);
+        }, 2000); 
 
         event.preventDefault();
     }
