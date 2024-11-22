@@ -9,6 +9,7 @@ namespace truckPRO_api.Controllers
 {
     public class AdminController(IAdminService adminService, IUserService userService) : Controller
     {
+
         [HttpPost]
         [Route("signUpManager")]
         [Authorize(Roles = "Admin")]
@@ -25,10 +26,17 @@ namespace truckPRO_api.Controllers
             {
                 return BadRequest(new { message = ModelState});
             }
-
-            string result = await adminService.CreateManager(SignUpDTO);
-            if (result != null && result.Length == 6) return Ok(new { message = $"{result}" });
-            return BadRequest(new { message = "Error creating manager!"});
+            
+            try
+            {
+                string result = await adminService.CreateManager(SignUpDTO);
+                if (result != null && result.Length == 6) return Ok(new { message = $"{result}" });
+                return BadRequest(new { message = "Error creating manager!"});
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet]
