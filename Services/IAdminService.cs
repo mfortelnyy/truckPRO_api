@@ -15,6 +15,9 @@ namespace truckPRO_api.Services
         public Task<bool> DeleteCompany(int companyId);
         public Task<bool> DeleteManager(int userId);
 
+        public Task<string> CreateManager(SignUpDTO signUpDTO);
+
+
        
     }
 }
