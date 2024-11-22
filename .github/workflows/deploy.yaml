@@ -21,7 +21,7 @@ jobs:
           port: ${{ secrets.PORT }}
           command_timeout: 30m            
           script: |
-                    C:\Users\Administrator\Documents\truckProRepo\truckPRO_api\deploy.bat
+                    C:\Users\Administrator\Documents\truckProRepo\deploy_script\deploy.bat
   
                     # Check if the bat file ran successfully
   check:
