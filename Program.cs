@@ -9,6 +9,7 @@ using truckPRO_api.MappingProfiles;
 using truckPRO_api.Models;
 using truckPRO_api.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -125,6 +126,13 @@ app.MapRazorPages();
 
 //to enable Assets folder
 app.UseStaticFiles();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Pages")),
+    RequestPath = "/pages"
+});
+
 
 // Start the application
 app.Run();
