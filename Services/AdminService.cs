@@ -1,12 +1,71 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using truckPRO_api.Data;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
 
 namespace truckPRO_api.Services
 {
-    public class AdminService(ApplicationDbContext context) : IAdminService
+    public class AdminService(ApplicationDbContext context, IMapper mapper, IPasswordHasher<User> passwordHasher, IConfiguration configuration) : IAdminService
     {
+        private readonly IMapper _mapper = mapper;
+        private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
+        private readonly IConfiguration _config = configuration;
+        public async Task<string> CreateManager(SignUpDTO signUpDTO)
+        {
+            
+            
+            var userExists = await context.User.AnyAsync(u => u.Email == signUpDTO.Email);
+            var pendingDriver = await context.PendingUser.FirstOrDefaultAsync(pd => pd.Email == signUpDTO.Email);
+            if (userExists)
+            {
+                throw new InvalidOperationException("User already exists.");
+            }
+            
+            else if (pendingDriver == null || signUpDTO.Role == 0 || signUpDTO.Role == 1)
+            {
+                throw new InvalidOperationException($"Email {signUpDTO.Email} was not added by the manager.");
+            }
+
+            else if(signUpDTO.CompanyId != pendingDriver!.CompanyId)
+            {
+                throw new InvalidOperationException("Company Id does not match with the one provided by the manager.");
+            }
+            
+
+            User newUser = mapper.Map<User>(signUpDTO);
+            newUser.EmailVerified = false;
+            bool duplicate = true;
+            var emailCode = UserService.GenerateVerificationToken();
+            var allTokens = await context.User.Select(x => x.EmailVerificationToken)
+                                                .Where(x=> x != null).ToListAsync();
+
+            //ensures token is unique 
+            while(duplicate)
+            {
+                if(allTokens.Contains(emailCode))
+                {
+                    emailCode = UserService.GenerateVerificationToken();
+                }   
+                else
+                {
+                    duplicate = false;
+                }
+            }
+            newUser.EmailVerificationToken = emailCode;
+
+            //hash password from signupDTO to User for db  
+            newUser.Password = _passwordHasher.HashPassword(newUser, signUpDTO.Password);
+
+            await context.User.AddAsync(newUser);
+            await context.SaveChangesAsync();
+            return newUser.EmailVerificationToken; 
+                
+        }
+      
+
         public async Task<List<Company>> GetAllComapnies()
         {
             var companies = context.Company.ToList() ?? throw new InvalidOperationException("No company could be found!");
