@@ -29,9 +29,47 @@
             </div>
         }
 
-        <form method="post" action="/sign-up-from-page">
-            <!-- Form Fields -->
-            ...
+         <form method="post" action="/sign-up-from-page">
+            <div class="form-group mb-3">
+                <label for="FirstName" class="form-label">First Name</label>
+                <input type="text" id="FirstName" name="FirstName" class="form-control" value="@Model.SignUpDTO.FirstName" required />
+            </div>
+            <div class="form-group mb-3">
+                <label for="LastName" class="form-label">Last Name</label>
+                <input type="text" id="LastName" name="LastName" class="form-control" value="@Model.SignUpDTO.LastName" required />
+            </div>
+            <div class="form-group mb-3">
+                <label for="Email" class="form-label">Email</label>
+                <input type="email" id="Email" name="Email" class="form-control" value="@Model.SignUpDTO.Email" required />
+            </div>
+            <div class="form-group mb-3">
+                <label for="Phone" class="form-label">Phone Number</label>
+                <input type="text" id="Phone" name="Phone" class="form-control" value="@Model.SignUpDTO.Phone" required />
+            </div>
+            <div class="form-group mb-3">
+                <label for="Password" class="form-label">Password</label>
+                <input type="password" id="Password" name="Password" class="form-control" required />
+            </div>
+            <div class="form-group mb-3">
+                <label for="ConfirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control" required />
+            </div>
+            <div class="form-group mb-3">
+                <label for="Role" class="form-label">Role</label>
+                <select id="Role" name="Role" class="form-select" required>
+                    <option value="2" @(Model.SignUpDTO.Role == 2 ? "selected" : "")>Driver</option>
+                    <option value="1" @(Model.SignUpDTO.Role == 3 ? "selected" : "")>Manager</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="CompanyId" class="form-label">Select Company</label>
+                <select id="CompanyId" name="CompanyId" class="form-select">
+                    @foreach (var company in Model.Companies)
+                    {
+                        <option value="@company.Id" @(Model.SignUpDTO.CompanyId == company.Id ? "selected" : "")>@company.Name</option>
+                    }
+                </select>
+            </div>
             <button type="submit" class="btn">Sign Up</button>
         </form>
     </div>
