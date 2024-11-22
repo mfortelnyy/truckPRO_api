@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Graph.Education.Classes.Item.Assignments.Item.Submissions.Item.Return;
 using Newtonsoft.Json;
 using System.Security.Claims;
 using truckapi.Models;
+using truckPro_api.Hubs;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
 using truckPRO_api.Services;
@@ -11,17 +14,18 @@ using truckPRO_api.Services;
 namespace truckPRO_api.Controllers
 {
     [ApiController]
-    public class LogEntryController(S3Service s3Service, ILogEntryService logEntryService) : ControllerBase
+    public class LogEntryController(S3Service s3Service, ILogEntryService logEntryService, IHubContext<LogHub> hubContext) : ControllerBase
     {
         private readonly S3Service _s3Service = s3Service;
         private readonly ILogEntryService _logEntryService = logEntryService;
+        private readonly IHubContext<LogHub> _hubContext = hubContext;
 
 
 
         //test endpoint
         [HttpPost]
-        [Route("uploadPhoto")]
-        [Authorize(Roles = "Driver")]
+        [Route("uploadProfilePic")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UploadPhoto([FromForm] IFormFile image)
         {
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
@@ -44,8 +48,8 @@ namespace truckPRO_api.Controllers
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> UploadPhotos([FromForm] List<IFormFile> images)
         {
-            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-
+           var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+           
             List<string> imageUrls = await _s3Service.UploadPhotos(images, []);
             if (imageUrls.Count == 0)
             {
@@ -101,32 +105,33 @@ namespace truckPRO_api.Controllers
         }
 
 
-
-
-
-
-
-  /*      [HttpPost]
+        [HttpPost]
         [Route("createDrivingLog")]
         [Authorize(Roles = "Driver")]
-        public async Task<IActionResult> CreateDrivingLog([FromForm] List<IFormFile> images, [FromForm] String promptImages)
+        public async Task<IActionResult> CreateDrivingLog([FromForm] List<IFormFile> images, [FromForm] string promptImages)
         {
-            string res = "";
+            string? companyId = User.FindFirst("companyId")?.Value;
+
+            if (string.IsNullOrEmpty(companyId))
+            {
+                return Conflict("Company ID not found in the token.");
+            }
+            int companyIdInt = int.Parse(companyId);
+
             try
             {
-                var imageInfoList = JsonConvert.DeserializeObject<List<PromptImage>>(promptImages) ?? throw new Exception("Wrong format!");
-       
+                string res = "";
                 var userId = User.FindFirst("userId").Value;
-                
+                // Deserialize the promptImages JSON string into a List of PromptImage objects
+                var promptImagesList = JsonConvert.DeserializeObject<List<PromptImage>>(promptImages);
+                Console.WriteLine(promptImages);
+                // Upload the images and get their URLs
+                List<string> imageUrls = await _s3Service.UploadPhotos(images, promptImagesList);
+                // foreach (var item in imageUrls)
+                // {
+                //     Console.WriteLine(item);
+                // }
 
-                //Console.WriteLine($"userId :   {userId}");
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User ID not found in the token.");
-                }
-
-                List<string> imageUrls = await _s3Service.UploadPhotos(images, imageInfoList);
                 if (imageUrls.Count == 0)
                 {
                     return Conflict("Image upload failed");
@@ -146,6 +151,50 @@ namespace truckPRO_api.Controllers
 
                 res = await _logEntryService.CreateDrivingLog(logEntry);
                 
+                await _hubContext.Clients.Group(companyId).SendAsync("ReceiveNewLog", logEntry.StartTime);
+
+                // Return success with the uploaded URLs
+                return Ok($"Driving log with id {res} was added");
+                
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+
+            catch (Exception ex)
+            {
+                // Log the error and return a bad request
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Route("createOffDutyLog")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> CreateOffDutyLog()
+        {
+            try
+            {
+                var userId = User.FindFirst("userId").Value;
+
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+                LogEntry logEntry = new()
+                {
+                    UserId = int.Parse(userId),
+                    StartTime = DateTime.Now,
+                    EndTime = null,
+                    LogEntryType = LogEntryType.OffDuty,
+                    ImageUrls = null,
+                };
+
+                var res = await _logEntryService.CreateOffDutyLog(logEntry);
+                return Ok($"Off Duty log with id {res} was added");
             }
             catch (InvalidOperationException ex)
             {
@@ -155,98 +204,7 @@ namespace truckPRO_api.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
-            return Ok($"DrivingLogEntry with id {res} was added");
         }
-
-*/
-        [HttpPost]
-        [Route("createDrivingLog")]
-        [Authorize(Roles = "Driver")]
-public async Task<IActionResult> CreateDrivingLog([FromForm] List<IFormFile> images, [FromForm] string promptImages)
-{
-    try
-    {
-        string res = "";
-        var userId = User.FindFirst("userId").Value;
-        // Deserialize the promptImages JSON string into a List of PromptImage objects
-        var promptImagesList = JsonConvert.DeserializeObject<List<PromptImage>>(promptImages);
-        Console.WriteLine(promptImages);
-        // Upload the images and get their URLs
-        List<string> imageUrls = await _s3Service.UploadPhotos(images, promptImagesList);
-        foreach (var item in imageUrls)
-        {
-            Console.WriteLine(item);
-        }
-        if (imageUrls.Count == 0)
-        {
-            return Conflict("Image upload failed");
-        }
-
-        // Validate and process the driving log entry
-
-        LogEntry logEntry = new()
-        {
-            UserId = int.Parse(userId),
-            StartTime = DateTime.Now,
-            EndTime = null,
-            LogEntryType = LogEntryType.Driving,
-            ImageUrls = imageUrls,
-
-        };
-
-        res = await _logEntryService.CreateDrivingLog(logEntry);
-        // Return success with the uploaded URLs
-        return Ok($"Off Duty log with id {res} was added");
-        
-    }
-    catch (InvalidOperationException ex)
-    {
-        return Conflict(ex.Message);
-    }
-
-    catch (Exception ex)
-    {
-        // Log the error and return a bad request
-        return BadRequest(new { message = ex.Message });
-    }
-}
-
-    [HttpPost]
-    [Route("createOffDutyLog")]
-    [Authorize(Roles = "Driver")]
-    public async Task<IActionResult> CreateOffDutyLog()
-    {
-        try
-        {
-            var userId = User.FindFirst("userId").Value;
-
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized("User ID not found in the token.");
-            }
-
-            LogEntry logEntry = new()
-            {
-                UserId = int.Parse(userId),
-                StartTime = DateTime.Now,
-                EndTime = null,
-                LogEntryType = LogEntryType.OffDuty,
-                ImageUrls = null,
-            };
-
-            var res = await _logEntryService.CreateOffDutyLog(logEntry);
-            return Ok($"Off Duty log with id {res} was added");
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-        }
-    }
 
 
         [HttpPost]
