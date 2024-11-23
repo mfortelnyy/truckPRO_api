@@ -274,5 +274,26 @@ namespace truckPRO_api.Controllers
             });
         }
 
+        [HttpPost("UpdateDeviceToken")]
+        [Authorize(Roles = "Admin, Manager, Driver")]
+        public async Task<IActionResult> UpdateDeviceToken([FromBody] string deviceToken)
+        {
+
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
+            if(userId == null) return NotFound();
+            var res = await _userService.UpdateDeviceToken(int.Parse(userId), deviceToken);
+            if(res.Length >1)
+            {
+                return Ok(new
+                {
+                    Message = res,
+                });
+            }
+            return BadRequest(new
+            {
+                Message = "Can not Update token",
+            });
+        }
+
     }
 }
