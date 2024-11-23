@@ -32,6 +32,9 @@ namespace truckPRO_api.Models
         [ForeignKey("CompanyId")]
         public int? CompanyId { get; set; }
 
+        [MinLength(3)]
+        public string FcmDeviceToken{ get; set; }
+
         public Company Company { get; set; }
 
         public bool EmailVerified { get; set; }
