@@ -234,5 +234,23 @@ namespace truckPRO_api.Services
             return _mapper.Map<UserDTO>(user);
             
         }
+
+        public async Task<string> UpdateDeviceToken(int userId, string fcmDeviceToken)
+        {
+            var user = _context.User.Where(u => u.Id == userId).FirstOrDefault() ?? throw new InvalidOperationException("No user found!");
+            user.FcmDeviceToken = fcmDeviceToken;
+            var res = await _context.SaveChangesAsync();
+            if(res == 0)
+            {
+                throw new InvalidOperationException("No user found!");
+            }
+            return "Successfully Update Device Token!";
+        }
+
+        public Task<List<string>> GetManagerFcmTokensAsync(int companyId)
+        {
+            var res = _context.User.Where(u => u.CompanyId == companyId && u.Role == UserRole.Manager).Select(u => u.FcmDeviceToken).Where(f => f != null).ToListAsync() ?? throw new InvalidOperationException("No Managers Signed in!");
+            return res;
+        }
     }
 }
