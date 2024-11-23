@@ -11,7 +11,9 @@ namespace truckPRO_api.Services
         Task<string> UpdatePassword(int driverId, string oldPassword, string newPassword);
         Task<string> ForgetPassword(String email);
         Task<UserDTO> GetUserById(int userId);
-        Task<String> SaveNewVerificationCode(int userId);
+        Task<string> SaveNewVerificationCode(int userId);
+        Task<string> UpdateDeviceToken(int userId, string fcmDeviceToken);
+        Task<List<string>> GetManagerFcmTokensAsync(int companyId);
         
     }
 }
