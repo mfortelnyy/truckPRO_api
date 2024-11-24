@@ -17,13 +17,14 @@ using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var firebaseCredentialsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CredentialsFirebase", "credentials.json");
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", @"<PATH_TO_CREDENTIALS_FILE");
 
-if (!File.Exists(firebaseCredentialsPath))
+
+var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+if (string.IsNullOrEmpty(firebaseCredentialsPath))
 {
-    throw new Exception("Firebase credentials file not found.");
+    throw new Exception("Firebase credentials file path is not set in environment variables.");
 }
-
 FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.FromFile(firebaseCredentialsPath)
