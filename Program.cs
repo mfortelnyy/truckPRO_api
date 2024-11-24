@@ -28,7 +28,6 @@ FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.FromFile(firebaseCredentialsPath)
 });
-Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
 
 // Add console logging
 builder.Logging.AddConsole();
@@ -90,6 +89,8 @@ if (string.IsNullOrEmpty(jwtKey))
 else if (!string.IsNullOrEmpty(jwtKey))
 {
     Console.WriteLine("Succ key parsed");
+    Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
+
 }
 
 // Add JWT Authentication
@@ -143,13 +144,13 @@ app.MapControllers();
 app.MapRazorPages();
 
 //to enable Assets folder
-app.UseStaticFiles();
+// app.UseStaticFiles();
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Pages")),
-    RequestPath = "/pages"
-});
+// app.UseStaticFiles(new StaticFileOptions
+// {
+//     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Pages")),
+//     RequestPath = "/pages"
+// });
 
 app.MapHub<LogHub>("/logHub");
 
