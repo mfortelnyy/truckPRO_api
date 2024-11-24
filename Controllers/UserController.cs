@@ -276,8 +276,9 @@ namespace truckPRO_api.Controllers
 
         [HttpPost("UpdateDeviceToken")]
         [Authorize(Roles = "Admin, Manager, Driver")]
-        public async Task<IActionResult> UpdateDeviceToken([FromBody] string deviceToken)
-        {
+        public async Task<IActionResult> UpdateDeviceToken([FromForm] string deviceToken)
+        {   
+            Console.WriteLine($"device token: {deviceToken}");  
 
             var userId = User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
             if(userId == null) return NotFound();
