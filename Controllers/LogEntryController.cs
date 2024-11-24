@@ -151,10 +151,7 @@ namespace truckPRO_api.Controllers
 
                 res = await _logEntryService.CreateDrivingLog(logEntry);
                 
-                await _hubContext.Clients.Group(companyId).SendAsync("ReceiveNewLog", logEntry.StartTime);
-                var logHub = _hubContext.Clients.Group(companyId.ToString()) as LogHub;
-                await logHub!.NotifyManagers(int.Parse(companyId), $"log by user id {logEntry.UserId} at {logEntry.StartTime}");
-
+                await _hubContext.Clients.Group(companyId.ToString()).SendAsync("ReceiveNotification", $"Log by user id {logEntry.UserId} at {logEntry.StartTime}");
 
 
                 // Return success with the uploaded URLs
