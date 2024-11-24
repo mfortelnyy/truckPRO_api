@@ -28,6 +28,7 @@ FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.FromFile(firebaseCredentialsPath)
 });
+Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
 
 // Add console logging
 builder.Logging.AddConsole();
