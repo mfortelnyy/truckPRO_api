@@ -10,6 +10,7 @@ using truckPRO_api.Models;
 using truckPRO_api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using truckPro_api.Hubs;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +62,7 @@ builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 
 builder.Services.AddScoped<IUserValidationService, UserValidationService>();
+builder.Services.AddSignalR();
 
 
 
@@ -133,6 +135,9 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Pages")),
     RequestPath = "/pages"
 });
+
+app.MapHub<LogHub>("/logHub");
+
 
 
 // Start the application
