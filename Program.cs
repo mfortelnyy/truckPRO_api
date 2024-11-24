@@ -11,9 +11,23 @@ using truckPRO_api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using truckPro_api.Hubs;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+var firebaseCredentialsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CredentialsFirebase", "credentials.json");
+
+if (!File.Exists(firebaseCredentialsPath))
+{
+    throw new Exception("Firebase credentials file not found.");
+}
+
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile(firebaseCredentialsPath)
+});
 
 // Add console logging
 builder.Logging.AddConsole();
