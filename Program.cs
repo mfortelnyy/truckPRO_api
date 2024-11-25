@@ -20,22 +20,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Add console logging
 builder.Logging.AddConsole();
 
-var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-if (string.IsNullOrEmpty(firebaseCredentialsPath))
-{
-    Console.WriteLine("Firebase credentials path not found in environment variables.");
-    throw new Exception("Firebase credentials path not found in environment variables.");
-}
+// var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+// if (string.IsNullOrEmpty(firebaseCredentialsPath))
+// {
+//     Console.WriteLine("Firebase credentials path not found in environment variables.");
+//     throw new Exception("Firebase credentials path not found in environment variables.");
+// }
 
-var creds = false;
-if(firebaseCredentialsPath != null)
-{
-    creds = true;
-}
-FirebaseApp.Create(new AppOptions()
-{
-    Credential = GoogleCredential.FromFile(firebaseCredentialsPath)
-});
+// var creds = false;
+// if(firebaseCredentialsPath != null)
+// {
+//     creds = true;
+// }
+// FirebaseApp.Create(new AppOptions()
+// {
+//     Credential = GoogleCredential.FromFile(firebaseCredentialsPath)
+// });
 
 
 //Add Razor pages
@@ -51,8 +51,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-// Add Swagger for API documentation
-builder.Services.AddEndpointsApiExplorer();
 
 // Add and register AutoMapper service
 builder.Services.AddAutoMapper(typeof(DriverMappingProfilecs));
@@ -94,10 +92,8 @@ if (string.IsNullOrEmpty(jwtKey))
 }
 else if (!string.IsNullOrEmpty(jwtKey))
 {
-    Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath} and cred: {creds}");
+    //Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath} and cred: {creds}");
     Console.WriteLine("Succ key parsed");
-    Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
-
 }
 
 // Add JWT Authentication
