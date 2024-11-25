@@ -11,32 +11,12 @@ using truckPRO_api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using truckPro_api.Hubs;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add console logging
 builder.Logging.AddConsole();
-
-// var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-// if (string.IsNullOrEmpty(firebaseCredentialsPath))
-// {
-//     Console.WriteLine("Firebase credentials path not found in environment variables.");
-//     throw new Exception("Firebase credentials path not found in environment variables.");
-// }
-
-// var creds = false;
-// if(firebaseCredentialsPath != null)
-// {
-//     creds = true;
-// }
-// FirebaseApp.Create(new AppOptions()
-// {
-//     Credential = GoogleCredential.FromFile(firebaseCredentialsPath)
-// });
-
 
 //Add Razor pages
 builder.Services.AddControllersWithViews();
@@ -92,7 +72,6 @@ if (string.IsNullOrEmpty(jwtKey))
 }
 else if (!string.IsNullOrEmpty(jwtKey))
 {
-    //Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath} and cred: {creds}");
     Console.WriteLine("Succ key parsed");
 }
 
@@ -121,15 +100,6 @@ builder.Services.AddAuthorization(auth =>
             .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
             .RequireAuthenticatedUser().Build());
     });
-
-//session for firebase
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
 
 builder.Services.AddRazorPages();
 
@@ -165,9 +135,6 @@ app.MapRazorPages();
 // });
 
 app.MapHub<LogHub>("/logHub");
-
-app.UseSession();
-
 
 // Start the application
 app.Run();
