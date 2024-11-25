@@ -1,15 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using truckPro_api.Hubs;
 
 namespace truckPRO_api.Controllers
 {
-    [Route("test")]
+    [Route("qwerty")]
     [ApiController]
-    public class TestController : ControllerBase
+    public class TestController(IHubContext<LogHub> hubContext) : ControllerBase
     {
+        private readonly IHubContext<LogHub> _hubContext = hubContext;
+
         [HttpGet("validate-token")]
         public IActionResult ValidateToken()
         {
@@ -32,6 +36,8 @@ namespace truckPRO_api.Controllers
                 return Unauthorized("Token is invalid");
             }
         }
+
+        
 
         [HttpGet("driver-data")]
         [Authorize(Roles = "Driver")] // Requires JWT and the "Driver" role

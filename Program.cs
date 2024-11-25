@@ -17,12 +17,16 @@ using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add console logging
+builder.Logging.AddConsole();
 
 var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
 if (string.IsNullOrEmpty(firebaseCredentialsPath))
 {
     Console.WriteLine("Firebase credentials path not found in environment variables.");
+    throw new Exception("Firebase credentials path not found in environment variables.");
 }
+
 var creds = false;
 if(firebaseCredentialsPath != null)
 {
@@ -34,8 +38,6 @@ FirebaseApp.Create(new AppOptions()
 });
 Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
 
-// Add console logging
-builder.Logging.AddConsole();
 
 //Add Razor pages
 builder.Services.AddControllersWithViews();
@@ -123,6 +125,15 @@ builder.Services.AddAuthorization(auth =>
             .RequireAuthenticatedUser().Build());
     });
 
+//session for firebase
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.Services.AddRazorPages();
 
 //register signalR for real-time communication with DI
@@ -158,6 +169,7 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.MapHub<LogHub>("/logHub");
 
+app.UseSession();
 
 
 // Start the application
