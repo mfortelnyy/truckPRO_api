@@ -17,8 +17,6 @@ using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", @"<PATH_TO_CREDENTIALS_FILE");
-
 
 var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
 if (string.IsNullOrEmpty(firebaseCredentialsPath))
