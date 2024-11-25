@@ -23,7 +23,12 @@ Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", @"<PATH_TO_
 var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
 if (string.IsNullOrEmpty(firebaseCredentialsPath))
 {
-    throw new Exception("Firebase credentials file path is not set in environment variables.");
+    Console.WriteLine("Firebase credentials path not found in environment variables.");
+}
+var creds = false;
+if(firebaseCredentialsPath != null)
+{
+    creds = true;
 }
 FirebaseApp.Create(new AppOptions()
 {
@@ -89,6 +94,7 @@ if (string.IsNullOrEmpty(jwtKey))
 }
 else if (!string.IsNullOrEmpty(jwtKey))
 {
+    Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath} and cred: {creds}");
     Console.WriteLine("Succ key parsed");
     Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
 
