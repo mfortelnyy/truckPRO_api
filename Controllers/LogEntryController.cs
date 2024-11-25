@@ -23,7 +23,7 @@ namespace truckPRO_api.Controllers
         //test endpoint
         [HttpPost]
         [Route("testFire")]
-         public async Task<IActionResult> TestFire([FromForm] IFormFile image)
+         public async Task<IActionResult> TestFire()
         {
             string? companyId = User.FindFirst("companyId")?.Value;
 
