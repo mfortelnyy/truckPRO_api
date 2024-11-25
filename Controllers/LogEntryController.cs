@@ -20,8 +20,10 @@ namespace truckPRO_api.Controllers
         private readonly ILogEntryService _logEntryService = logEntryService;
         private readonly IHubContext<LogHub> _hubContext = hubContext;
 
-        [HttpPost("testFire")]
-        public async Task<IActionResult> TestFire()
+        //test endpoint
+        [HttpPost]
+        [Route("testFire")]
+         public async Task<IActionResult> TestFire([FromForm] IFormFile image)
         {
             string? companyId = User.FindFirst("companyId")?.Value;
 
@@ -30,11 +32,15 @@ namespace truckPRO_api.Controllers
                 return Conflict("Company ID not found in the token.");
             }
             int companyIdInt = int.Parse(companyId);
+            await _hubContext.Clients.Group(companyId.ToString()).SendAsync("ReceiveNotification", $"TestFire");
 
-            await _hubContext.Clients.Group(companyId.ToString()).SendAsync("ReceiveNotification", $"Hello from test");
 
-            return Ok($"Sent successfully");
+            return Ok($"sent succ!");
+
+
         }
+
+
 
         //test endpoint
         [HttpPost]
