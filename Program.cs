@@ -156,13 +156,13 @@ app.MapControllers();
 app.MapRazorPages();
 
 //to enable Assets folder
-// app.UseStaticFiles();
+app.UseStaticFiles();
 
-// app.UseStaticFiles(new StaticFileOptions
-// {
-//     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Pages")),
-//     RequestPath = "/pages"
-// });
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Pages")),
+    RequestPath = "/pages"
+});
 
 app.MapHub<LogHub>("/logHub");
 
