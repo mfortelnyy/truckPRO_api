@@ -11,12 +11,33 @@ using truckPRO_api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using truckPro_api.Hubs;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add console logging
 builder.Logging.AddConsole();
+
+var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+if (string.IsNullOrEmpty(firebaseCredentialsPath))
+{
+    Console.WriteLine("Firebase credentials path not found in environment variables.");
+    throw new Exception("Firebase credentials path not found in environment variables.");
+}
+
+var creds = false;
+if (firebaseCredentialsPath != null)
+{
+    creds = true;
+}
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile(firebaseCredentialsPath)
+});
+Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
+
 
 //Add Razor pages
 builder.Services.AddControllersWithViews();
@@ -128,13 +149,13 @@ app.MapRazorPages();
 //to enable Assets folder
 app.UseStaticFiles();
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Pages")),
-    RequestPath = "/pages"
-});
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Pages")),
+//    RequestPath = "/pages"
+//});
 
-app.MapHub<LogHub>("/logHub");
+//app.MapHub<LogHub>("/logHub");
 
 // Start the application
 app.Run();
