@@ -35,6 +35,8 @@ namespace truckPRO_api.Models
         [MinLength(3)]
         public string FcmDeviceToken{ get; set; }
 
+        public DateTime CreatedAt { get; set; }
+
         public Company Company { get; set; }
 
         public bool EmailVerified { get; set; }
