@@ -28,6 +28,13 @@ namespace truckapi.Controllers
             return View("VerifyEmail"); 
         }
 
+        [HttpGet("PrivacyPolicy")]
+        public IActionResult PrivacyPolicy()
+        {
+            return View("PrivacyPolicy");
+        }
+
+
         // [HttpGet("signup-page")]
         // public IActionResult SignUpPage()
         // {
