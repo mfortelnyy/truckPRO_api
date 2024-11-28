@@ -31,6 +31,8 @@ namespace truckPRO_api.Services
 
             User newUser = mapper.Map<User>(signUpDTO);
             newUser.EmailVerified = false;
+            newUser.CreatedAt = DateTime.UtcNow;
+            newUser.FcmDeviceToken = "hello";
             bool duplicate = true;
             var emailCode = UserService.GenerateVerificationToken();
             var allTokens = await context.User.Select(x => x.EmailVerificationToken)
