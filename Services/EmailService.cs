@@ -55,6 +55,8 @@ namespace truckPRO_api.Services
                                 </a>
                             </div>
                             <p style='font-size: 16px; color: #333;'>Best regards,<br/>The TruckPro Team</p>
+                            <a href='mailto:support@truckcheck.org' style='color: #999;'>support@truckcheck.org</a>
+
                         </div>
                     </body>
                     </html>", isHtml: true)
@@ -110,7 +112,7 @@ namespace truckPRO_api.Services
                             <p style='font-size: 12px; color: #999; text-align: center;'>
                                 TruckPro Inc.<br/>
                                 <br/>
-                                <a href='mailto:support@truckpro.com' style='color: #999;'>support@truckpro.com</a>
+                                <a href='mailto:support@truckcheck.org' style='color: #999;'>support@truckcheck.org</a>
                             </p>
                         </div>
                     </body>
@@ -162,7 +164,7 @@ namespace truckPRO_api.Services
                             <p style='font-size: 12px; color: #999; text-align: center;'>
                                 TruckPro Inc.<br/>
                                  <br/>
-                                <a href='mailto:support@truckpro.com' style='color: #999;'>support@truckpro.com</a>
+                                <a href='mailto:support@truckcheck.org' style='color: #999;'>support@truckcheck.org</a>
                             </p>
                         </div>
                     </body>
