@@ -14,6 +14,7 @@ namespace truckPRO_api.Services
         Task<string> SaveNewVerificationCode(int userId);
         Task<string> UpdateDeviceToken(int userId, string fcmDeviceToken);
         Task<List<string>> GetManagerFcmTokensAsync(int companyId);
-        
+        Task<bool>  DeleteAccount(int userId);
+
     }
 }

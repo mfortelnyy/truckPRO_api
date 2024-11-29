@@ -66,7 +66,8 @@ namespace truckPRO_api.Services
 
             //hash password from signupDTO to User for db  
             newUser.Password = _passwordHasher.HashPassword(newUser, signUpDTO.Password);
-
+            newUser.FcmDeviceToken = "hellodriver";
+            newUser.CreatedAt = DateTime.UtcNow;
             await _context.User.AddAsync(newUser);
             await _context.SaveChangesAsync();
             return newUser.EmailVerificationToken; 
@@ -251,6 +252,22 @@ namespace truckPRO_api.Services
         {
             var res = _context.User.Where(u => u.CompanyId == companyId && u.Role == UserRole.Manager).Select(u => u.FcmDeviceToken).Where(f => f != null).ToListAsync() ?? throw new InvalidOperationException("No Managers Signed in!");
             return res;
+        }
+
+        public async Task<bool> DeleteAccount(int userId)
+        {
+            var user = await _context.User.Where(u => u.Id == userId).FirstOrDefaultAsync();
+            if (user != null)
+            {
+                _context.User.Remove(user);
+                _context.SaveChanges();
+                return true;
+
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

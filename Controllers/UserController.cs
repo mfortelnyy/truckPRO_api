@@ -296,5 +296,27 @@ namespace truckPRO_api.Controllers
             });
         }
 
+        [HttpDelete("DeleteAccount")]
+        [Authorize(Roles = "Manager, Driver")]
+        public async Task<IActionResult> DeleteAccount([FromForm] string deviceToken)
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
+            if (userId == null) return NotFound();
+            var res = await _userService.DeleteAccount(int.Parse(userId));
+            if (res)
+            {
+                return Ok(new
+                {
+                    Message = "Account deleted successfully",
+                });
+            }
+            return BadRequest(new
+            {
+                Message = "Can not Delete Account",
+            });
+        }
+
+
+
     }
 }
