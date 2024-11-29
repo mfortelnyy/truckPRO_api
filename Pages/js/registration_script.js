@@ -1,4 +1,7 @@
 document.querySelector("form").addEventListener("submit", function (event) {
+
+    //TODO: Add check for empty input fields
+
     var password = document.getElementById("Password").value;
     var confirmPassword = document.getElementById("ConfirmPassword").value;
 
