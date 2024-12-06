@@ -14,11 +14,13 @@ using truckPRO_api.Services;
 namespace truckPRO_api.Controllers
 {
     [ApiController]
-    public class LogEntryController(S3Service s3Service, ILogEntryService logEntryService, IHubContext<LogHub> hubContext) : ControllerBase
+    public class LogEntryController(S3Service s3Service, ILogEntryService logEntryService, IUserService userService, IHubContext<LogHub> hubContext, IFirebaseService firebaseService) : ControllerBase
     {
         private readonly S3Service _s3Service = s3Service;
         private readonly ILogEntryService _logEntryService = logEntryService;
         private readonly IHubContext<LogHub> _hubContext = hubContext;
+        private readonly IFirebaseService _firebaseService = firebaseService;
+        private readonly IUserService _userService = userService;
 
         //test endpoint
         [HttpPost]
@@ -33,7 +35,6 @@ namespace truckPRO_api.Controllers
             }
             int companyIdInt = int.Parse(companyId);
             await _hubContext.Clients.Group(companyId.ToString()).SendAsync("ReceiveNotification", $"TestFire");
-
 
             return Ok($"sent succ!");
 
@@ -123,6 +124,24 @@ namespace truckPRO_api.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+        [HttpPost]
+        [Route("TestPush")]
+        public async Task<IActionResult> TestPush()
+        {
+            await _userService.GetManagerFcmTokensAsync(1);
+            await _hubContext.Clients.Group("1").SendAsync("ReceiveNotification", "Test Push Notification!");
+            
+            var sent = await _firebaseService.SendTestPushToManagers();
+            if (sent)
+            {
+                return Ok("sent succ!");
+            }
+            return Conflict("failed to send");
+
+        }
+
+
 
 
         [HttpPost]
