@@ -27,7 +27,7 @@ namespace truckPro_api.Services
             try
             {
                 // send the message with cloud msg
-                var response = await FirebaseMessaging.DefaultInstance.SendMulticastAsync(message);
+            var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
                 
                 // check if sent
                 if (response.FailureCount > 0)
