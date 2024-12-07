@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Graph.Education.Classes.Item.Assignments.Item.Submissions.Item.Return;
 using Newtonsoft.Json;
 using System.Security.Claims;
+using truckapi.DTOs;
 using truckapi.Models;
 using truckPro_api.Hubs;
 using truckPRO_api.DTOs;
@@ -191,11 +192,14 @@ namespace truckPRO_api.Controllers
                 res = await _logEntryService.CreateDrivingLog(logEntry);
                 
                 await _hubContext.Clients.Group(companyId.ToString()).SendAsync("ReceiveNotification", $"Log by user id {logEntry.UserId} at {logEntry.StartTime}");
-
+                
+                UserDTO user = await _userService.GetUserById(int.Parse(userId));
+                var sent = await _firebaseService.SendDriverDrivingPushToManagers(companyIdInt, "Approve Log!", user.FirstName, user.LastName);
 
                 // Return success with the uploaded URLs
-                return Ok($"Driving log with id {res} was added");
-                
+                return Ok($"Driving log with id {res} was added and managers notified: {sent}");                
+            
+
             }
             catch (InvalidOperationException ex)
             {
