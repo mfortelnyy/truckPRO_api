@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using truckPro_api.Hubs;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using truckPro_api.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,7 @@ var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICA
 if (string.IsNullOrEmpty(firebaseCredentialsPath))
 {
     Console.WriteLine("Firebase credentials path not found in environment variables.");
-    throw new Exception("Firebase credentials path not found in environment variables.");
+    //throw new Exception("Firebase credentials path not found in environment variables.");
 }
 else
 {
@@ -35,9 +36,12 @@ if (firebaseCredentialsPath != null)
 {
     creds = true;
 }
+
+
 FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.FromFile(firebaseCredentialsPath)
+    //Credential = GoogleCredential.FromJson(gJson)
 });
 Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
 
@@ -84,6 +88,9 @@ builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 
 builder.Services.AddScoped<IUserValidationService, UserValidationService>();
+
+builder.Services.AddScoped<IFirebaseService, FirebaseService>();
+
 builder.Services.AddSignalR();
 
 
