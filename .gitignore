@@ -348,7 +348,6 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder
 .mfractor/
 
-.FirebaseCreds/
 
 # Local History for Visual Studio
 .localhistory/
@@ -365,3 +364,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 truckPRO_api.http
+/FirebaseCreds 
