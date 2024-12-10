@@ -64,7 +64,8 @@ namespace truckPRO_api.Services
 
         public async Task<List<Company>> GetAllComapnies()
         {
-            var companies = context.Company.ToList() ?? throw new InvalidOperationException("No company could be found!");
+            //0 for Independent drivers - internally set when indep driver registers
+            var companies = context.Company.Where(c => c.Id > 0).ToList() ?? throw new InvalidOperationException("No company could be found!");
             return companies;
         }
 
