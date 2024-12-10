@@ -129,7 +129,7 @@ namespace truckPRO_api.Services
             {
                 Host = _configuration["SmtpSettings:Host"],
                 Port = int.Parse(_configuration["SmtpSettings:Port"]),
-                EnableSsl = bool.Parse(_configuration["SmtpSettings:EnableSsl"]),
+                EnableSsl = bool.TryParse(_configuration["SmtpSettings:EnableSsl"], out var enableSsl) && enableSsl,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(
