@@ -105,7 +105,7 @@ namespace truckPRO_api.Controllers
                     else //if email failed to send
                     {
                         return BadRequest(new {message = $"Failed to send email to pending user: {driver.Email}"+
-                                                                         "\nAll Emails prior to this were added!"});
+                                                                         "\nAll Emails prior to this in the list were notified!"});
                     }
                     
 
