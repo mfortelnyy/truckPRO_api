@@ -223,6 +223,8 @@ namespace truckPRO_api.Services
                        throw new InvalidOperationException("No user found!");
             //Console.WriteLine($"user found: {user.Email}");
             String tempPassword = GenerateTemporaryPassword();
+            //Console.WriteLine($"temp pswd: {tempPassword}");
+
             user.Password = _passwordHasher.HashPassword(user, tempPassword);
             await _context.SaveChangesAsync();
             return tempPassword;
