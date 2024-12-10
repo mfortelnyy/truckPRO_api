@@ -64,13 +64,22 @@ namespace truckPro_api.Services
         {
            
             var FCMTokensManagers = await _userService.GetManagerFcmTokensAsync(companyId);
+            //filter only non empty tokens for extra safety
+            FCMTokensManagers = FCMTokensManagers.Where(token => !string.IsNullOrWhiteSpace(token)).ToList();
             var message = new MulticastMessage
             {
                 Tokens = FCMTokensManagers, 
                 Notification = new Notification
                 {
                     Title = $"Please Approve Drivng Log by {driverFirstName} {driverLastName}!", 
-                    Body = $"Review images for the driving shift!" 
+                    Body = $"Review images for the driving shift!",
+                    
+                },
+                Data = new Dictionary<string, string>
+                {
+                  { "driverLastName",driverLastName },
+                  { "companyId", companyId.ToString() },
+                  { "action", "approveDrivingLog" }      
                 }
             };
 
