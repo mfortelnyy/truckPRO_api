@@ -17,6 +17,7 @@ namespace truckPRO_api.Models
 
         [Required]
         public DateTime StartTime { get; set; }
+        
         //start of shift is required, end of the shift is determined by the driver
         public DateTime? EndTime { get; set; }
         
@@ -27,11 +28,10 @@ namespace truckPRO_api.Models
         //store list of images urls for the shift, nullable
         public List<string>? ImageUrls { get; set; }
 
-        //store list of logentries for the onduty shift logs and offduty sleep only hence nullable
-        public List<LogEntry>? LogEntries { get; set; }
-
+        //store parent log entry id
+        // onduty shift log id - driving, break. 
+        // offduty shift log id - break which counts as sleep
+        public int? ParentLogEntryId { get; set; }
         public bool IsApprovedByManager { get; set; }  
-
-
     }
 }
