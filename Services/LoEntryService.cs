@@ -38,11 +38,28 @@ namespace truckPRO_api.Services
             context.LogEntry.Add(logEntry);
             await context.SaveChangesAsync();
 
-            return "On-duty log created successfully."; ;
+            return "On-duty log created successfully."; 
         }
         
         public async Task<string> CreateDrivingLog(LogEntry logEntry)
         {
+            //if there is no active on duty log then create one
+            if(!await HasActiveOnDutyCycle(logEntry.UserId))
+            {
+                LogEntry newOnDutyLog = new LogEntry
+                {
+                    UserId = logEntry.UserId,
+                    StartTime = DateTime.UtcNow,
+                    EndTime = null,
+                    LogEntryType = LogEntryType.OnDuty,
+                    ImageUrls = null,
+                };
+                var res = await CreateOnDutyLog(newOnDutyLog);
+                if(res.Contains("successfully"))
+                {
+                    var activeOnDutyLog = await GetActiveOnDutyLog(logEntry.UserId);
+                }
+            }
             // 1 - if the driver has exceeded the daily driving limit of 11 hours
             if (await HasExceededDailyDrivingLimit(logEntry.UserId))
             {
