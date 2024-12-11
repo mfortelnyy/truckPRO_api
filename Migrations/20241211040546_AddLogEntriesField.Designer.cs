@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using truckPRO_api.Data;
 
@@ -11,9 +12,11 @@ using truckPRO_api.Data;
 namespace truckPRO_api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241211040546_AddLogEntriesField")]
+    partial class AddLogEntriesField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,10 +60,10 @@ namespace truckPRO_api.Migrations
                     b.Property<bool>("IsApprovedByManager")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LogEntryType")
+                    b.Property<int?>("LogEntryId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ParentLogEntryId")
+                    b.Property<int>("LogEntryType")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartTime")
@@ -70,6 +73,8 @@ namespace truckPRO_api.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LogEntryId");
 
                     b.HasIndex("UserId");
 
@@ -162,6 +167,10 @@ namespace truckPRO_api.Migrations
 
             modelBuilder.Entity("truckPRO_api.Models.LogEntry", b =>
                 {
+                    b.HasOne("truckPRO_api.Models.LogEntry", null)
+                        .WithMany("LogEntries")
+                        .HasForeignKey("LogEntryId");
+
                     b.HasOne("truckPRO_api.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -178,6 +187,11 @@ namespace truckPRO_api.Migrations
                         .HasForeignKey("CompanyId");
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("truckPRO_api.Models.LogEntry", b =>
+                {
+                    b.Navigation("LogEntries");
                 });
 #pragma warning restore 612, 618
         }
