@@ -55,13 +55,21 @@ namespace truckPRO_api.Services
                     ImageUrls = null,
                 };
                 var res = await CreateOnDutyLog(newOnDutyLog);
-                if(res.Contains("successfully"))
+                if(!res.Contains("successfully"))
                 {
-                    var activeOnDutyLog = await GetActiveOnDutyLog(logEntry.UserId);
+                    // var activeOnDutyLog = await GetActiveOnDutyLog(logEntry.UserId);
+                    // //make the freshly created on duty log parent of the driving log
+                    // logEntry.ParentLogEntryId = activeOnDutyLog.Id;
+                    throw new InvalidOperationException("Something went wrong. Please, try again later!");
                 }
             }
+
+            //establish relationship between the on duty log (parent) and the driving log
+            var activeOnDutyLog = await GetActiveOnDutyLog(logEntry.UserId);
+            logEntry.ParentLogEntryId = activeOnDutyLog.Id;
+
             // 1 - if the driver has exceeded the daily driving limit of 11 hours
-            if (await HasExceededDailyDrivingLimit(logEntry.UserId))
+            if (await HasExceededDailyDrivingLimit(logEntry))
             {
                 return "Driving limit exceeded. You cannot drive for more than 11 hours today.";
             }
@@ -147,23 +155,19 @@ namespace truckPRO_api.Services
 
 
         // 1 - Limit checks for daily driving limit
-        public async Task<bool> HasExceededDailyDrivingLimit(int userId)
+        public async Task<bool> HasExceededDailyDrivingLimit(LogEntry le)
         {
             //locate current driver's 'On Duty' log
-            var activeOnDutyLog = await context.LogEntry
-                                        .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.EndTime == null)
-                                        .FirstOrDefaultAsync() ?? throw new InvalidOperationException("No current On Duty Log");
+            var activeOnDutyLog = await GetActiveOnDutyLog(le.UserId) ?? throw new InvalidOperationException("No current On Duty Log");
 
             //retrieve all driving logs for the current on duty log
-            var activeDrivingLogsPerOnDuty = await context.LogEntry
-                .Where(log => log.UserId == userId && log.ParentLogEntryId == activeOnDutyLog.Id && log.LogEntryType == LogEntryType.Driving && log.EndTime == null)
+            var DrivingLogsPerOnDuty = await context.LogEntry
+                .Where(log => log.UserId == le.UserId && log.ParentLogEntryId == activeOnDutyLog.Id && log.ParentLogEntryId == le.ParentLogEntryId && log.LogEntryType == LogEntryType.Driving && log.EndTime != null)
                 .ToListAsync();
 
             //calculate total driving hours for the current On Duty log
-            double totalDrivingHoursPerOnDuty = activeDrivingLogsPerOnDuty.Sum(log =>
-                log.EndTime != null 
-                    ? (log.EndTime.Value - log.StartTime).TotalHours 
-                    : (DateTime.Now - log.StartTime).TotalHours);
+            double totalDrivingHoursPerOnDuty = DrivingLogsPerOnDuty.Sum(log =>
+                (log.EndTime!.Value - log.StartTime).TotalHours);
 
             //check if limit exceeded 
             return totalDrivingHoursPerOnDuty > 11;
