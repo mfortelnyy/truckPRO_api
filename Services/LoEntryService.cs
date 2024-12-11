@@ -56,8 +56,6 @@ namespace truckPRO_api.Services
                 var res = await CreateOnDutyLog(newOnDutyLog);
                 if(!res.Contains("successfully"))
                 {
-                    // //make the freshly created on duty log parent of the driving log
-                    // logEntry.ParentLogEntryId = activeOnDutyLog.Id;
                     throw new InvalidOperationException("Something went wrong. Please, try again later!");
                 }
             }
@@ -108,11 +106,53 @@ namespace truckPRO_api.Services
 
         }
 
+        //In context of Off duty cycle break is sleep
+        //For On duty cycle break is just a break (30 min after 8hrs)
+        public async Task<string> CreateBreakLog(LogEntry logEntry)
+        {
+            var hasActiveOffDuty = await HasActiveOffDutyCycle(logEntry.UserId);
+            var hasActiveOnDuty = await HasActiveOnDutyCycle(logEntry.UserId);
+
+            if(await HasActiveBreakCycle(logEntry.UserId))
+            {
+                return "You can not start a new Break Log Entry.\nYou have an active Break Log!";
+            }
+
+            if(hasActiveOffDuty && hasActiveOnDuty)
+            {
+                return "Something went wrong. Please try again later!";
+            }
+
+            if(hasActiveOffDuty)
+            {
+                var activeOffDuty = await GetActiveOffDutyLog(logEntry.UserId);
+                logEntry.StartTime = DateTime.UtcNow;
+                logEntry.LogEntryType = LogEntryType.Break;
+                logEntry.ParentLogEntryId = activeOffDuty!.Id;
+                context.LogEntry.Add(logEntry);
+                await context.SaveChangesAsync();
+                return $"Sleep log created successfully!";
+            }
+            else if(hasActiveOnDuty)
+            {
+                var activeOnDuty = await GetActiveOnDutyLog(logEntry.UserId);
+                logEntry.StartTime = DateTime.UtcNow;
+                logEntry.LogEntryType = LogEntryType.Break;
+                logEntry.ParentLogEntryId = activeOnDuty!.Id;
+                context.LogEntry.Add(logEntry);
+                await context.SaveChangesAsync();
+                return $"Break log created successfully!";
+            }
+
+            return "Something went wrong. Please try again later!";
+        }
+
        
 
         public async Task<List<LogEntry>> GetActiveLogEntries(int driverId)
         {
-            throw new NotImplementedException();
+            return await context.LogEntry.Where(logEntry => logEntry.UserId == driverId && logEntry.EndTime == null).ToListAsync();
+            //add DTO OnDuty/OffDuty main that contains a list of other logentries with parentid the same as id of onduty/offduty
         }
 
         public async Task<List<LogEntry>> GetAllLogs(int driverId)
@@ -324,6 +364,15 @@ namespace truckPRO_api.Services
                 .FirstOrDefaultAsync();
 
             return activeOffDutyLog != null;
+        }
+
+        public async Task<bool> HasActiveBreakCycle(int userId)
+        {
+            var activeBreakLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.Break && log.EndTime == null)
+                .FirstOrDefaultAsync();
+
+            return activeBreakLog != null;
         }
 
 
