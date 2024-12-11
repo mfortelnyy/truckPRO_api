@@ -248,5 +248,14 @@ namespace truckPRO_api.Services
 
             return activeOnDutyLog != null;
         }
+
+        public async Task<LogEntry> GetActiveOnDutyLog(int userId)
+        {
+            var activeOnDutyLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.EndTime == null)
+                .FirstOrDefaultAsync() ?? throw new InvalidOperationException("No current On Duty Log");
+
+            return activeOnDutyLog;
+        }
     }
 }
