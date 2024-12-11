@@ -14,20 +14,25 @@ namespace truckPRO_api.Services
             //if new user then just start
             var newUser = await IsNewUser(logEntry.UserId);
 
-            // Check if the driver has exceeded the 14-hour on-duty limit
-            if (await HasExceededOnDutyLimit(logEntry.UserId) && newUser == false)
-            {
-                return "On-duty limit exceeded. You cannot be on-duty for more than 14 hours today.";
-            }
+            // // Check if the driver has exceeded the 14-hour on-duty limit
+            // if (newUser == false && await HasExceededOnDutyLimit(logEntry.UserId))
+            // {
+            //     return "On-duty limit exceeded. You cannot be on-duty for more than 14 hours today.";
+            // }
 
             // Ensure there is a valid off-duty cycle before the on-duty shift
-            if (await HasValidOffDutyCycle(logEntry.UserId) && newUser == false)
+            if (newUser == false && !await HasValidOffDutyCycle(logEntry.UserId))
             {
                 return "You need to take a break for at least 10 hours before starting a new on-duty shift.";
             }
 
             logEntry.StartTime = DateTime.UtcNow;
             logEntry.LogEntryType = LogEntryType.OnDuty;
+
+            context.LogEntry.Add(logEntry);
+            await context.SaveChangesAsync();
+
+            return "On-duty log created successfully."; ;
         }
         
         public async Task<string> CreateDrivingLog(LogEntry logEntry)
@@ -157,19 +162,39 @@ namespace truckPRO_api.Services
 
         public async Task<bool> HasValidOffDutyCycle(int userId)
         {
-            var lastOffDutyLog = await context.LogEntry
+            //get first off duty with null end time = endtime == null
+            var currentOffDutyCycleLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OffDuty && log.EndTime == null)
+                .FirstOrDefaultAsync(); 
+            
+            LogEntry? lastOffDutyLog = null;
+            //if there is no current of duty log then check in completed off duty logs
+            if(currentOffDutyCycleLog == null)
+            {
+              lastOffDutyLog = await context.LogEntry
                 .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OffDuty && log.EndTime != null)
                 .OrderByDescending(log => log.EndTime)
                 .FirstOrDefaultAsync();
-
-            if (lastOffDutyLog == null)
-            {
-                return false; 
             }
 
-            //if the driver has had at least 10 hours of off-duty time before driving again
-            var offDutyDuration = DateTime.UtcNow - lastOffDutyLog.EndTime.Value;
-            return offDutyDuration.TotalHours >= 10;
+            //if both are null something wrong since new users with not logs wouldn't be checked
+            if (lastOffDutyLog == null && currentOffDutyCycleLog == null)
+            {
+                return false;
+            }
+            else if (lastOffDutyLog == null && currentOffDutyCycleLog != null)
+            {
+                //calculate duration for of the current of duty log
+                var offDutyDuration = DateTime.UtcNow - currentOffDutyCycleLog.StartTime;
+                return offDutyDuration.TotalHours >= 10;
+            }
+            else if (lastOffDutyLog != null && currentOffDutyCycleLog == null)
+            {
+                //calculate duration of last off duty log
+                var offDutyDuration = lastOffDutyLog.EndTime!.Value - lastOffDutyLog.StartTime;
+                return offDutyDuration.TotalHours >= 10;
+            }
+            return false; 
         }
 
         public async Task<bool> IsNewUser(int userId)
