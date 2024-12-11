@@ -1,6 +1,7 @@
 using Docker.DotNet.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using truckPro_api.DTOs;
 using truckPRO_api.Data;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
@@ -149,13 +150,46 @@ namespace truckPRO_api.Services
 
        
 
-        public async Task<List<LogEntry>> GetActiveLogEntries(int driverId)
+        public async Task<LogEntryParent?> GetActiveLogEntries(int driverId)
         {
-            return await context.LogEntry.Where(logEntry => logEntry.UserId == driverId && logEntry.EndTime == null).ToListAsync();
+            //return await context.LogEntry.Where(logEntry => logEntry.UserId == driverId && logEntry.EndTime == null).ToListAsync();
             //add DTO OnDuty/OffDuty main that contains a list of other logentries with parentid the same as id of onduty/offduty
+            var activeOnDutyLog = await GetActiveOnDutyLog(driverId);
+            var activeOffDutyLog = await GetActiveOffDutyLog(driverId);
+            //holds the main active log - off duty or on duty with all the children logs
+            var logEntryParentActive = new LogEntryParent();
+            if (activeOnDutyLog == null && activeOffDutyLog == null)
+            {
+                return null;
+            }
+            else if (activeOnDutyLog != null && activeOffDutyLog != null)
+            {
+                return null;
+            }
+            else if(activeOffDutyLog != null && activeOnDutyLog == null)
+            {
+                //get all child logs
+                var childrenLogs = await context.LogEntry.Where(log => log.UserId == driverId 
+                                && log.ParentLogEntryId == activeOffDutyLog.Id && log.EndTime == null)
+                                .OrderBy(log => log.StartTime)
+                                .ToListAsync();
+
+                logEntryParentActive.ChildLogEntries = childrenLogs;
+            }
+            else if(activeOnDutyLog != null && activeOffDutyLog == null)
+            {
+                //get all child logs
+                var childrenLogs = await context.LogEntry.Where(log => log.UserId == driverId
+                                && log.ParentLogEntryId == activeOnDutyLog.Id && log.EndTime == null)
+                                .OrderBy(log => log.StartTime)
+                                .ToListAsync();
+
+                logEntryParentActive.ChildLogEntries = childrenLogs;
+            }
+            return logEntryParentActive;
         }
 
-        public async Task<List<LogEntry>> GetAllLogs(int driverId)
+        public async Task<List<LogEntryParent>> GetAllLogs(int driverId)
         {
             throw new NotImplementedException();
         }
