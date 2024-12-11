@@ -11,7 +11,7 @@ namespace truckPRO_api.Services
     {
         public async Task<string> CreateOnDutyLog(LogEntry logEntry)
         {
-            //if new user then just start
+            //if new user then limit checks are not performed
             var newUser = await IsNewUser(logEntry.UserId);
 
             // // Check if the driver has exceeded the 14-hour on-duty limit
@@ -20,7 +20,13 @@ namespace truckPRO_api.Services
             //     return "On-duty limit exceeded. You cannot be on-duty for more than 14 hours today.";
             // }
 
+            if(await HasActiveOnDutyCycle(logEntry.UserId))
+            {
+                return "You can not start a new On Duty Log Entry.\nYou have an active On Duty Log!";
+            }
+
             // Ensure there is a valid off-duty cycle before the on-duty shift
+            //HasValidOffDutyCycle end current off duty if rest period is satisfied
             if (newUser == false && !await HasValidOffDutyCycle(logEntry.UserId))
             {
                 return "You need to take a break for at least 10 hours before starting a new on-duty shift.";
@@ -160,6 +166,7 @@ namespace truckPRO_api.Services
             return currentOnDutyHours > TimeSpan.FromHours(14);
         }
 
+        //LAST CHECK
         public async Task<bool> HasValidOffDutyCycle(int userId)
         {
             //get first off duty with null end time = endtime == null
@@ -186,7 +193,16 @@ namespace truckPRO_api.Services
             {
                 //calculate duration for of the current of duty log
                 var offDutyDuration = DateTime.UtcNow - currentOffDutyCycleLog.StartTime;
-                return offDutyDuration.TotalHours >= 10;
+                var hasValidRest = offDutyDuration.TotalHours >= 10;
+                //THIS IS THE LAST CHECK SO IF THREASHOLD FOR REST REACHED - STOP OFF DUTY WHEN CREATE ON DUTY IS RECEIVED
+                if (hasValidRest)
+                {
+                    //end off duty and save changes
+                    currentOffDutyCycleLog.EndTime = DateTime.UtcNow;
+                    context.LogEntry.Update(currentOffDutyCycleLog);
+                    await context.SaveChangesAsync();
+                }
+                return hasValidRest;
             }
             else if (lastOffDutyLog != null && currentOffDutyCycleLog == null)
             {
@@ -207,5 +223,13 @@ namespace truckPRO_api.Services
             return lastLogEntry == null;
         }
 
+        public async Task<bool> HasActiveOnDutyCycle(int userId)
+        {
+            var activeOnDutyLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.EndTime == null)
+                .FirstOrDefaultAsync();
+
+            return activeOnDutyLog != null;
+        }
     }
 }
