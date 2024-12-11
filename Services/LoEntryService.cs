@@ -14,12 +14,6 @@ namespace truckPRO_api.Services
             //if new user then limit checks are not performed
             var newUser = await IsNewUser(logEntry.UserId);
 
-            // // Check if the driver has exceeded the 14-hour on-duty limit
-            // if (newUser == false && await HasExceededOnDutyLimit(logEntry.UserId))
-            // {
-            //     return "On-duty limit exceeded. You cannot be on-duty for more than 14 hours today.";
-            // }
-
             if(await HasActiveOnDutyCycle(logEntry.UserId))
             {
                 return "You can not start a new On Duty Log Entry.\nYou have an active On Duty Log!";
@@ -43,6 +37,11 @@ namespace truckPRO_api.Services
         
         public async Task<string> CreateDrivingLog(LogEntry logEntry)
         {
+            if(await HasActiveDrivingCycle(logEntry.UserId))
+            {
+                return "You can not start a new Driving Log Entry.\nYou have an active Driving Log!";
+            }
+
             //if there is no active on duty log then create one
             if(!await HasActiveOnDutyCycle(logEntry.UserId))
             {
@@ -57,7 +56,6 @@ namespace truckPRO_api.Services
                 var res = await CreateOnDutyLog(newOnDutyLog);
                 if(!res.Contains("successfully"))
                 {
-                    // var activeOnDutyLog = await GetActiveOnDutyLog(logEntry.UserId);
                     // //make the freshly created on duty log parent of the driving log
                     // logEntry.ParentLogEntryId = activeOnDutyLog.Id;
                     throw new InvalidOperationException("Something went wrong. Please, try again later!");
@@ -68,30 +66,21 @@ namespace truckPRO_api.Services
             var activeOnDutyLog = await GetActiveOnDutyLog(logEntry.UserId);
             logEntry.ParentLogEntryId = activeOnDutyLog.Id;
 
-            // 1 - if the driver has exceeded the daily driving limit of 11 hours
+            //check if the driver has exceeded the daily driving limit of 11 hours
             if (await HasExceededDailyDrivingLimit(logEntry))
             {
                 return "Driving limit exceeded. You cannot drive for more than 11 hours today.";
             }
 
-            // 2 - if the driver has exceeded the 14-hour on-duty limit
+            //check if the driver has exceeded the 14-hour on-duty limit
             if (await HasExceededOnDutyLimit(logEntry.UserId))
             {
                 return "On-duty limit exceeded. You cannot be on-duty for more than 14 hours today.";
             }
 
-            // 3 - ensure a valid break (off-duty cycle) before the driving shift
-            if (await HasValidOffDutyCycle(logEntry.UserId))
-            {
-                return "You need to take a break for at least 10 hours before starting a new driving shift.";
-            }
-
-            // 4. Set the start time and log type
             logEntry.StartTime = DateTime.UtcNow;
             logEntry.LogEntryType = LogEntryType.Driving;
-
-            // 5. Add the log entry to the database
-            //context.LogEntries.Add(logEntry);
+            context.LogEntry.Add(logEntry);
             await context.SaveChangesAsync();
 
             return "Driving log created successfully.";
@@ -100,7 +89,23 @@ namespace truckPRO_api.Services
 
         public async Task<string> CreateOffDutyLog(LogEntry logEntry)
         {
-            throw new NotImplementedException();
+            if(await HasActiveOffDutyCycle(logEntry.UserId))
+            {
+                return "You can not start a new Off Duty Log Entry.\nYou have an active Off Duty Log!";
+            }
+
+            if(await HasActiveOnDutyCycle(logEntry.UserId))
+            {
+                await StopOnDutyLog(logEntry.UserId);
+            }
+
+            logEntry.StartTime = DateTime.UtcNow;
+            logEntry.LogEntryType = LogEntryType.OffDuty;
+            context.LogEntry.Add(logEntry);
+            await context.SaveChangesAsync();
+            
+            return "Off Duty log created successfully.";
+
         }
 
        
@@ -142,13 +147,43 @@ namespace truckPRO_api.Services
 
         public async Task<string> StopOffDutyLog(int userId)
         {
-            throw new NotImplementedException();
+            LogEntry? activeOffDutyLog = await GetActiveOffDutyLog(userId);
+            if (activeOffDutyLog == null)
+            {
+                return "No active Off Duty Log found.";
+            }
+
+            // if found then update it's endtime
+            activeOffDutyLog.EndTime = DateTime.Now;
+            context.Update(activeOffDutyLog);
+            await context.SaveChangesAsync();
+
+            return $"Off Duty Log Ended successfully";
         }
 
         public async Task<string> StopOnDutyLog(int userId)
         {
-            throw new NotImplementedException();
+            var activeOnDutyLog = await GetActiveOnDutyLog(userId);
+            if (activeOnDutyLog == null)
+            {
+                return "No active On Duty Log found.";
+            }
+
+            var activePerOnDuty = await context.LogEntry
+                            .Where(l => l.UserId == userId 
+                            && l.ParentLogEntryId == activeOnDutyLog.Id 
+                            && l.EndTime == null).ToListAsync();
+            foreach(var log in activePerOnDuty)
+            {
+                log.EndTime = DateTime.UtcNow;
+                context.Update(log);
+            }
+            activeOnDutyLog.EndTime = DateTime.UtcNow;
+            await context.SaveChangesAsync();
+            return "On Duty Log Ended successfully";
+
         }
+
 
 
         // Limit checks - helper funcitons
@@ -219,9 +254,11 @@ namespace truckPRO_api.Services
                 if (hasValidRest)
                 {
                     //end off duty and save changes
-                    currentOffDutyCycleLog.EndTime = DateTime.UtcNow;
-                    context.LogEntry.Update(currentOffDutyCycleLog);
-                    await context.SaveChangesAsync();
+                    var res = await StopOffDutyLog(userId);
+                    if (res.Contains("successfully"))
+                    {
+                        return true;
+                    }     
                 }
                 return hasValidRest;
             }
@@ -253,6 +290,15 @@ namespace truckPRO_api.Services
             return activeOnDutyLog != null;
         }
 
+        public async Task<bool> HasActiveDrivingCycle(int userId)
+        {
+            var activeDrivingLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.Driving && log.EndTime == null)
+                .FirstOrDefaultAsync();
+
+            return activeDrivingLog != null;
+        }
+
         public async Task<LogEntry> GetActiveOnDutyLog(int userId)
         {
             var activeOnDutyLog = await context.LogEntry
@@ -261,5 +307,25 @@ namespace truckPRO_api.Services
 
             return activeOnDutyLog;
         }
+
+        public async Task<LogEntry?> GetActiveOffDutyLog(int userId)
+        {
+             return await context.LogEntry.Where(u => u.UserId == userId &&
+                                                u.LogEntryType == LogEntryType.OffDuty &&
+                                                u.EndTime == null)
+                                            .OrderByDescending(u => u.StartTime)
+                                            .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> HasActiveOffDutyCycle(int userId)
+        {
+            var activeOffDutyLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OffDuty && log.EndTime == null)
+                .FirstOrDefaultAsync();
+
+            return activeOffDutyLog != null;
+        }
+
+
     }
 }
