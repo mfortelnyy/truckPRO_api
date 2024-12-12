@@ -350,12 +350,47 @@ namespace truckPRO_api.Services
 
         }
 
+        public async Task<string> StopBreakLog(int userId)
+        {
+            var hasActiveOffDuty = await HasActiveOffDutyCycle(userId);
+            var hasActiveOnDuty = await HasActiveOnDutyCycle(userId);
+
+            if(await HasActiveBreakCycle(userId))
+            {
+                return "You can not start a new Break Log Entry.\nYou have an active Break Log!";
+            }
+
+            if(hasActiveOffDuty && hasActiveOnDuty)
+            {
+                return "Something went wrong. Please try again later!";
+            }
+
+            if(hasActiveOffDuty)
+            {
+                var activeOffDuty = await GetActiveOffDutyLog(userId);
+                activeOffDuty!.EndTime = DateTime.UtcNow;
+                context.LogEntry.Update(activeOffDuty);
+                await context.SaveChangesAsync();
+                return $"Sleep Log Stopped successfully!";
+            }
+            else if(hasActiveOnDuty)
+            {
+                var activeOnDuty = await GetActiveOnDutyLog(userId);
+                activeOnDuty.EndTime = DateTime.UtcNow;
+                context.LogEntry.Update(activeOnDuty);
+                await context.SaveChangesAsync();
+                return $"Break Log Stopped successfully!";
+            }
+
+            return "Something went wrong. Please try again later!";
+        }
+
 
 
         // Limit checks - helper funcitons
 
 
-        // 1 - Limit checks for daily driving limit
+        //Limit checks for daily driving limit
         public async Task<bool> HasExceededDailyDrivingLimit(LogEntry le)
         {
             //locate current driver's 'On Duty' log
@@ -374,7 +409,7 @@ namespace truckPRO_api.Services
             return totalDrivingHoursPerOnDuty > 11;
         }
 
-        // 2 - Limit check for on-duty hours (14 hours max)
+        //Limit check for on-duty hours (14 hours max)
         public async Task<bool> HasExceededOnDutyLimit(int userId)
         {
             //locate current driver's 'On Duty' log
@@ -506,8 +541,6 @@ namespace truckPRO_api.Services
             var hoursPerWeek = await GetTotalOnDutyHoursLastWeek7days(userId);
             var weeklyLimit = TimeSpan.FromHours(60);
             return hoursPerWeek > weeklyLimit;
-        }
-
-        
+        }        
     }
 }
