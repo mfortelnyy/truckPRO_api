@@ -1,429 +1,280 @@
-﻿using Docker.DotNet.Models;
+using System.Numerics;
+using AutoMapper;
+using Docker.DotNet.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Graph.Education.Classes.Item.Assignments.Item.Submissions.Item.Return;
+using truckPro_api.DTOs;
 using truckPRO_api.Data;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
 
 namespace truckPRO_api.Services
 {
-    public class LogEntryService(ApplicationDbContext context) : ILogEntryService
+    public class LogEntryService(ApplicationDbContext context, IMapper mapper) : ILogEntryService
     {
-        public async Task<string> CreateOffDutyLog(LogEntry logEntry)
-        {
-            var userId = logEntry.UserId;
-            var user = await context.User.Where(u => u.Id == userId).FirstOrDefaultAsync();
-            logEntry.User = user;
-
-            if (await HasActiveOffDutyLog(userId))
-            {
-                throw new InvalidOperationException("Cannot create a Duty Off log. The user is currently OFF Duty");
-            }
-
-            var activeLogEntryDriving = await context.LogEntry
-                                                     .Where(logEntry => userId == logEntry.UserId &&
-                                                                        
-                                                                     (logEntry.LogEntryType == LogEntryType.OnDuty ||
-                                                                     logEntry.LogEntryType == LogEntryType.Driving) &&
-                                                                     logEntry.EndTime == null)
-                                                     .ToListAsync();
-           
-            
-            //ends all active logs
-            if (activeLogEntryDriving.Count != 0)
-            {
-                foreach (var le in activeLogEntryDriving)
-                {
-                    
-                    le.EndTime = DateTime.Now;
-                    context.LogEntry.Update(le);  
-                    
-                }
-            }
-            context.Add(logEntry);
-            await context.SaveChangesAsync();
-            return logEntry.Id.ToString();
-        }
-
-    
-        public async Task<string> CreateDrivingLog(LogEntry logEntry)
-        {
-            var userId = logEntry.UserId;
-            var user = await context.User.Where(u => u.Id == userId).FirstOrDefaultAsync();
-
-            //if there is no on duty log 
-            if (!await HasActiveOnDuty(userId))
-            {
-                //if there is no on duty log then create one
-                await CreateOnDutyLog(new LogEntry
-                {
-                    User = user,
-                    UserId = userId,
-                    LogEntryType = LogEntryType.OnDuty,
-                    StartTime = DateTime.Now
-                });
-                
-                //throw new InvalidOperationException( "Cannot create a driving log. The user does not have an active on-duty log. ");
-            }
-
-            //if there is already a driving log
-            if(await HasActiveDriving(userId))
-            {
-                throw new InvalidOperationException("Cannot create a new driving log. The user already has an active driving log.");
-
-            }
-
-            //if (!await ValidLastLogEntryTimeFrame(userId)) throw new InvalidOperationException("Cannot create a driving log. The user does not have an active on-duty log.");
-            else
-            {
-                context.Add(logEntry);
-                await context.SaveChangesAsync();
-            }
-
-            return logEntry.Id.ToString();
-
-        }
+        private readonly IMapper _mapper = mapper;
 
         public async Task<string> CreateOnDutyLog(LogEntry logEntry)
         {
+            //if new user then limit checks are not performed
+            var newUser = await IsNewUser(logEntry.UserId);
 
-            var userId = logEntry.UserId;
-            var user = await context.User.Where(u => u.Id == userId).FirstOrDefaultAsync();
-            logEntry.User = user;
-
-            //check for existing logs that may conflict
-            if(await HasActiveOnDutyOrDrivingLog(userId)) 
+            if(await HasActiveOnDutyCycle(logEntry.UserId))
             {
-                throw new InvalidOperationException("User has already has an active on-duty or driving log!");
+                return "You can not start a new On Duty Log Entry.\nYou have an active On Duty Log!";
             }
 
-            //check if on duty is started after the 10 hour off-duty
-            if (!await IsValidStartTimeAfterBreak(userId))
+            if(await HasExceededWeeklyOnDutyLimit(logEntry.UserId))
             {
-                throw new InvalidOperationException("On-duty log entry cannot start before completing the required off duty period. (10 hours)");
+                return "Weekly on-duty limit exceeded.\nYou cannot be on-duty for more than 40 hours in a week.";
             }
 
-            if(await HasActiveOffDutyLog(userId))
+            // Ensure there is a valid off-duty cycle before the on-duty shift
+            //HasValidOffDutyCycle end current off duty if rest period is satisfied
+            if (newUser == false && !await HasValidOffDutyCycle(logEntry.UserId))
             {
-                try
-                {
-                    //if there is an active off duty log then end it
-                    var stopped = await StopOffDutyLog(userId);
-                   
-                }catch(Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    throw new InvalidOperationException("Cannot create a new on-duty log.");
-                }
+                return "You need to take a break for at least 10 hours before starting a new on-duty shift.";
             }
 
-            //if all checks are passed then create and save logentry to db
+            logEntry.StartTime = DateTime.UtcNow;
+            logEntry.LogEntryType = LogEntryType.OnDuty;
+
             context.LogEntry.Add(logEntry);
             await context.SaveChangesAsync();
 
-
-
-            return logEntry.Id.ToString();
-
+            return "On-duty log created successfully."; 
         }
-
-
-        public async Task<string> StopDrivingLog(int userId)
-        {
-            //find last driving log
-            LogEntry activeDrivingLog = await context.LogEntry.Where(u => u.UserId == userId && 
-                                                                              u.LogEntryType == LogEntryType.Driving &&
-                                                                              u.EndTime == null)
-                                                         .OrderByDescending(u => u.StartTime)
-                                                         .FirstAsync() ?? throw new InvalidOperationException("No Active Driving Log Found!");
-            // if found then update it's endtime
-            activeDrivingLog.EndTime = DateTime.Now;
-            context.Update(activeDrivingLog);
-            await context.SaveChangesAsync();
-
-            return $"Driving Log with {activeDrivingLog.Id} Ended";
-        }
-
-        public async Task<string> StopOnDutyLog(int userId)
-        {
-            //find last on duty log
-            LogEntry activeOnDutyLog = await context.LogEntry.Where(u => u.UserId == userId &&
-                                                                              u.LogEntryType == LogEntryType.OnDuty &&
-                                                                              u.EndTime == null)
-                                                         .OrderByDescending(u => u.StartTime)
-                                                         .FirstAsync() ?? throw new InvalidOperationException("No On Duty Log Found!");
-            // if found then update it's endtime
-            activeOnDutyLog.EndTime = DateTime.Now;
-            context.Update(activeOnDutyLog);
-            await context.SaveChangesAsync();
-
-            return $"On Duty Log with {activeOnDutyLog.Id} Ended";
-        }
-
-        public async Task<string> StopOffDutyLog(int userId)
-        {
-            //find last off Duty log
-            Console.WriteLine(userId);
-
-            LogEntry activeOffDutyLog = await context.LogEntry.Where(u => u.UserId == userId &&
-                                                                              u.LogEntryType == LogEntryType.OffDuty &&
-                                                                              u.EndTime == null)
-                                                         .OrderByDescending(u => u.StartTime)
-                                                         .FirstOrDefaultAsync() ?? throw new InvalidOperationException("No Off Duty Log Found!");
-            // if found then update it's endtime
-            Console.WriteLine(activeOffDutyLog.StartTime);
-            activeOffDutyLog.EndTime = DateTime.Now;
-            context.Update(activeOffDutyLog);
-            await context.SaveChangesAsync();
-
-            return $"Off Duty Log with {activeOffDutyLog.Id} Ended";
-        }
-
         
-        public async Task<List<LogEntry>> GetActiveLogEntries(int driverId)
+        public async Task<string> CreateDrivingLog(LogEntry logEntry)
         {
-            Console.WriteLine($"driverId={driverId}");
-
-            
-            var activeLogs = await context.LogEntry
-                .Where(log => log.UserId == driverId && log.EndTime == null)
-                .ToListAsync(); 
-
-          
-            Console.WriteLine($"Number of active logs: {activeLogs.Count}");
-            
-            if (activeLogs.Count == 0)
+            if(await HasActiveDrivingCycle(logEntry.UserId))
             {
-                throw new InvalidOperationException("No active logs available!");
+                return "You can not start a new Driving Log Entry.\nYou have an active Driving Log!";
             }
 
-            return activeLogs;
+            //if there is no active on duty log then create one
+            if(!await HasActiveOnDutyCycle(logEntry.UserId))
+            {
+                LogEntry newOnDutyLog = new LogEntry
+                {
+                    UserId = logEntry.UserId,
+                    StartTime = DateTime.UtcNow,
+                    EndTime = null,
+                    LogEntryType = LogEntryType.OnDuty,
+                    ImageUrls = null,
+                };
+                var res = await CreateOnDutyLog(newOnDutyLog);
+                if(!res.Contains("successfully"))
+                {
+                    throw new InvalidOperationException("Something went wrong. Please, try again later!");
+                }
+            }
+
+            //establish relationship between the on duty log (parent) and the driving log
+            var activeOnDutyLog = await GetActiveOnDutyLog(logEntry.UserId);
+            logEntry.ParentLogEntryId = activeOnDutyLog.Id;
+
+            //check if the driver has exceeded the daily driving limit of 11 hours
+            if (await HasExceededDailyDrivingLimit(logEntry))
+            {
+                return "Driving limit exceeded.\nYou cannot drive for more than 11 hours today.";
+            }
+
+            //check if the driver has exceeded the 14-hour on-duty limit
+            if (await HasExceededOnDutyLimit(logEntry.UserId))
+            {
+                return "On-duty limit exceeded.\nYou cannot be on-duty for more than 14 hours today.";
+            }
+
+            logEntry.StartTime = DateTime.UtcNow;
+            logEntry.LogEntryType = LogEntryType.Driving;
+            context.LogEntry.Add(logEntry);
+            await context.SaveChangesAsync();
+
+            return "Driving Log Started successfully.";
         }
 
 
-        // Fetch total driving hours for the driver in the last week (starting from the most recent Monday)
-        public async Task<TimeSpan> GetTotalDrivingHoursLastWeek(int userId)
+        public async Task<string> CreateOffDutyLog(LogEntry logEntry)
         {
-        
-            var currentDate = DateTime.UtcNow;
-            // find the most recent Monday
-            var daysSinceMonday = (int)currentDate.DayOfWeek - (int)DayOfWeek.Monday;
-            var startOfWeek = currentDate.AddDays(-daysSinceMonday).Date;
+            if(await HasActiveOffDutyCycle(logEntry.UserId))
+            {
+                return "You can not start a new Off Duty Log Entry.\nYou have an active Off Duty Log!";
+            }
 
-            // fetch driving logs for the user from the most recent Monday
-            var drivingLogs = await context.LogEntry
-                                        .Where(log => log.UserId == userId 
-                                                    && log.LogEntryType == LogEntryType.Driving 
-                                                    && log.StartTime >= startOfWeek)
-                                        .ToListAsync() ?? throw new InvalidOperationException("No driving logs available!");;
-            var totalDrivingTime = drivingLogs.Sum(log => log.EndTime != null 
-                                ? (log.EndTime.Value - log.StartTime).TotalHours 
-                                : (DateTime.Now - log.StartTime).TotalHours);
-            return TimeSpan.FromHours(totalDrivingTime);
+            if(await HasActiveOnDutyCycle(logEntry.UserId))
+            {
+                await StopOnDutyLog(logEntry.UserId);
+            }
+
+            logEntry.StartTime = DateTime.UtcNow;
+            logEntry.LogEntryType = LogEntryType.OffDuty;
+            context.LogEntry.Add(logEntry);
+            await context.SaveChangesAsync();
+            
+            return "Off Duty Log Started successfully.";
+
         }
 
-         // Fetch total on duty hours for the driver in the last week (starting from the most recent Monday)
-        public async Task<TimeSpan> GetTotalOnDutyHoursLastWeek(int userId)
+        //In context of Off duty cycle break is sleep
+        //For On duty cycle break is just a break (30 min after 8hrs)
+        public async Task<string> CreateBreakLog(LogEntry logEntry)
         {
-        
-            var currentDate = DateTime.UtcNow;
-            // find the most recent Monday
-            var daysSinceMonday = (int)currentDate.DayOfWeek - (int)DayOfWeek.Monday;
+            var hasActiveOffDuty = await HasActiveOffDutyCycle(logEntry.UserId);
+            var hasActiveOnDuty = await HasActiveOnDutyCycle(logEntry.UserId);
 
-            var startOfWeek = currentDate.AddDays(-daysSinceMonday).Date;
-            Console.WriteLine($"startOfWeek=   {startOfWeek}");
+            if(await HasActiveBreakCycle(logEntry.UserId))
+            {
+                return "You can not start a new Break Log Entry.\nYou have an active Break Log!";
+            }
 
-            // fetch driving logs for the user from the most recent Monday
-            var onDutyLogs = await context.LogEntry
-                                        .Where(log => log.UserId == userId 
-                                                    && log.LogEntryType == LogEntryType.OnDuty 
-                                                    && log.StartTime >= startOfWeek)
-                                        .ToListAsync() ?? throw new InvalidOperationException("No On Duty logs available!");;
+            if(hasActiveOffDuty && hasActiveOnDuty)
+            {
+                return "Something went wrong. Please try again later!";
+            }
 
-            var totalOnDutyTime = onDutyLogs.Sum(log => log.EndTime != null 
-                                ? (log.EndTime.Value - log.StartTime).TotalHours 
-                                : (DateTime.Now - log.StartTime).TotalHours);
-                Console.WriteLine($"totalOnDutyTime=   {totalOnDutyTime}");
-                                
-            return TimeSpan.FromHours(totalOnDutyTime);
+            if(hasActiveOffDuty)
+            {
+                var activeOffDuty = await GetActiveOffDutyLog(logEntry.UserId);
+                logEntry.StartTime = DateTime.UtcNow;
+                logEntry.LogEntryType = LogEntryType.Break;
+                logEntry.ParentLogEntryId = activeOffDuty!.Id;
+                context.LogEntry.Add(logEntry);
+                await context.SaveChangesAsync();
+                return $"Sleep Log Started successfully!";
+            }
+            else if(hasActiveOnDuty)
+            {
+                var activeOnDuty = await GetActiveOnDutyLog(logEntry.UserId);
+                logEntry.StartTime = DateTime.UtcNow;
+                logEntry.LogEntryType = LogEntryType.Break;
+                logEntry.ParentLogEntryId = activeOnDuty!.Id;
+                context.LogEntry.Add(logEntry);
+                await context.SaveChangesAsync();
+                return $"Break Log Started successfully!";
+            }
+
+            return "Something went wrong. Please try again later!";
         }
 
-         // Fetch total off duty hours for the driver in the last week (starting from the most recent Monday)
+       
+
+        public async Task<LogEntryParent?> GetActiveLogEntries(int driverId)
+        {
+            //return await context.LogEntry.Where(logEntry => logEntry.UserId == driverId && logEntry.EndTime == null).ToListAsync();
+            //add DTO OnDuty/OffDuty main that contains a list of other logentries with parentid the same as id of onduty/offduty
+            var activeOnDutyLog = await GetActiveOnDutyLog(driverId);
+            var activeOffDutyLog = await GetActiveOffDutyLog(driverId);
+            var parentLogentryActive = new LogEntryParent();
+            //holds the main active log - off duty or on duty with all the children logs
+
+            if (activeOnDutyLog == null && activeOffDutyLog == null)
+            {
+                return null;
+            }
+            else if (activeOnDutyLog != null && activeOffDutyLog != null)
+            {
+                return null;
+            }
+            else if(activeOffDutyLog != null && activeOnDutyLog == null)
+            {
+                parentLogentryActive = _mapper.Map<LogEntryParent>(activeOffDutyLog);
+
+                //get all child logs for 'Off Duty'
+                var childrenLogs = await context.LogEntry.Where(log => log.UserId == driverId 
+                                && log.ParentLogEntryId == activeOffDutyLog.Id && log.EndTime == null)
+                                .OrderBy(log => log.StartTime)
+                                .ToListAsync();
+
+                parentLogentryActive.ChildLogEntries = childrenLogs;
+            }
+            else if(activeOnDutyLog != null && activeOffDutyLog == null)
+            {
+                parentLogentryActive = _mapper.Map<LogEntryParent>(activeOnDutyLog);
+
+                //get all child logs for 'On Duty'
+                var childrenLogs = await context.LogEntry.Where(log => log.UserId == driverId
+                                && log.ParentLogEntryId == activeOnDutyLog.Id && log.EndTime == null)
+                                .OrderBy(log => log.StartTime)
+                                .ToListAsync();
+                parentLogentryActive.ChildLogEntries = childrenLogs;
+            }
+            return parentLogentryActive;
+        }
+
+        public async Task<List<LogEntryParent>> GetAllLogs(int driverId)
+        {
+            var parentLogentries = new List<LogEntryParent>();
+            var allParentLogEntries = await context.LogEntry.Where(log => log.UserId == driverId
+                                && (log.LogEntryType == LogEntryType.OnDuty || log.LogEntryType == LogEntryType.OffDuty))
+                                .OrderBy(log=>log.StartTime).ToListAsync();
+
+
+            foreach(var parentLogEntry in allParentLogEntries)
+            {
+                var childrenLogs = await context.LogEntry.Where(log => log.ParentLogEntryId == parentLogEntry.Id && log.UserId == driverId)
+                                                   .OrderBy(log => log.StartTime).ToListAsync();
+
+                var newParentLog = _mapper.Map<LogEntryParent>(parentLogEntry);
+                newParentLog.ChildLogEntries = childrenLogs;
+                parentLogentries.Add(newParentLog);
+            }
+            return parentLogentries;
+            
+        }
+
+        public async Task<TimeSpan> GetTotalOnDutyHoursLastWeek7days(int userId)
+        {
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+
+            // calc total on-duty hours in the last 7 days
+            var totalOnDutyHours = TimeSpan.FromHours(0);
+            var allDrivingLogsLast7days= await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.StartTime >= sevenDaysAgo).ToListAsync();
+            
+            foreach(var log in allDrivingLogsLast7days)
+            {
+                var duration = log.EndTime != null ? log.EndTime - log.StartTime : DateTime.UtcNow - log.StartTime;
+                totalOnDutyHours += duration.Value;
+            }
+
+            return totalOnDutyHours;
+        }
+
         public async Task<TimeSpan> GetTotalOffDutyHoursLastWeek(int userId)
         {
-        
-            var currentDate = DateTime.UtcNow;
-            // find the most recent Monday
-            var daysSinceMonday = (int)currentDate.DayOfWeek - (int)DayOfWeek.Monday;
-            var startOfWeek = currentDate.AddDays(-daysSinceMonday).Date;
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
 
-            // fetch driving logs for the user from the most recent Monday
-            var offDutyLogs = await context.LogEntry
-                                        .Where(log => log.UserId == userId 
-                                                    && log.LogEntryType == LogEntryType.OffDuty 
-                                                    && log.StartTime >= startOfWeek)
-                                        .ToListAsync() ?? throw new InvalidOperationException("No Off Duty logs available!");;
-
-            var totalOffDutyTime = offDutyLogs.Sum(log => log.EndTime != null 
-                                ? (log.EndTime.Value - log.StartTime).TotalHours 
-                                : (DateTime.Now - log.StartTime).TotalHours);
-
-            return TimeSpan.FromHours(totalOffDutyTime);
-        }
-
-
-        //Validation Methods
-        //Checks to validate if the log can be added
-        private async Task<bool> HasActiveOnDutyOrDrivingLog(int userId)
-
-        { 
-            Console.WriteLine($"userid   {userId}");
-            return await context.LogEntry.AnyAsync(logEntry => logEntry.UserId == userId &&
-                                                                  (logEntry.LogEntryType == LogEntryType.OnDuty || logEntry.LogEntryType == LogEntryType.Driving) &&
-                                                                  logEntry.EndTime == null);
-        }
-
-        private async Task<bool> IsValidStartTimeAfterBreak(int userId)
-
-        {
-            var allOffDuty = await context.LogEntry
-                                          .Where(logEntry => logEntry.UserId == userId && logEntry.LogEntryType == LogEntryType.OffDuty).ToListAsync();
-
-            var activeOffDuty = await context.LogEntry
-                                          .Where(logEntry => logEntry.UserId == userId && logEntry.LogEntryType == LogEntryType.OffDuty && logEntry.EndTime == null)
-                                          .OrderByDescending(logEntry => logEntry.StartTime)
-                                          .FirstOrDefaultAsync();
-
-            var lastOnDutyLog = await context.LogEntry
-                                          .Where(logEntry => logEntry.UserId == userId && logEntry.EndTime != null && logEntry.LogEntryType == LogEntryType.OnDuty)
-                                          .OrderByDescending(logEntry => logEntry.EndTime)
-                                          .FirstOrDefaultAsync();
-
-            // if (activeOffDuty != null)
-            // {
-            //     var breakDuration = DateTime.Now - activeOffDuty.StartTime;
-            //     if (breakDuration < TimeSpan.FromHours(10))
-            //     {
-            //         return false; //"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.";
-            //     }
-            //     else
-            //     {
-            //         return true;
-            //         // // update the end time of the break log to now
-            //         // activeOffDuty.EndTime = DateTime.Now;
-            //         // context.LogEntry.Update(activeOffDuty);
-            //         // await context.SaveChangesAsync();
-            //         // // break duration is ended when on duty is strated
-            //         // return true; 
-            //     }
-
-            // }
-            // else --  active off duty is iirelevant 
-            //since time after last on duty matters
-
-            if(lastOnDutyLog!=null)
-            {  
-                Console.WriteLine("last on duty ont null");
-                var sinceLastOnDutyDuration = DateTime.Now - lastOnDutyLog.EndTime;
-                var onDutyDuration = lastOnDutyLog.EndTime - lastOnDutyLog.StartTime;
-                Console.WriteLine($"last on duty dureation - {onDutyDuration}   since last {sinceLastOnDutyDuration} {sinceLastOnDutyDuration < TimeSpan.FromHours(10)}");
-
-                if (sinceLastOnDutyDuration < TimeSpan.FromHours(10) && onDutyDuration > TimeSpan.FromHours(13))
-                {
-                    var hoursLeft = TimeSpan.FromHours(10) - sinceLastOnDutyDuration;
-                    var message  = $"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty. You need {hoursLeft.ToString} hours Off duty.";
-                    
-                    //throw new InvalidOperationException("Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.");
-                    return false; //"Cannot start a new on-duty log. The driver must have at least 10 hours off-duty.";
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            //enusres new drivers can start the log
-            else if(lastOnDutyLog == null ) 
-            {
-                Console.WriteLine("last on duty and off duty are null");
-                return true;
-            } 
-            Console.WriteLine($"{activeOffDuty == null} {lastOnDutyLog != null} {lastOnDutyLog?.Id}");
-            return false;     
-        }
-
-        //driving log entry can be added after starting the shift (on duty) 
-        private async Task<bool> HasActiveOnDuty(int userId)
-        {
-            var result = await context.LogEntry.Where(u => u.UserId == userId &&
-                                                                        u.LogEntryType == LogEntryType.OnDuty&&
-                                                                        u.EndTime == null).ToListAsync();
-            if (result.Count == 1) return true;
-            return false;
+            // calc total on-duty hours in the last 7 days
+            var totalOffDutyHours = TimeSpan.FromHours(0);
+            var allOffDutyLogsLast7days= await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OffDuty && log.StartTime >= sevenDaysAgo).ToListAsync();
             
-        }
-
-        //new driving log can not be added because an active driving log is in the system
-        public async Task<bool> HasActiveDriving(int userId)
-        {
-            return await context.LogEntry.AnyAsync(u => u.UserId == userId &&
-                                                                        u.LogEntryType == LogEntryType.Driving &&
-                                                                        u.EndTime == null);
-        }
-
-        //gets the last log entry for the user
-        public async Task<bool> ValidLastLogEntryTimeFrame(int userId)
-        {
-            var lastLogEntry = await context.LogEntry
-                                  .Where(u => u.UserId == userId && u.LogEntryType == LogEntryType.Driving)
-                                  .OrderByDescending(u => u.StartTime).ToListAsync();
-                                  
-
-            if (lastLogEntry == null) return true;
-
-            
-
-            if (lastLogEntry[0].LogEntryType == LogEntryType.OnDuty || lastLogEntry[0].LogEntryType == LogEntryType.Driving) 
+            foreach(var log in allOffDutyLogsLast7days)
             {
-                var LogDuration = lastLogEntry[0].EndTime - lastLogEntry[0].StartTime;
-                //testing -> if on duty log was active more than 14 hours update the endtime and return false
-                if (LogDuration > TimeSpan.FromHours(14))
-                {
-                    //end on duty log and does not allow new driving log
-                    // lastLogEntry.EndTime = lastLogEntry.StartTime + TimeSpan.FromHours(14);
-                    // context.Update(lastLogEntry);
-                    // await context.SaveChangesAsync();
-                    return false;
-                }
-                //if on duty log duration is less than 14 hrs -> allow addding driving log
-                else
-                {
-                    return true;
-                }
+                var duration = log.EndTime != null ? log.EndTime - log.StartTime : DateTime.UtcNow - log.StartTime;
+                totalOffDutyHours += duration.Value;
             }
-
-            //if any other type of logentry is last then no driving is allowed
-            return false;
+            return totalOffDutyHours;            
         }
 
-        public async Task<List<LogEntry>> GetActiveLogs(int userId)
+        public async Task<TimeSpan> GetTotalDrivingHoursLastWeek(int userId)
         {
-            var activeLogs = await context.LogEntry
-                                  .Where(u => u.UserId == userId && u.EndTime == null)
-                                  .OrderByDescending(u => u.StartTime)
-                                  .ToListAsync() ?? throw new InvalidOperationException("No active logs found!");
-            return activeLogs;
- 
+            var seveDaysAgo = DateTime.UtcNow.AddDays(-7);
+            var totalDrivingHours = TimeSpan.FromHours(0);
+            var allDrivingLogsLast7days= await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.Driving && log.StartTime >= seveDaysAgo).ToListAsync();
+                
+            foreach(var log in allDrivingLogsLast7days)
+            {
+                var duration = log.EndTime != null ? log.EndTime - log.StartTime : DateTime.UtcNow - log.StartTime;
+                totalDrivingHours += duration.Value;
+            }
+            return totalDrivingHours;
         }
 
-        public async Task<List<LogEntry>> GetAllLogs(int driverId)
-        {
-            var allLogs = await context.LogEntry
-                                  .Where(u => u.UserId == driverId)
-                                  .OrderByDescending(u => u.StartTime)
-                                  .ToListAsync() ?? throw new InvalidOperationException("No history of logs!");
-            return allLogs;
- 
-        }
+    
 
         public async Task<bool> NotifyManagers(int userId)
         {
@@ -432,15 +283,231 @@ namespace truckPRO_api.Services
             var managers = await context.User.Where(u => u.Role == UserRole.Manager && u.CompanyId == user.CompanyId).ToListAsync();
             return false;
         }
-        
 
-        private async Task<bool> HasActiveOffDutyLog(int userId)
-        { 
-            var offDuty = await context.LogEntry.Where(u => u.UserId == userId &&
-                                                u.LogEntryType == LogEntryType.OffDuty &&
-                                                u.EndTime == null).FirstOrDefaultAsync();
-            return offDuty == null ? false : true;
+        public async Task<string> StopDrivingLog(int userId)
+        {
+            //locate active on duty 
+            var activeOnDuty = await GetActiveLogEntries(userId);
+            if (activeOnDuty == null)
+            {
+                return "No active On Duty Log found.";
+            }
+            //use active on duty as parent to locate the current driving log
+            var activeDrivingLog = await context.LogEntry.Where(log => log.UserId == userId
+                                && log.ParentLogEntryId == activeOnDuty.Id
+                                && log.LogEntryType == LogEntryType.Driving
+                                && log.EndTime == null).FirstOrDefaultAsync();
+            if(activeDrivingLog == null)
+            {
+                return "No active Driving Log found.";
+            }
+            //if found driving log -> end it and save changes
+            activeDrivingLog.EndTime = DateTime.UtcNow;
+            context.Update(activeDrivingLog);
+            await context.SaveChangesAsync();
+            return "Driving Log Stopped successfully!";
+
         }
 
+        public async Task<string> StopOffDutyLog(int userId)
+        {
+            LogEntry? activeOffDutyLog = await GetActiveOffDutyLog(userId);
+            if (activeOffDutyLog == null)
+            {
+                return "No active Off Duty Log found.";
+            }
+
+            // if found then update it's endtime
+            activeOffDutyLog.EndTime = DateTime.Now;
+            context.Update(activeOffDutyLog);
+            await context.SaveChangesAsync();
+
+            return $"Off Duty Log Stopped successfully";
+        }
+
+        public async Task<string> StopOnDutyLog(int userId)
+        {
+            var activeOnDutyLog = await GetActiveOnDutyLog(userId);
+            if (activeOnDutyLog == null)
+            {
+                return "No active On Duty Log found.";
+            }
+
+            var activePerOnDuty = await context.LogEntry
+                            .Where(l => l.UserId == userId 
+                            && l.ParentLogEntryId == activeOnDutyLog.Id 
+                            && l.EndTime == null).ToListAsync();
+            foreach(var log in activePerOnDuty)
+            {
+                log.EndTime = DateTime.UtcNow;
+                context.Update(log);
+                
+            }
+            activeOnDutyLog.EndTime = DateTime.UtcNow;
+            context.Update(activeOnDutyLog);
+            await context.SaveChangesAsync();
+            return $"On Duty Log Stopped successfully as well as {activePerOnDuty.Count} other related logs";
+
+        }
+
+
+
+        // Limit checks - helper funcitons
+
+
+        // 1 - Limit checks for daily driving limit
+        public async Task<bool> HasExceededDailyDrivingLimit(LogEntry le)
+        {
+            //locate current driver's 'On Duty' log
+            var activeOnDutyLog = await GetActiveOnDutyLog(le.UserId) ?? throw new InvalidOperationException("No current On Duty Log");
+
+            //retrieve all driving logs for the current on duty log
+            var DrivingLogsPerOnDuty = await context.LogEntry
+                .Where(log => log.UserId == le.UserId && log.ParentLogEntryId == activeOnDutyLog.Id && log.ParentLogEntryId == le.ParentLogEntryId && log.LogEntryType == LogEntryType.Driving && log.EndTime != null)
+                .ToListAsync();
+
+            //calculate total driving hours for the current On Duty log
+            double totalDrivingHoursPerOnDuty = DrivingLogsPerOnDuty.Sum(log =>
+                (log.EndTime!.Value - log.StartTime).TotalHours);
+
+            //check if limit exceeded 
+            return totalDrivingHoursPerOnDuty > 11;
+        }
+
+        // 2 - Limit check for on-duty hours (14 hours max)
+        public async Task<bool> HasExceededOnDutyLimit(int userId)
+        {
+            //locate current driver's 'On Duty' log
+            var activeOnDutyLog = await context.LogEntry
+                                        .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.EndTime == null)
+                                        .FirstOrDefaultAsync() ?? throw new InvalidOperationException("No current On Duty Log");
+
+            DateTime currentDateTimeUtc = DateTime.UtcNow;
+            TimeSpan currentOnDutyHours = activeOnDutyLog.StartTime - currentDateTimeUtc;
+
+            return currentOnDutyHours > TimeSpan.FromHours(14);
+        }
+
+        //LAST CHECK
+        public async Task<bool> HasValidOffDutyCycle(int userId)
+        {
+            //get first off duty with null end time = endtime == null
+            var currentOffDutyCycleLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OffDuty && log.EndTime == null)
+                .FirstOrDefaultAsync(); 
+            
+            LogEntry? lastOffDutyLog = null;
+            //if there is no current of duty log then check in completed off duty logs
+            if(currentOffDutyCycleLog == null)
+            {
+              lastOffDutyLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OffDuty && log.EndTime != null)
+                .OrderByDescending(log => log.EndTime)
+                .FirstOrDefaultAsync();
+            }
+
+            //if both are null something wrong since new users with not logs wouldn't be checked
+            if (lastOffDutyLog == null && currentOffDutyCycleLog == null)
+            {
+                return false;
+            }
+            else if (lastOffDutyLog == null && currentOffDutyCycleLog != null)
+            {
+                //calculate duration for of the current of duty log
+                var offDutyDuration = DateTime.UtcNow - currentOffDutyCycleLog.StartTime;
+                var hasValidRest = offDutyDuration.TotalHours >= 10;
+                //THIS IS THE LAST CHECK SO IF THREASHOLD FOR REST REACHED - STOP OFF DUTY WHEN CREATE ON DUTY IS RECEIVED
+                if (hasValidRest)
+                {
+                    //end off duty and save changes
+                    var res = await StopOffDutyLog(userId);
+                    if (res.Contains("successfully"))
+                    {
+                        return true;
+                    }     
+                }
+                return hasValidRest;
+            }
+            else if (lastOffDutyLog != null && currentOffDutyCycleLog == null)
+            {
+                //calculate duration of last off duty log
+                var offDutyDuration = lastOffDutyLog.EndTime!.Value - lastOffDutyLog.StartTime;
+                return offDutyDuration.TotalHours >= 10;
+            }
+            return false; 
+        }
+
+        public async Task<bool> IsNewUser(int userId)
+        {
+            var lastLogEntry = await context.LogEntry
+                .Where(log => log.UserId == userId)
+                .OrderByDescending(log => log.StartTime)
+                .FirstOrDefaultAsync();
+
+            return lastLogEntry == null;
+        }
+
+        public async Task<bool> HasActiveOnDutyCycle(int userId)
+        {
+            var activeOnDutyLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.EndTime == null)
+                .FirstOrDefaultAsync();
+
+            return activeOnDutyLog != null;
+        }
+
+        public async Task<bool> HasActiveDrivingCycle(int userId)
+        {
+            var activeDrivingLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.Driving && log.EndTime == null)
+                .FirstOrDefaultAsync();
+
+            return activeDrivingLog != null;
+        }
+
+        public async Task<LogEntry> GetActiveOnDutyLog(int userId)
+        {
+            var activeOnDutyLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.EndTime == null)
+                .FirstOrDefaultAsync() ?? throw new InvalidOperationException("No current On Duty Log");
+
+            return activeOnDutyLog;
+        }
+
+        public async Task<LogEntry?> GetActiveOffDutyLog(int userId)
+        {
+             return await context.LogEntry.Where(u => u.UserId == userId &&
+                                                u.LogEntryType == LogEntryType.OffDuty &&
+                                                u.EndTime == null)
+                                            .OrderByDescending(u => u.StartTime)
+                                            .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> HasActiveOffDutyCycle(int userId)
+        {
+            var activeOffDutyLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OffDuty && log.EndTime == null)
+                .FirstOrDefaultAsync();
+
+            return activeOffDutyLog != null;
+        }
+
+        public async Task<bool> HasActiveBreakCycle(int userId)
+        {
+            var activeBreakLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.Break && log.EndTime == null)
+                .FirstOrDefaultAsync();
+
+            return activeBreakLog != null;
+        }
+
+        public async Task<bool> HasExceededWeeklyOnDutyLimit(int userId)
+        {
+            var hoursPerWeek = await GetTotalOnDutyHoursLastWeek7days(userId);
+            var weeklyLimit = TimeSpan.FromHours(60);
+            return hoursPerWeek > weeklyLimit;
+        }
+
+        
     }
 }
