@@ -23,8 +23,8 @@ builder.Logging.AddConsole();
 var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
 if (string.IsNullOrEmpty(firebaseCredentialsPath))
 {
-    Console.WriteLine("Firebase credentials path not found in environment variables.");
-    //throw new Exception("Firebase credentials path not found in environment variables.");
+    //Console.WriteLine("Firebase credentials path not found in environment variables.");
+    throw new Exception("Firebase credentials path not found in environment variables.");
 }
 else
 {
@@ -43,7 +43,7 @@ FirebaseApp.Create(new AppOptions()
     Credential = GoogleCredential.FromFile(firebaseCredentialsPath)
     //Credential = GoogleCredential.FromJson(gJson)
 });
-Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
+//Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
 
 
 //Add Razor pages
