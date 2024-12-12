@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using AutoMapper;
 using Docker.DotNet.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -20,12 +20,12 @@ namespace truckPRO_api.Services
             //if new user then limit checks are not performed
             var newUser = await IsNewUser(logEntry.UserId);
 
-            if(await HasActiveOnDutyCycle(logEntry.UserId))
+            if(newUser == false && await HasActiveOnDutyCycle(logEntry.UserId))
             {
                 return "You can not start a new On Duty Log Entry.\nYou have an active On Duty Log!";
             }
 
-            if(await HasExceededWeeklyOnDutyLimit(logEntry.UserId))
+            if(newUser == false && await HasExceededWeeklyOnDutyLimit(logEntry.UserId))
             {
                 return "Weekly on-duty limit exceeded.\nYou cannot be on-duty for more than 40 hours in a week.";
             }
@@ -469,7 +469,7 @@ namespace truckPRO_api.Services
         {
             var activeOnDutyLog = await context.LogEntry
                 .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.EndTime == null)
-                .FirstOrDefaultAsync() ?? throw new InvalidOperationException("No current On Duty Log");
+                .FirstOrDefaultAsync();
 
             return activeOnDutyLog;
         }
