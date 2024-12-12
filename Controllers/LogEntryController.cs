@@ -43,6 +43,22 @@ namespace truckPRO_api.Controllers
         }
 
 
+        [HttpPost]
+        [Route("TestPush")]
+        public async Task<IActionResult> TestPush()
+        {
+            await _userService.GetManagerFcmTokensAsync(1);
+            await _hubContext.Clients.Group("1").SendAsync("ReceiveNotification", "Test Push Notification!");
+            
+            var sent = await _firebaseService.SendTestPushToManagers();
+            if (sent)
+            {
+                return Ok("sent succ!");
+            }
+            return Conflict("failed to send");
+
+        }
+
 
         //test endpoint
         [HttpPost]
@@ -114,7 +130,7 @@ namespace truckPRO_api.Controllers
 
 
                 //Console.WriteLine(userId);
-                return Ok($"OnDutyLogEntry with id {result} was added");
+                return Ok(result);
             }
             catch (InvalidOperationException ex)
             {
@@ -126,24 +142,7 @@ namespace truckPRO_api.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("TestPush")]
-        public async Task<IActionResult> TestPush()
-        {
-            await _userService.GetManagerFcmTokensAsync(1);
-            await _hubContext.Clients.Group("1").SendAsync("ReceiveNotification", "Test Push Notification!");
-            
-            var sent = await _firebaseService.SendTestPushToManagers();
-            if (sent)
-            {
-                return Ok("sent succ!");
-            }
-            return Conflict("failed to send");
-
-        }
-
-
-
+        
 
         [HttpPost]
         [Route("createDrivingLog")]
@@ -257,6 +256,42 @@ namespace truckPRO_api.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("createBreakLog")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> CreateBreakLog()
+        {
+            try
+            {
+                var userId = User.FindFirst("userId").Value;
+
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in the token.");
+                }
+
+                LogEntry logEntry = new()
+                {
+                    UserId = int.Parse(userId),
+                    StartTime = DateTime.Now,
+                    EndTime = null,
+                    LogEntryType = LogEntryType.Break,
+                    ImageUrls = null,
+                };
+
+                var res = await _logEntryService.CreateBreakLog(logEntry);
+                return Ok($"Break log with id {res} was added");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
 
         [HttpPost]
         [Route("stopDrivingLog")]
@@ -341,22 +376,20 @@ namespace truckPRO_api.Controllers
             }
         }
 
-
-        [HttpGet]
-        [Route("getActive")]
+        [HttpPost]
+        [Route("stopBreakLog")]
         [Authorize(Roles = "Driver")]
-        public async Task<IActionResult> GetActiveLogEntries()
+        public async Task<IActionResult> StopBreakLog()
         {
             try
             {
-                var driverId =  User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
-       
-                if (string.IsNullOrEmpty(driverId))
+                var userId = User.FindFirst("userId").Value;
+                if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized("User ID not found in the token.");
                 }
 
-                var result = await _logEntryService.GetActiveLogEntries(int.Parse(driverId));
+                var result = await _logEntryService.StopBreakLog(int.Parse(userId));
                 return Ok(result);
 
             }
@@ -369,6 +402,8 @@ namespace truckPRO_api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+    
+        
         
         [HttpGet]
         [Route("getTotalDrivingHoursLastWeek")]
@@ -513,7 +548,6 @@ namespace truckPRO_api.Controllers
 
         }
         
-        
-        
+    
     }
 }
