@@ -162,22 +162,22 @@ namespace truckPRO_api.Controllers
             {
                 string res = "";
                 var userId = User.FindFirst("userId").Value;
-                // Deserialize the promptImages JSON string into a List of PromptImage objects
+                //Deserialize the promptImages JSON string into a List of PromptImage objects
                 var promptImagesList = JsonConvert.DeserializeObject<List<PromptImage>>(promptImages);
                 Console.WriteLine(promptImages);
-                // Upload the images and get their URLs
+                //Upload the images and get their URLs
                 List<string> imageUrls = await _s3Service.UploadPhotos(images, promptImagesList);
-                // foreach (var item in imageUrls)
-                // {
-                //     Console.WriteLine(item);
-                // }
+                foreach (var item in imageUrls)
+                {
+                    Console.WriteLine(item);
+                }
 
-                if (imageUrls.Count == 0)
+                if (imageUrls.Count != 0)
                 {
                     return Conflict("Image upload failed");
                 }
 
-                // Validate and process the driving log entry
+                //Validate and process the driving log entry
 
                 LogEntry logEntry = new()
                 {
@@ -197,7 +197,14 @@ namespace truckPRO_api.Controllers
                 var sent = await _firebaseService.SendDriverDrivingPushToManagers(companyIdInt, "Approve Log!", user.FirstName, user.LastName);
 
                 // Return success with the uploaded URLs
-                return Ok($"Driving log with id {res} was added and managers notified: {sent}");                
+                if(res.Contains("successfully"))
+                {
+                    return Ok($"{res} Managers notified: {sent}");
+                }
+                else
+                {
+                    return Conflict(res);
+                }                
             
 
             }
@@ -405,7 +412,7 @@ namespace truckPRO_api.Controllers
                     return Unauthorized("User ID not found in the token.");
                 }
 
-                var result = await _logEntryService.GetTotalOnDutyHoursLastWeek(int.Parse(driverId));
+                var result = await _logEntryService.GetTotalOnDutyHoursLastWeek7days(int.Parse(driverId));
                 return Ok(result);
 
             }
