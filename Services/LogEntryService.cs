@@ -38,7 +38,7 @@ namespace truckPRO_api.Services
                 return "You need to take a break for at least 10 hours before starting a new on-duty shift.";
             }
 
-            logEntry.StartTime = DateTime.UtcNow;
+            logEntry.StartTime = DateTime.Now;
             logEntry.LogEntryType = LogEntryType.OnDuty;
 
             context.LogEntry.Add(logEntry);
@@ -60,7 +60,7 @@ namespace truckPRO_api.Services
                 LogEntry newOnDutyLog = new()
                 {
                     UserId = logEntry.UserId,
-                    StartTime = DateTime.UtcNow,
+                    StartTime = DateTime.Now,
                     EndTime = null,
                     LogEntryType = LogEntryType.OnDuty,
                     ImageUrls = null,
@@ -88,7 +88,7 @@ namespace truckPRO_api.Services
                 return "On-duty limit exceeded.\nYou cannot be on-duty for more than 14 hours today.";
             }
 
-            logEntry.StartTime = DateTime.UtcNow;
+            logEntry.StartTime = DateTime.Now;
             logEntry.LogEntryType = LogEntryType.Driving;
             context.LogEntry.Add(logEntry);
             await context.SaveChangesAsync();
