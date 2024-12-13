@@ -178,7 +178,7 @@ namespace truckPRO_api.Controllers
                     Console.WriteLine(item);
                 }
 
-                if (imageUrls.Count != 0)
+                if (imageUrls.Count == 0)
                 {
                     return Conflict("Image upload failed");
                 }
