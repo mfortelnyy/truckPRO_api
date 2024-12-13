@@ -130,7 +130,14 @@ namespace truckPRO_api.Controllers
 
 
                 //Console.WriteLine(userId);
-                return Ok(result);
+                if(result.Contains("successfully"))
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return Conflict(result);
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -244,7 +251,14 @@ namespace truckPRO_api.Controllers
                 };
 
                 var res = await _logEntryService.CreateOffDutyLog(logEntry);
-                return Ok($"Off Duty log with id {res} was added");
+                if(res.Contains("successfully"))
+                {
+                    return Ok(res);
+                }
+                else
+                {
+                    return Conflict(res);
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -280,8 +294,15 @@ namespace truckPRO_api.Controllers
                     ImageUrls = null,
                 };
 
-                var res = await _logEntryService.CreateBreakLog(logEntry);
-                return Ok($"Break log with id {res} was added");
+                var result = await _logEntryService.CreateBreakLog(logEntry);
+                if(result.Contains("successfully"))
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return Conflict(result);
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -307,7 +328,14 @@ namespace truckPRO_api.Controllers
                 }
 
                 var result = await _logEntryService.StopDrivingLog(int.Parse(userId));
-                return Ok(result);
+                if(result.Contains("successfully"))
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return Conflict(result);
+                }
 
             }
             catch (InvalidOperationException ex)
@@ -335,8 +363,14 @@ namespace truckPRO_api.Controllers
                 }
 
                 var result = await _logEntryService.StopOnDutyLog(int.Parse(userId));
-                return Ok(result);
-
+                if(result.Contains("successfully"))
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return Conflict(result);
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -363,7 +397,14 @@ namespace truckPRO_api.Controllers
                 }
 
                 var result = await _logEntryService.StopOffDutyLog(int.Parse(userId));
-                return Ok(result);
+                if(result.Contains("successfully"))
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return Conflict(result);
+                }
 
             }
             catch (InvalidOperationException ex)
@@ -390,7 +431,14 @@ namespace truckPRO_api.Controllers
                 }
 
                 var result = await _logEntryService.StopBreakLog(int.Parse(userId));
-                return Ok(result);
+                if(result.Contains("successfully"))
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return Conflict(result);
+                }
 
             }
             catch (InvalidOperationException ex)
