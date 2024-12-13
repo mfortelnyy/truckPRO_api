@@ -19,20 +19,21 @@ namespace truckPRO_api.Services
         {
             //if new user then limit checks are not performed
             var newUser = await IsNewUser(logEntry.UserId);
+         
 
-            if(newUser == false && await HasActiveOnDutyCycle(logEntry.UserId))
+            if(newUser == false && !await HasEnoughTimeSinceLastOnDuty(logEntry.UserId) && await HasActiveOnDutyCycle(logEntry.UserId))
             {
                 return "You can not start a new On Duty Log Entry.\nYou have an active On Duty Log!";
             }
 
-            if(newUser == false && await HasExceededWeeklyOnDutyLimit(logEntry.UserId))
+            if(newUser == false && !await HasEnoughTimeSinceLastOnDuty(logEntry.UserId) && await HasExceededWeeklyOnDutyLimit(logEntry.UserId))
             {
                 return "Weekly on-duty limit exceeded.\nYou cannot be on-duty for more than 40 hours in a week.";
             }
 
             // Ensure there is a valid off-duty cycle before the on-duty shift
-            //HasValidOffDutyCycle end current off duty if rest period is satisfied
-            if (newUser == false && !await HasValidOffDutyCycle(logEntry.UserId))
+            //HasValidOffDutyCycle ends current off duty if rest period is satisfied
+            if (newUser == false && !await HasEnoughTimeSinceLastOnDuty(logEntry.UserId) && !await HasValidOffDutyCycle(logEntry.UserId))
             {
                 return "You need to take a break for at least 10 hours before starting a new on-duty shift.";
             }
@@ -54,9 +55,9 @@ namespace truckPRO_api.Services
             }
 
             //if there is no active on duty log then create one
-            if(!await HasActiveOnDutyCycle(logEntry.UserId))
+            else if(!await HasActiveOnDutyCycle(logEntry.UserId))
             {
-                LogEntry newOnDutyLog = new LogEntry
+                LogEntry newOnDutyLog = new()
                 {
                     UserId = logEntry.UserId,
                     StartTime = DateTime.UtcNow,
@@ -423,7 +424,7 @@ namespace truckPRO_api.Services
             return currentOnDutyHours > TimeSpan.FromHours(14);
         }
 
-        //LAST CHECK
+        //LAST CHECK - ends 
         public async Task<bool> HasValidOffDutyCycle(int userId)
         {
             //get first off duty with null end time = endtime == null
@@ -500,23 +501,12 @@ namespace truckPRO_api.Services
             return activeDrivingLog != null;
         }
 
-        public async Task<LogEntry> GetActiveOnDutyLog(int userId)
+        public async Task<bool> HasExceededWeeklyOnDutyLimit(int userId)
         {
-            var activeOnDutyLog = await context.LogEntry
-                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.EndTime == null)
-                .FirstOrDefaultAsync();
-
-            return activeOnDutyLog;
-        }
-
-        public async Task<LogEntry?> GetActiveOffDutyLog(int userId)
-        {
-             return await context.LogEntry.Where(u => u.UserId == userId &&
-                                                u.LogEntryType == LogEntryType.OffDuty &&
-                                                u.EndTime == null)
-                                            .OrderByDescending(u => u.StartTime)
-                                            .FirstOrDefaultAsync();
-        }
+            var hoursPerWeek = await GetTotalOnDutyHoursLastWeek7days(userId);
+            var weeklyLimit = TimeSpan.FromHours(60);
+            return hoursPerWeek > weeklyLimit;
+        }      
 
         public async Task<bool> HasActiveOffDutyCycle(int userId)
         {
@@ -536,11 +526,52 @@ namespace truckPRO_api.Services
             return activeBreakLog != null;
         }
 
-        public async Task<bool> HasExceededWeeklyOnDutyLimit(int userId)
+        public async Task<bool> HasEnoughTimeSinceLastOnDuty(int userId)
         {
-            var hoursPerWeek = await GetTotalOnDutyHoursLastWeek7days(userId);
-            var weeklyLimit = TimeSpan.FromHours(60);
-            return hoursPerWeek > weeklyLimit;
-        }        
+           var lastParentLogEntry = await GetLastParentLog(userId);
+           if(lastParentLogEntry.LogEntryType == LogEntryType.OffDuty)
+           {
+            return false;
+           }
+
+           if (DateTime.UtcNow - lastParentLogEntry.EndTime >= TimeSpan.FromHours(10))
+           {
+            return true;
+           }
+           return false;
+        }
+
+        public async Task<LogEntry> GetActiveOnDutyLog(int userId)
+        {
+            var activeOnDutyLog = await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.EndTime == null)
+                .FirstOrDefaultAsync();
+
+            return activeOnDutyLog;
+        }
+
+        public async Task<LogEntry?> GetActiveOffDutyLog(int userId)
+        {
+             return await context.LogEntry.Where(u => u.UserId == userId &&
+                                                u.LogEntryType == LogEntryType.OffDuty &&
+                                                u.EndTime == null)
+                                            .OrderByDescending(u => u.StartTime)
+                                            .FirstOrDefaultAsync();
+        }
+
+        
+        public async Task<LogEntryParent> GetLastParentLog(int userId)
+        {
+            var lastParentLogEntry = await context.LogEntry
+                .Where(log => log.UserId == userId && (log.LogEntryType == LogEntryType.OnDuty || log.LogEntryType == LogEntryType.OnDuty)  && log.EndTime != null)
+                .OrderByDescending(log => log.EndTime)
+                .FirstOrDefaultAsync();
+
+            var lastParentLog = _mapper.Map<LogEntryParent>(lastParentLogEntry);
+
+            return lastParentLog;
+        }
+
+          
     }
 }
