@@ -229,7 +229,7 @@ namespace truckPRO_api.Controllers
 
                 res = await _logEntryService.CreateDrivingLog(logEntry);
                 var sent = false;
-                if(res.Contains("Successfully"))
+                if(res.Contains("successfully"))
                 {
                   UserDTO user = await _userService.GetUserById(int.Parse(userId));
                   sent = await _firebaseService.SendDriverDrivingPushToManagers(companyIdInt, "Approve Log!", user.FirstName, user.LastName);
