@@ -11,6 +11,7 @@ using truckPro_api.Hubs;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
 using truckPRO_api.Services;
+using Twilio.Rest.Intelligence.V2.Transcript;
 
 namespace truckPRO_api.Controllers
 {
@@ -164,6 +165,40 @@ namespace truckPRO_api.Controllers
             }
             int companyIdInt = int.Parse(companyId);
 
+            if(images.Count == 0 && promptImages.Length == 0)
+            {
+                try
+                {
+                  var userId = User.FindFirst("userId").Value;
+
+                  LogEntry logEntry = new()
+                  {
+                    UserId = int.Parse(userId),
+                    StartTime = DateTime.Now,
+                    EndTime = null,
+                    LogEntryType = LogEntryType.Driving,
+                  };
+
+                  var res = await _logEntryService.CreateDrivingLog(logEntry);
+                  var sent = false;
+                  if(res.Contains("successfully"))
+                  {
+                    UserDTO user = await _userService.GetUserById(int.Parse(userId));
+                    sent = await _firebaseService.SendDriverDrivingPushToManagers(companyIdInt, "Approve Log!", user.FirstName, user.LastName);
+                    await _hubContext.Clients.Group(companyId.ToString()).SendAsync("ReceiveNotification", $"Log by user id {logEntry.UserId} at {logEntry.StartTime}");
+                    return Ok($"{res} Managers notified: {sent}");
+                  }
+                  else
+                  {
+                    return Conflict(res);
+                  }                
+            
+                }catch(Exception ex)
+                {
+                    return Conflict(ex.Message);
+                }
+            }
+
             try
             {
                 string res = "";
@@ -192,16 +227,13 @@ namespace truckPRO_api.Controllers
                 };
 
                 res = await _logEntryService.CreateDrivingLog(logEntry);
-                
-                await _hubContext.Clients.Group(companyId.ToString()).SendAsync("ReceiveNotification", $"Log by user id {logEntry.UserId} at {logEntry.StartTime}");
-                
-                UserDTO user = await _userService.GetUserById(int.Parse(userId));
-                var sent = await _firebaseService.SendDriverDrivingPushToManagers(companyIdInt, "Approve Log!", user.FirstName, user.LastName);
-
-                // Return success with the uploaded URLs
-                if(res.Contains("successfully"))
+                var sent = false;
+                if(res.Contains("Successfully"))
                 {
-                    return Ok($"{res} Managers notified: {sent}");
+                  UserDTO user = await _userService.GetUserById(int.Parse(userId));
+                  sent = await _firebaseService.SendDriverDrivingPushToManagers(companyIdInt, "Approve Log!", user.FirstName, user.LastName);
+                  await _hubContext.Clients.Group(companyId.ToString()).SendAsync("ReceiveNotification", $"Log by user id {logEntry.UserId} at {logEntry.StartTime}");
+                  return Ok($"{res} Managers notified: {sent}");
                 }
                 else
                 {
