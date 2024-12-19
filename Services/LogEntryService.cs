@@ -213,7 +213,7 @@ namespace truckPRO_api.Services
             var parentLogentries = new List<LogEntryParent>();
             var allParentLogEntries = await context.LogEntry.Where(log => log.UserId == driverId
                                 && (log.LogEntryType == LogEntryType.OnDuty || log.LogEntryType == LogEntryType.OffDuty))
-                                .OrderBy(log=>log.StartTime).ToListAsync();
+                                .OrderByDescending(log=>log.StartTime).ToListAsync();
 
 
             foreach(var parentLogEntry in allParentLogEntries)
