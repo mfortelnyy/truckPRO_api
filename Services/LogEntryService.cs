@@ -4,6 +4,7 @@ using Docker.DotNet.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Graph.Education.Classes.Item.Assignments.Item.Submissions.Item.Return;
+using Microsoft.Kiota.Abstractions.Serialization;
 using truckPro_api.DTOs;
 using truckPRO_api.Data;
 using truckPRO_api.DTOs;
@@ -364,7 +365,7 @@ namespace truckPRO_api.Services
             var hasActiveOffDuty = await HasActiveOffDutyCycle(userId);
             var hasActiveOnDuty = await HasActiveOnDutyCycle(userId);
 
-            if(await HasActiveBreakCycle(userId))
+            if(!await HasActiveBreakCycle(userId))
             {
                 return "You can not start a new Break Log Entry.\nYou have an active Break Log!";
             }
@@ -374,19 +375,20 @@ namespace truckPRO_api.Services
                 return "Something went wrong. Please try again later!";
             }
 
-            if(hasActiveOffDuty)
+            else if(hasActiveOffDuty)
             {
-                var activeOffDuty = await GetActiveOffDutyLog(userId);
-                activeOffDuty!.EndTime = DateTime.UtcNow;
-                context.LogEntry.Update(activeOffDuty);
+                var breakLog = await GetActiveBreakLog(userId);
+                breakLog!.EndTime = DateTime.UtcNow;
+                context.LogEntry.Update(breakLog);
                 await context.SaveChangesAsync();
                 return $"Sleep Log Stopped successfully!";
             }
+
             else if(hasActiveOnDuty)
             {
-                var activeOnDuty = await GetActiveOnDutyLog(userId);
-                activeOnDuty.EndTime = DateTime.UtcNow;
-                context.LogEntry.Update(activeOnDuty);
+                var breakLog = await GetActiveBreakLog(userId);
+                breakLog.EndTime = DateTime.UtcNow;
+                context.LogEntry.Update(breakLog);
                 await context.SaveChangesAsync();
                 return $"Break Log Stopped successfully!";
             }
@@ -595,6 +597,14 @@ namespace truckPRO_api.Services
                 .ToListAsync();
 
             return activeChildrenLogs;
+        }
+
+        public async Task<LogEntry?> GetActiveBreakLog(int userId)
+        {
+            return await context.LogEntry
+                .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.Break && log.EndTime == null)
+                .OrderByDescending(log => log.StartTime)
+                .FirstOrDefaultAsync();
         }
 
           
