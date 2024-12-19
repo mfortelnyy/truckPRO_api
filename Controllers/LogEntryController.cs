@@ -177,6 +177,7 @@ namespace truckPRO_api.Controllers
                     StartTime = DateTime.Now,
                     EndTime = null,
                     LogEntryType = LogEntryType.Driving,
+                    ImageUrls = null,
                   };
 
                   var res = await _logEntryService.CreateDrivingLog(logEntry);
