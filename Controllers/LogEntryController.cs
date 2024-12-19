@@ -109,7 +109,7 @@ namespace truckPRO_api.Controllers
             {
                 //Get userid form token
                 var userId = User.FindFirst("userId").Value;
-                Console.WriteLine("userid:  ", userId);
+                //Console.WriteLine("userid:  ", userId);
 
                 if (string.IsNullOrEmpty(userId))
                 {
@@ -170,13 +170,9 @@ namespace truckPRO_api.Controllers
                 var userId = User.FindFirst("userId").Value;
                 //Deserialize the promptImages JSON string into a List of PromptImage objects
                 var promptImagesList = JsonConvert.DeserializeObject<List<PromptImage>>(promptImages);
-                Console.WriteLine(promptImages);
+                //Console.WriteLine(promptImages);
                 //Upload the images and get their URLs
                 List<string> imageUrls = await _s3Service.UploadPhotos(images, promptImagesList);
-                foreach (var item in imageUrls)
-                {
-                    Console.WriteLine(item);
-                }
 
                 if (imageUrls.Count == 0)
                 {
