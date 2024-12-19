@@ -167,6 +167,8 @@ namespace truckPRO_api.Services
             //add DTO OnDuty/OffDuty main that contains a list of other logentries with parentid the same as id of onduty/offduty
             var activeOnDutyLog = await GetActiveOnDutyLog(driverId);
             var activeOffDutyLog = await GetActiveOffDutyLog(driverId);
+            //Console.WriteLine($" Has active on duty {await HasActiveOnDutyCycle(driverId)} and active: {activeOnDutyLog!.Id}");
+
             var parentLogentryActive = new LogEntryParent();
             //holds the main active log - off duty or on duty with all the children logs
 
@@ -193,6 +195,7 @@ namespace truckPRO_api.Services
             else if(activeOnDutyLog != null && activeOffDutyLog == null)
             {
                 parentLogentryActive = _mapper.Map<LogEntryParent>(activeOnDutyLog);
+                //Console.WriteLine($"Parent log entry active: {parentLogentryActive.Id}");
 
                 //get all child logs for 'On Duty'
                 var childrenLogs = await context.LogEntry.Where(log => log.UserId == driverId
@@ -320,6 +323,14 @@ namespace truckPRO_api.Services
 
             // if found then update it's endtime
             activeOffDutyLog.EndTime = DateTime.Now;
+
+            var childrenLogs = await GetActiveChildrenLogs(activeOffDutyLog.Id);
+            foreach(var log in childrenLogs!)
+            {
+                log.EndTime = DateTime.UtcNow;
+                context.Update(log);
+            }
+            
             context.Update(activeOffDutyLog);
             await context.SaveChangesAsync();
 
@@ -334,11 +345,8 @@ namespace truckPRO_api.Services
                 return "No active On Duty Log found.";
             }
 
-            var activePerOnDuty = await context.LogEntry
-                            .Where(l => l.UserId == userId 
-                            && l.ParentLogEntryId == activeOnDutyLog.Id 
-                            && l.EndTime == null).ToListAsync();
-            foreach(var log in activePerOnDuty)
+            var activeChildrenOnDuty = await GetActiveChildrenLogs(activeOnDutyLog.Id);
+            foreach(var log in activeChildrenOnDuty)
             {
                 log.EndTime = DateTime.UtcNow;
                 context.Update(log);
@@ -347,7 +355,7 @@ namespace truckPRO_api.Services
             activeOnDutyLog.EndTime = DateTime.UtcNow;
             context.Update(activeOnDutyLog);
             await context.SaveChangesAsync();
-            return $"On Duty Log Stopped successfully as well as {activePerOnDuty.Count} other related logs";
+            return $"On Duty Log Stopped successfully as well as {activeChildrenOnDuty.Count} other related logs";
 
         }
 
@@ -541,11 +549,17 @@ namespace truckPRO_api.Services
            return false;
         }
 
-        public async Task<LogEntry> GetActiveOnDutyLog(int userId)
+        public async Task<LogEntry?> GetActiveOnDutyLog(int userId)
         {
+            //Console.WriteLine("GETTING ACTOVE ON DUTY!");
+
             var activeOnDutyLog = await context.LogEntry
                 .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OnDuty && log.EndTime == null)
+                .OrderByDescending(log => log.StartTime)
                 .FirstOrDefaultAsync();
+            
+            //Console.WriteLine($"active on duty null:{activeOnDutyLog == null}");
+
 
             return activeOnDutyLog;
         }
@@ -570,6 +584,17 @@ namespace truckPRO_api.Services
             var lastParentLog = _mapper.Map<LogEntryParent>(lastParentLogEntry);
 
             return lastParentLog;
+        }
+
+
+        public async Task<List<LogEntry>?> GetActiveChildrenLogs(int parentLogId)
+        {
+            var activeChildrenLogs = await context.LogEntry
+                .Where(log => log.ParentLogEntryId == parentLogId && log.EndTime == null)
+                .OrderByDescending(log => log.StartTime)
+                .ToListAsync();
+
+            return activeChildrenLogs;
         }
 
           
