@@ -50,32 +50,11 @@ namespace truckPRO_api.Services
         
         public async Task<string> CreateDrivingLog(LogEntry logEntry)
         {
+            
             if(await HasActiveDrivingCycle(logEntry.UserId))
             {
                 return "You can not start a new Driving Log Entry.\nYou have an active Driving Log!";
             }
-
-            //if there is no active on duty log then create one
-            else if(!await HasActiveOnDutyCycle(logEntry.UserId))
-            {
-                LogEntry newOnDutyLog = new()
-                {
-                    UserId = logEntry.UserId,
-                    StartTime = DateTime.Now,
-                    EndTime = null,
-                    LogEntryType = LogEntryType.OnDuty,
-                    ImageUrls = null,
-                };
-                var res = await CreateOnDutyLog(newOnDutyLog);
-                if(!res.Contains("successfully"))
-                {
-                    throw new InvalidOperationException("Something went wrong. Please, try again later!");
-                }
-            }
-
-            //establish relationship between the on duty log (parent) and the driving log
-            var activeOnDutyLog = await GetActiveOnDutyLog(logEntry.UserId);
-            logEntry.ParentLogEntryId = activeOnDutyLog.Id;
 
             //check if the driver has exceeded the daily driving limit of 11 hours
             if (await HasExceededDailyDrivingLimit(logEntry))
@@ -89,8 +68,40 @@ namespace truckPRO_api.Services
                 return "On-duty limit exceeded.\nYou cannot be on-duty for more than 14 hours today.";
             }
 
+            //if there is no active on duty log then create one
+            else if(!await HasActiveOnDutyCycle(logEntry.UserId))
+            {
+                
+                LogEntry newOnDutyLog = new()
+                {
+                    UserId = logEntry.UserId,
+                    StartTime = DateTime.Now,
+                    EndTime = null,
+                    LogEntryType = LogEntryType.OnDuty,
+                    ImageUrls = null,
+                };
+                var res = await CreateOnDutyLog(newOnDutyLog);
+                if(!res.Contains("successfully"))
+                {
+                    throw new InvalidOperationException(res);
+                }
+            }
+            var activeBreak = await GetActiveBreakLog(logEntry.UserId);
+            
+
+            //establish relationship between the on duty log (parent) and the driving log
+            var activeOnDutyLog = await GetActiveOnDutyLog(logEntry.UserId);
+            logEntry.ParentLogEntryId = activeOnDutyLog.Id;
+
+            
+
             logEntry.StartTime = DateTime.Now;
             logEntry.LogEntryType = LogEntryType.Driving;
+            if(activeBreak != null)
+            {
+                activeBreak.EndTime = DateTime.Now;
+                context.LogEntry.Update(activeBreak);
+            }
             context.LogEntry.Add(logEntry);
             await context.SaveChangesAsync();
 
