@@ -165,7 +165,7 @@ namespace truckPRO_api.Controllers
             }
             int companyIdInt = int.Parse(companyId);
 
-            if(promptImages.Length == 0)
+            if(string.IsNullOrEmpty(promptImages) || images == null || images.Count == 0)
             {
                 try
                 {
