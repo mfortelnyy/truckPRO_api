@@ -1,12 +1,15 @@
 ﻿
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using truckPro_api.DTOs;
 using truckPRO_api.Data;
 using truckPRO_api.Models;
 
 namespace truckPRO_api.Services
 {
-    public class ManagerService(ApplicationDbContext context) : IManagerService
+    public class ManagerService(ApplicationDbContext context, IMapper mapper) : IManagerService
     {
+        IMapper _mapper = mapper;
         public async Task<List<User>> GetAllDriversByCompany(int CompanyId)
         {
             var AllDrivers = await context.User.Where(u =>  u.CompanyId == CompanyId && u.Role == UserRole.Driver).ToListAsync();
@@ -67,14 +70,23 @@ namespace truckPRO_api.Services
 
         public async Task<List<LogEntry>> GetAllActiveDrivingLogs(int companyId)
         {
-            var drivingLogs = await context.LogEntry
+            var activeDrivingLogs = await context.LogEntry
                 .Include(log => log.User)
                 .Where(predicate: log => log.User.CompanyId == companyId && 
-                                                                (log.LogEntryType == LogEntryType.Driving || log.LogEntryType == LogEntryType.OnDuty) &&
-                                                                log.EndTime == null).ToListAsync();
+                                                                log.LogEntryType == LogEntryType.OnDuty &&
+                                                                log.EndTime == null).ToListAsync() ?? throw new InvalidOperationException("No Active Logs at this moment!");
 
-            if (drivingLogs == null || drivingLogs.Count == 0) throw new InvalidOperationException("No active drivers driving");
-            return drivingLogs;
+            List<LogEntry?> activeDrivingLogsPerCompany = [];
+            foreach (var log in activeDrivingLogs)
+            {                
+                var activeDrivingLog = await context.LogEntry.Where(l => l.ParentLogEntryId == log.Id &&
+                             log.EndTime == null).FirstOrDefaultAsync();
+                if (activeDrivingLog != null)
+                { 
+                    activeDrivingLogsPerCompany.Add(activeDrivingLog);    
+                }                       
+            }
+            return activeDrivingLogsPerCompany;
         }
 
         public async Task<string> ApproveDrivingLogById(int logEntryId)
