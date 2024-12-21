@@ -19,11 +19,13 @@ namespace truckPRO_api.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IManagerService _managerService;
 
-        public PdfService(ApplicationDbContext context, IMapper mapper)
+        public PdfService(ApplicationDbContext context, IMapper mapper, IManagerService managerService)
         {
             _context = context;
             _mapper = mapper;
+            _managerService = managerService;
         }
 
         public async Task<byte[]> GenerateDrivingRecordsPdfAsync(int driverId, DateTime startDate, DateTime endDate, List<LogEntryType> selectedLogTypes)
@@ -34,14 +36,14 @@ namespace truckPRO_api.Services
                 throw new Exception("Driver not found.");
             }
 
-            var records = await _context.LogEntry
-                .Where(le => le.UserId == driverId 
-                            && le.StartTime >= startDate 
-                            && (le.EndTime <= endDate || le.EndTime == null)
-                            && selectedLogTypes.Contains(le.LogEntryType))
-                .ToListAsync();
+            var logs = await _managerService.GetLogsByDriver(driverId);
+            var filteredLogs = logs
+                .Where(log => log != null && log.StartTime >= startDate 
+                            && (log.EndTime <= endDate || log.EndTime == null)
+                            && selectedLogTypes.Contains(log.LogEntryType))
+                .ToList();
 
-            if (records.Count == 0)
+            if (filteredLogs.Count == 0)
             {
                 throw new Exception("No driving records found for the specified date range.");
             }
@@ -49,68 +51,78 @@ namespace truckPRO_api.Services
             using var pdfDoc = new PdfDocument();
             pdfDoc.Info.Title = "Driving Records";
 
-            var titleFont = new XFont("Verdana", 16, XFontStyleEx.Bold);
-            var font = new XFont("Verdana", 12);
+            var titleFont = new XFont("Arial", 16, XFontStyleEx.Bold);
+            var sectionFont = new XFont("Arial", 14, XFontStyleEx.Bold);
+            var font = new XFont("Arial", 12, XFontStyleEx.Regular);
 
-            PdfPage page = null;
-            XGraphics gfx = null;
+            var grayBrush = new XSolidBrush(XColor.FromGrayScale(0.7));
+            var lineColor = XPens.Gray;
+
+            PdfPage page = pdfDoc.AddPage();
+            XGraphics gfx = XGraphics.FromPdfPage(page);
             int yPosition = 40;
 
-            //start with the first page
-            page = pdfDoc.AddPage();
-            gfx = XGraphics.FromPdfPage(page);
-
+            // Add Title Section
             gfx.DrawString("Driving Records Report", titleFont, XBrushes.Black, new XPoint(40, yPosition));
             gfx.DrawString($"Driver: {user.FirstName} {user.LastName}", font, XBrushes.Black, new XPoint(40, yPosition + 20));
             gfx.DrawString($"Date Range: {startDate:yyyy-MM-dd} to {endDate:yyyy-MM-dd}", font, XBrushes.Black, new XPoint(40, yPosition + 40));
             yPosition += 70;
 
-            foreach (var record in records)
+            foreach (var parentLog in filteredLogs)
             {
-                //add a new page is needed
-                if (yPosition > page.Height - 100) 
+                // Add a new page if needed
+                if (yPosition > page.Height - 100)
                 {
                     page = pdfDoc.AddPage();
                     gfx = XGraphics.FromPdfPage(page);
                     yPosition = 40;
                 }
 
-                //log entry separator
-                gfx.DrawLine(XPens.Black, 40, yPosition, page.Width - 40, yPosition);
+                // Parent Log Entry Header
+                gfx.DrawLine(lineColor, 40, yPosition, page.Width - 40, yPosition);
                 yPosition += 10;
-
-                //log details: Start Time and End Time
-                gfx.DrawString($"Start Time: {record.StartTime:G}", font, XBrushes.Black, new XPoint(40, yPosition));
-                
-                if(record.EndTime != null)
+                gfx.DrawString($"Log Type: {parentLog.LogEntryType}", sectionFont, grayBrush, new XPoint(40, yPosition));
+                gfx.DrawString($"Start Time: {parentLog.StartTime:G}", font, XBrushes.Black, new XPoint(40, yPosition + 20));
+                if (parentLog.EndTime != null)
                 {
-                    gfx.DrawString($"End Time: {record.EndTime?.ToString("G")}", font, XBrushes.Black, new XPoint(300, yPosition));
-
+                    gfx.DrawString($"End Time: {parentLog.EndTime:G}", font, XBrushes.Black, new XPoint(300, yPosition + 20));
                 }
                 else
                 {
-                    gfx.DrawString("In Progress", font, XBrushes.Black, new XPoint(300, yPosition));
-
+                    gfx.DrawString("In Progress", font, XBrushes.Black, new XPoint(300, yPosition + 20));
                 }
-                yPosition += 20;
+                yPosition += 50;
 
-                //log Type
-                gfx.DrawString($"Log Type: {record.LogEntryType}", font, XBrushes.Black, new XPoint(40, yPosition));
-
-                //display ApprovedbyManager only for Driving type
-                if (record.LogEntryType == LogEntryType.Driving)  
+                // Child Logs for Parent Log
+                foreach (var childLog in parentLog.ChildLogEntries)
                 {
-                    gfx.DrawString($"Approved by Manager: {(record.IsApprovedByManager ? "Yes" : "No")}", font, XBrushes.Black, new XPoint(300, yPosition));
-                    yPosition += 20;  
-                }
+                    if (yPosition > page.Height - 100)
+                    {
+                        page = pdfDoc.AddPage();
+                        gfx = XGraphics.FromPdfPage(page);
+                        yPosition = 40;
+                    }
 
-                //space after each log entry 
-                yPosition += 20; 
+                    gfx.DrawLine(lineColor, 50, yPosition, page.Width - 50, yPosition);
+                    yPosition += 10;
+                    gfx.DrawString($"- Child Log Type: {childLog.LogEntryType}", font, XBrushes.Black, new XPoint(50, yPosition));
+                    gfx.DrawString($"Start Time: {childLog.StartTime:G}", font, XBrushes.Black, new XPoint(50, yPosition + 20));
+                    if (childLog.EndTime != null)
+                    {
+                        gfx.DrawString($"End Time: {childLog.EndTime:G}", font, XBrushes.Black, new XPoint(300, yPosition + 20));
+                    }
+                    else
+                    {
+                        gfx.DrawString("In Progress", font, XBrushes.Black, new XPoint(300, yPosition + 20));
+                    }
+                    yPosition += 40;
+                }
             }
 
             using var stream = new MemoryStream();
             pdfDoc.Save(stream, false);
             return stream.ToArray();
         }
+            
     }
 }
