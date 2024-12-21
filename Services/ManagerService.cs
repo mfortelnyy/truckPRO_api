@@ -50,7 +50,7 @@ namespace truckPRO_api.Services
             foreach (var finishedParentLog in finishedParentLogs)
             {
                 var childrenFinishedLogs = await context.LogEntry
-                    .Where(log => log.UserId == driverId && log.ParentLogEntryId == inProgressLog!.Id).ToListAsync();
+                    .Where(log => log.UserId == driverId && log.ParentLogEntryId == finishedParentLog!.Id).ToListAsync();
                 var mappedParentLog = _mapper.Map<LogEntryParent>(finishedParentLog);
                 mappedParentLog.ChildLogEntries = childrenFinishedLogs;
                 finishedParentLogsList.Add(mappedParentLog);
