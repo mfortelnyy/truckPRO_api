@@ -1,11 +1,12 @@
-﻿using truckPRO_api.Models;
+﻿using truckPro_api.DTOs;
+using truckPRO_api.Models;
 
 namespace truckPRO_api.Services
 {
     public interface IManagerService
     {
         public Task<List<User>> GetAllDriversByCompany(int companyId);
-        public Task<List<LogEntry>> GetLogsByDriver(int driverId);
+        public Task<List<LogEntryParent?>> GetLogsByDriver(int driverId);
         public Task<string> AddDriverToCompany(PendingUser pendingUser);
         public Task<List<PendingUser>> GetPendingDriversByCompanyId(int companyId);
         public Task<string> UpdatePendingDriver(PendingUser pendingUser);
