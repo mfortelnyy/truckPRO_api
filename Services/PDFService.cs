@@ -66,6 +66,7 @@ namespace truckPRO_api.Services
             gfx.DrawString("Driving Records Report", titleFont, XBrushes.Black, new XPoint(40, yPosition));
             gfx.DrawString($"Driver: {user.FirstName} {user.LastName}", font, XBrushes.Black, new XPoint(40, yPosition + 20));
             gfx.DrawString($"Date Range: {startDate:yyyy-MM-dd} to {endDate:yyyy-MM-dd}", font, XBrushes.Black, new XPoint(40, yPosition + 40));
+
             yPosition += 70;
 
             foreach (var parentLog in filteredLogs)
@@ -91,7 +92,13 @@ namespace truckPRO_api.Services
                 {
                     gfx.DrawString("In Progress", font, XBrushes.Black, new XPoint(300, yPosition + 20));
                 }
+                if (parentLog.LogEntryType == LogEntryType.Driving)
+                {
+                    gfx.DrawString($"Approved by Manager: {parentLog.IsApprovedByManager}", font, XBrushes.Black, new XPoint(40, yPosition + 40)); 
+                }
                 yPosition += 50;
+                gfx.DrawString($"Events", titleFont, XBrushes.Black, new XPoint(50, yPosition));
+
 
                 // Child Logs for Parent Log
                 foreach (var childLog in parentLog.ChildLogEntries)
@@ -105,7 +112,7 @@ namespace truckPRO_api.Services
 
                     gfx.DrawLine(lineColor, 50, yPosition, page.Width - 50, yPosition);
                     yPosition += 10;
-                    gfx.DrawString($"- Child Log Type: {childLog.LogEntryType}", font, XBrushes.Black, new XPoint(50, yPosition));
+                    gfx.DrawString($"{childLog.LogEntryType}", font, XBrushes.Black, new XPoint(50, yPosition));
                     gfx.DrawString($"Start Time: {childLog.StartTime:G}", font, XBrushes.Black, new XPoint(50, yPosition + 20));
                     if (childLog.EndTime != null)
                     {
