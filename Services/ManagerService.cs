@@ -17,26 +17,46 @@ namespace truckPRO_api.Services
         }
 
         
-        public async Task<List<LogEntry>> GetLogsByDriver(int driverId)
+        public async Task<List<LogEntryParent?>> GetLogsByDriver(int driverId)
         {
             var user = await context.User.Where(u => u.Id == driverId).FirstOrDefaultAsync();
             int? cid = user.CompanyId;
             
-            // logs that are in-progress 
-            var inProgressLogs = await context.LogEntry
-                .Where(log => log.UserId == driverId && log.EndTime == null)
-                .ToListAsync();
+            // parent logs (on duty and off duty) that are in-progress 
+            var inProgressLog = await context.LogEntry
+                .Where(log => log.UserId == driverId 
+                && log.EndTime == null
+                && (log.LogEntryType == LogEntryType.OnDuty || log.LogEntryType == LogEntryType.OffDuty))
+                .OrderByDescending(log => log.StartTime)
+                .FirstOrDefaultAsync();
+
+            var childrenInProgressLogs = await context.LogEntry
+                    .Where(log => log.UserId == driverId && log.ParentLogEntryId == inProgressLog!.Id).ToListAsync();
+
+            LogEntryParent inProgressParentLog = _mapper.Map<LogEntryParent>(inProgressLog);
+
+            inProgressParentLog.ChildLogEntries = childrenInProgressLogs;
+
 
             // logs that are completed  and order them by endtime descending
-            var finishedLogs = await context.LogEntry
-                .Where(log => log.UserId == driverId && log.EndTime != null)
+            var finishedParentLogs = await context.LogEntry
+                .Where(log => log.UserId == driverId && log.EndTime != null
+                                && (log.LogEntryType == LogEntryType.OnDuty || log.LogEntryType == LogEntryType.OffDuty))
                 .OrderByDescending(log => log.EndTime)
                 .ToListAsync();
-
+            List<LogEntryParent?> finishedParentLogsList = [];
             // combine in-progress logs with finished logs
-            var allLogs = inProgressLogs.Concat(finishedLogs).ToList();
-
-            return allLogs;
+            finishedParentLogsList.Add(inProgressParentLog);
+            foreach (var finishedParentLog in finishedParentLogs)
+            {
+                var childrenFinishedLogs = await context.LogEntry
+                    .Where(log => log.UserId == driverId && log.ParentLogEntryId == inProgressLog!.Id).ToListAsync();
+                var mappedParentLog = _mapper.Map<LogEntryParent>(finishedParentLog);
+                mappedParentLog.ChildLogEntries = childrenFinishedLogs;
+                finishedParentLogsList.Add(mappedParentLog);
+            }
+            
+            return finishedParentLogsList;
         }
 
 
