@@ -88,7 +88,7 @@ namespace truckPRO_api.Services
 
         }
 
-        public async Task<List<LogEntry>> GetAllActiveDrivingLogs(int companyId)
+        public async Task<List<LogEntry?>> GetAllActiveDrivingLogs(int companyId)
         {
             var activeDrivingLogs = await context.LogEntry
                 .Include(log => log.User)
@@ -118,7 +118,7 @@ namespace truckPRO_api.Services
             return res != 0 ? "Log was successfully approved!" : "";
         }
 
-        public async Task<List<string>> GetImagesOfDrivingLog(int logId)
+        public async Task<List<string>?> GetImagesOfDrivingLog(int logId)
         {
             var logentry = await context.LogEntry.FirstOrDefaultAsync(log => log.Id == logId);
             if (logentry == null) throw new InvalidOperationException("Log could not be found!");
