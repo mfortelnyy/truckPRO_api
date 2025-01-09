@@ -82,36 +82,28 @@ namespace truckPRO_api.Services
             Email.DefaultSender = sender;
 
             var email = await Email
-                .From(fromAddress) 
+                .From(fromAddress)
                 .To(receiverEmail)
-                .Subject("TruckPro Registration Verification Code")
+                .Subject($"{verificationCode} is your TruckPro verification code")
                 .Body($@"
                     <html>
-                    <body style='font-family: Arial, sans-serif; color: #333;'>
-                        <div style='max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
-                            <table width='100%'>
+                    <body style='font-family: Arial, sans-serif; color: #333; line-height: 1.5;'>
+                        <div style='max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9;'>
+                            <table width='100%' style='margin-bottom: 20px;'>
                                 <tr>
                                     <td style='text-align: center;'>
                                         <img src='{logoUrl}' alt='TruckPro Logo' width='150'/>
                                     </td>
                                 </tr>
                             </table>
-                            <h2 style='color: #555;'>Dear Driver,</h2>
-                            <p>Welcome to TruckPro! To complete your registration, please enter the verification code below:</p>
-                            <h1 style='background-color: #f2f2f2; padding: 10px; text-align: center; border-radius: 4px; color: #333;'>{verificationCode}</h1>
-                            <p>Please verify your email using the link below:</p>
-                            <div style='text-align: center; margin: 20px 0;'>
-                                <a href='https://truckcheck.org:443/verify-email'
-                                style='display: inline-block; background-color: #FF6600; color: white; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; font-weight: bold;'>
-                                    Verify Email
-                                </a>
-                            </div>
-                            <p>If you did not request this code, please ignore this email.</p>
+                            <p>Hi,</p>
+                            <p>Someone tried to sign up for a TruckPro account with this email address. If it was you, enter this confirmation code in the app:</p>
+                            <h1 style='text-align: center; background-color: #f2f2f2; padding: 10px; border-radius: 8px; color: #333;'>{verificationCode}</h1>
+                            <p>If you didn’t request this code, you can safely ignore this email.</p>
                             <p style='color: #888;'>Best regards,<br/>The TruckPro Team</p>
                             <hr style='border: none; border-top: 1px solid #e0e0e0; margin-top: 20px;'/>
                             <p style='font-size: 12px; color: #999; text-align: center;'>
                                 TruckPro Inc.<br/>
-                                <br/>
                                 <a href='mailto:support@truckcheck.org' style='color: #999;'>support@truckcheck.org</a>
                             </p>
                         </div>
@@ -119,10 +111,8 @@ namespace truckPRO_api.Services
                     </html>", isHtml: true)
                 .SendAsync();
 
-
             return email.Successful;
         }
-
         public async Task<bool> SendTemporaryPassword(string receiverEmail, string temporaryPassword)
         {
             var sender = new SmtpSender(() => new SmtpClient()
