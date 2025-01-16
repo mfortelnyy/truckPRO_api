@@ -50,6 +50,8 @@ namespace truckPRO_api.Pages
                 var result = await _userService.CreateUserAsync(SignUpDTO);
                 if (result.Length == 6) // returns email verification code -> success
                 {
+                    // Set TempData flag for successful registration
+                    TempData["RegistrationSuccess"] = true;
                     return RedirectToPage("/Success");
                 }
             }
@@ -61,6 +63,8 @@ namespace truckPRO_api.Pages
 
             return Page();
         }
+
+
 
     }
 }
