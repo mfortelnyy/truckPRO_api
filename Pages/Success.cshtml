@@ -1,7 +1,22 @@
 @page
+@model truckPRO_api.Pages.SuccessModel
 @{
     ViewData["Title"] = "Registration Successful";
 }
 
-<h2>Registration Successful!</h2>
-<p>Your registration was successful. Please check your email to verify your account.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="/css/success_style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>@ViewData["Title"]</h2>
+        <p>@Model.Message</p>
+        <a href="/">Return to Home</a>
+    </div>
+</body>
+</html>
