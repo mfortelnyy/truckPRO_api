@@ -9,6 +9,7 @@ namespace YourAppNamespace.Pages
         public void OnGet()
         {
             WelcomeMessage = "Welcome to Truck Check Pro - Smarter Fleet Management!";
+            return Page();
         }
     }
 }
