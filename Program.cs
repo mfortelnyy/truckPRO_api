@@ -10,6 +10,8 @@ using truckPRO_api.MappingProfiles;
 using truckPRO_api.Models;
 using truckPRO_api.Services;
 using truckPro_api.Services;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 
