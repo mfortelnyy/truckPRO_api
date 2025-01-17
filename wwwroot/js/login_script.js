@@ -28,7 +28,7 @@ document.querySelector("#loginForm").addEventListener("submit", async function (
         if (response.ok) {
             const result = await response.json();
             alert("Login successful! Token: " + result); // needs appropriate success handling
-            window.location.href = "/Home"; // 
+            window.location.href = "/Home"; 
         } else {
             const error = await response.json();
             alert("Error: " + (error.message || "Login failed!"));
