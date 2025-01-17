@@ -2,24 +2,22 @@ using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using truckPRO_api.Data;
 using truckPRO_api.MappingProfiles;
 using truckPRO_api.Models;
 using truckPRO_api.Services;
-using Microsoft.EntityFrameworkCore;
-using truckPro_api.Hubs;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
 using truckPro_api.Services;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add console logging
+// Add Logging
+builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+// Firebase
 var firebaseCredentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
 if (string.IsNullOrEmpty(firebaseCredentialsPath))
 {
@@ -46,129 +44,80 @@ FirebaseApp.Create(new AppOptions()
 //Console.WriteLine($"Firebase initialized: {firebaseCredentialsPath}");
 
 
-//Add Razor pages
+// Add Razor Pages and Controllers
+builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
-
-
-// Add services to the container
 builder.Services.AddControllers();
 
-// Add DbContext for SQL Server
+// Add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
-// Add and register AutoMapper service
+// Register Services
 builder.Services.AddAutoMapper(typeof(DriverMappingProfilecs));
-
-// Register PasswordHasher for User model
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-
-// Register AWS S3 Client
 builder.Services.AddAWSService<IAmazonS3>();
-
-// Register the S3Service for S3 interactions
 builder.Services.AddScoped<S3Service>();
-
-// Register custom UserService for handling user-related operations
 builder.Services.AddScoped<IUserService, UserService>();
-
 builder.Services.AddScoped<ILogEntryService, LogEntryService>();
-
 builder.Services.AddScoped<IManagerService, ManagerService>();
-
 builder.Services.AddScoped<IEmailService, EmailService>();
-
 builder.Services.AddScoped<IAdminService, AdminService>();
-
 builder.Services.AddScoped<ISmsService, SmsService>();
-
 builder.Services.AddScoped<IPdfService, PdfService>();
-
 builder.Services.AddScoped<IUserValidationService, UserValidationService>();
-
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
-
 builder.Services.AddSignalR();
+builder.Services.AddHttpClient();
 
-
-
-// Retrieve the JWT key from configuration
+// Add JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrEmpty(jwtKey))
 {
-    throw new Exception("JWT Key is not configured properly in appsettings.json.");
+    throw new Exception("JWT Key is not configured properly.");
 }
-else if (!string.IsNullOrEmpty(jwtKey))
-{
-    Console.WriteLine("Succ key parsed");
-}
-
-// Add JWT Authentication
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("QoyLLM8SxXaUfYMJKT7svrVlAgpJD04d")),
-    };
-});
-
-builder.Services.AddAuthorization(auth =>
-    {
-        auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
-            .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-            .RequireAuthenticatedUser().Build());
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
     });
 
-builder.Services.AddRazorPages();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser()
+        .Build());
+});
 
-//register signalR for real-time communication with DI
-builder.Services.AddSignalR();
-
-// Build the application
+// Build App
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
 
-// Enable HTTPS redirection
 app.UseHttpsRedirection();
-
-// Enable JWT authentication
-app.UseAuthentication();
-
-// Enable authorization for secured endpoints
-app.UseAuthorization();
-
-// Map controller endpoints
-app.MapControllers();
-
-//enable razor ages mapping
-app.MapRazorPages();
-
-//to enable Assets folder
 app.UseStaticFiles();
-
-//default page
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+app.MapRazorPages();
 app.MapFallbackToPage("/Index");
-
-//app.UseStaticFiles(new StaticFileOptions
-//{
-//    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Pages")),
-//    RequestPath = "/pages"
-//});
-
-//app.MapHub<LogHub>("/logHub");
-
-// Start the application
 app.Run();
