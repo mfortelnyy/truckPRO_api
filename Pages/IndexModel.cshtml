@@ -1,0 +1,59 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Truck Check Pro - Welcome";
+}
+
+<div class="main-container">
+    <header class="app-bar">
+        <div class="logo">Truck Check Pro</div>
+        <nav class="nav-links">
+            <a href="/Account/Login" class="nav-button">Log In</a>
+            <a href="/Account/SignUp" class="nav-button signup-button">Sign Up</a>
+        </nav>
+        <link rel="stylesheet" href="/css/index_style.css">
+    </header>
+
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Ensure Safety, Reduce Costs, Streamline Operations</h1>
+            <p>
+                Fleet Managers and Drivers working together to keep trucks safer and reduce maintenance costs. 
+                Upload safety pictures, track driver shifts, and stay compliant effortlessly.
+            </p>
+            <div class="actions">
+                <a href="/Account/Login" class="action-button">Log In</a>
+                <a href="/Account/SignUp" class="action-button secondary">Sign Up</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <h2>Key Features</h2>
+        <div class="features">
+            <div class="feature">
+                <h3>Real-Time Monitoring</h3>
+                <p>Access real-time driver updates and ensure compliance during shifts.</p>
+            </div>
+            <div class="feature">
+                <h3>Pre-Shift Safety Checks</h3>
+                <p>Drivers upload safety pictures for approval before getting on the road.</p>
+            </div>
+            <div class="feature">
+                <h3>Cost Reduction</h3>
+                <p>Prevent costly repairs by addressing safety issues before they escalate.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2025 Truck Check Pro. All rights reserved.</p>
+        <nav>
+            <a href="/PrivacyPolicy">Privacy Policy</a> | 
+            <a href="/TermsOfService">Terms of Service</a> | 
+            <a href="/Contact">Contact Us</a>
+        </nav>
+    </footer>
+</div>
