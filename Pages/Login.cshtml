@@ -1,0 +1,58 @@
+@page "Login"
+@model truckPRO_api.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Truck Check Pro - Log In";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="/css/login_style.css">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header Section -->
+        <header class="app-bar">
+            <div class="logo">Truck Check Pro</div>
+        </header>
+
+        <!-- Login Section -->
+        <section class="login-section">
+            <div class="login-content">
+                <h1>Log In</h1>
+                <p>Welcome back! Please log in to your account.</p>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        <strong>Error:</strong> @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <form id="loginForm" method="post" action="/Login">
+                    <div class="form-group">
+                        <label for="Email" class="form-label">Email</label>
+                        <input type="email" id="Email" name="Email" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="Password" class="form-label">Password</label>
+                        <input type="password" id="Password" name="Password" class="form-input" required />
+                    </div>
+                    <button type="submit" class="action-button">Log In</button>
+                </form>
+
+                <div id="spinner" class="spinner-border text-orange" style="display: none;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+
+                <div class="login-footer">
+                    <p>Don't have an account? <a href="/Register">Sign Up</a></p>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="/js/login_script.js"></script>
+</body>
+</html>
