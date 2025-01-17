@@ -1,23 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
-namespace truckPRO_api.Pages.Account
+namespace truckPRO_api.Pages
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    public class LoginModel(IHttpClientFactory httpClientFactory) : PageModel
+    public class LoginModel : PageModel
     {
-        _httpClientFactory = httpClientFactory;
-        
+        private readonly IHttpClientFactory _httpClientFactory;
+
         [BindProperty]
         public string Email { get; set; }
 
         [BindProperty]
         public string Password { get; set; }
 
-        //for non-Js users
-        public IActionResult OnPost()
+        public LoginModel(IHttpClientFactory httpClientFactory)
         {
-            if (IsValidUser(Email, Password))
+            _httpClientFactory = httpClientFactory;
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (await IsValidUserAsync(Email, Password))
             {
                 return RedirectToPage("/Success");
             }
@@ -28,7 +35,7 @@ namespace truckPRO_api.Pages.Account
             }
         }
 
-        private bool IsValidUser(string email, string password)
+        private async Task<bool> IsValidUserAsync(string email, string password)
         {
             var client = _httpClientFactory.CreateClient();
             var loginPayload = new
@@ -46,11 +53,11 @@ namespace truckPRO_api.Pages.Account
 
             if (response.IsSuccessStatusCode)
             {
-                //valid if API returns success
+                // Valid if API returns success
                 return true;
             }
 
-            // log error
+            // Log error details
             var errorDetails = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Error during login: {errorDetails}");
 
