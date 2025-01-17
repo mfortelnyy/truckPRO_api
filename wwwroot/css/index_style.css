@@ -153,3 +153,18 @@ body {
 .footer a:hover {
     text-decoration: underline;
 }
+
+@media (max-width: 768px) {
+    .features {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .action-button {
+        margin-bottom: 10px;
+    }
+}
