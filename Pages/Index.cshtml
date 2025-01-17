@@ -1,22 +1,36 @@
 @page
-@model Index
+@model truckPRO_api.Pages.Index
 @{
     ViewData["Title"] = "Truck Check Pro - Welcome";
 }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truck Check Pro - Welcome</title>
+    <!-- Link your CSS file -->
+    <link rel="stylesheet" href="/css/index_style.css">
+    <script type="text/javascript">
+        window.onload = function () {
+            var url = window.location.href;
+            if (url.indexOf("index.html") >= 0) {
+                url = url.replace("index.html", "");
+                redirectPage(url);
+            }
+        };
 
-<div class="main-container">
-    <header class="app-bar">
-        <div class="logo">Truck Check Pro</div>
-        <nav class="nav-links">
-            <a href="/Account/Login" class="nav-button">Log In</a>
-            <a href="/Account/SignUp" class="nav-button signup-button">Sign Up</a>
-        </nav>
-        <link rel="stylesheet" href="/css/index_style.css">
-    </header>
-
+        function redirectPage(baseUrl) {
+            var url = baseUrl + "Home/Index";
+            window.location.href = url;
+        };
+    </script>
+</head>
+<body>
+    <!-- Hero Section -->
     <section class="hero-section">
         <div class="hero-content">
-            <h1>Ensure Safety, Reduce Costs, Streamline Operations</h1>
+            <h1>@Model.WelcomeMessage</h1>
             <p>
                 Fleet Managers and Drivers working together to keep trucks safer and reduce maintenance costs. 
                 Upload safety pictures, track driver shifts, and stay compliant effortlessly.
@@ -46,14 +60,5 @@
             </div>
         </div>
     </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>© 2025 Truck Check Pro. All rights reserved.</p>
-        <nav>
-            <a href="/PrivacyPolicy">Privacy Policy</a> | 
-            <a href="/TermsOfService">Terms of Service</a> | 
-            <a href="/Contact">Contact Us</a>
-        </nav>
-    </footer>
-</div>
+</body>
+</html>
