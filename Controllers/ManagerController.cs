@@ -302,7 +302,7 @@ namespace truckPRO_api.Controllers
             try
             {
                 var companyId = int.Parse(User.FindFirst("companyId").Value);
-                var signedUrls = await _s3Service.GenerateSignedUrls(urls);
+                var signedUrls = _s3Service.GenerateSignedUrls(urls);
                 if (signedUrls == null || signedUrls.Count == 00)
                 {
                     return NotFound("Sorry, no signed urls can be generated!");
