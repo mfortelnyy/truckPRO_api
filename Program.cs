@@ -159,6 +159,9 @@ app.MapRazorPages();
 //to enable Assets folder
 app.UseStaticFiles();
 
+//default page
+app.MapFallbackToPage("/Index");
+
 //app.UseStaticFiles(new StaticFileOptions
 //{
 //    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Pages")),
