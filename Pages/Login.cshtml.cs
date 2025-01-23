@@ -8,14 +8,17 @@ using truckPRO_api.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using truckPRO_api.Services;
+using Microsoft.AspNetCore.Antiforgery;
+
 
 
 namespace truckPRO_api.Pages
 {
     public class LoginModel : PageModel
     {
-        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IUserService _userService;
+        private readonly IAntiforgery _antiforgery;
+
 
         [BindProperty]
         public string Email { get; set; }
@@ -23,11 +26,19 @@ namespace truckPRO_api.Pages
         [BindProperty]
         public string Password { get; set; }
 
-        public LoginModel(IHttpClientFactory httpClientFactory, IUserService userService)
+        public LoginModel(IUserService userService, IAntiforgery antiforgery)
         {
-            _httpClientFactory = httpClientFactory;
             _userService = userService;
+            _antiforgery = antiforgery;
         }
+        public string AntiforgeryToken { get; private set; }
+
+        public void OnGet()
+        {
+            //generate antiforgery token
+            AntiforgeryToken = _antiforgery.GetAndStoreTokens(HttpContext).RequestToken;
+        }
+
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -106,18 +117,17 @@ namespace truckPRO_api.Pages
 
         private string ExtractToken(string responseMessage)
         {
-            //response message format is: "User with {email} successfully signed in. Token: {token}"
             const string tokenPrefix = "Token: ";
-            var tokenStartIndex = responseMessage.IndexOf(tokenPrefix);
+            //.log($"{responseMessage}");
+            var tokenStartIndex = responseMessage.IndexOf(tokenPrefix, StringComparison.Ordinal);
 
             if (tokenStartIndex >= 0)
             {
-                //extract from the message
-                return responseMessage.Substring(tokenStartIndex + tokenPrefix.Length);
+                // Extract the token
+                return responseMessage.Substring(tokenStartIndex + tokenPrefix.Length).Trim();
             }
 
-            throw null;
+            throw new InvalidOperationException("The response does not contain a token in the expected format.");
         }
-    
     }
 }
