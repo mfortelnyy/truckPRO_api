@@ -178,8 +178,6 @@ namespace truckPRO_api.Services
             return password.ToString();
         }
 
-
-
     
         private String GenerateJwtToken(User user)
         {
