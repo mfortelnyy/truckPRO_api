@@ -1,9 +1,11 @@
 document.querySelector("#loginForm").addEventListener("submit", async function (event) {
     event.preventDefault(); // prevent form from submitting normally
 
-    //display spinner
-    document.getElementById("spinner").style.display = "block";
-
+    function showSpinner() {
+        const spinner = document.getElementById("spinner");
+        spinner.style.display = "block";
+    }
+    
     //get form data
     const email = document.getElementById("Email").value;
     const password = document.getElementById("Password").value;
