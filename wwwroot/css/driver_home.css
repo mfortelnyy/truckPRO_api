@@ -1,0 +1,84 @@
+/* App Bar */
+.app-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #007BFF;
+    padding: 15px 20px;
+    color: white;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-links .logout-button {
+    text-decoration: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    background-color: #FF4136;
+    font-weight: bold;
+}
+
+.nav-links .logout-button:hover {
+    background-color: #C0392B;
+}
+
+/* Main Dashboard */
+.dashboard {
+    padding: 20px;
+}
+
+.main-content h1 {
+    color: #333;
+}
+
+.dashboard-actions {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.action-button {
+    padding: 10px 20px;
+    background-color: #28A745;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.action-button.secondary {
+    background-color: #007BFF;
+}
+
+.action-button:hover {
+    background-color: #218838;
+}
+
+.logs-section ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.logs-section ul li {
+    padding: 10px;
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* Summary Section */
+.summary-section ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.summary-section ul li {
+    margin: 5px 0;
+    font-weight: bold;
+}
