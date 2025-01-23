@@ -1,0 +1,48 @@
+@page
+@model truckPRO_api.Pages.DriverHome
+@{
+    ViewData["Title"] = "Driver Home";
+}
+
+<div class="dashboard">
+    <header class="app-bar">
+        <div class="logo">Truck Check Pro</div>
+        <nav class="nav-links">
+            <a href="/Account/Logout" class="nav-button logout-button">Log Out</a>
+        </nav>
+    </header>
+
+    <!-- Main Dashboard -->
+    <section class="main-content">
+        <h1>Welcome, @Model.DriverName!</h1>
+        <p>Your shift logs and tools are available below:</p>
+
+        <div class="dashboard-actions">
+            <a href="/CreateLog/OnDuty" class="action-button">Create On Duty Log</a>
+            <a href="/CreateLog/Driving" class="action-button secondary">Create Driving Log</a>
+            <a href="/CreateLog/OffDuty" class="action-button">Create Off Duty Log</a>
+            <a href="/UploadPhotos" class="action-button secondary">Upload Photos</a>
+        </div>
+
+        <!-- Active Logs -->
+        <section class="logs-section">
+            <h2>Active Logs</h2>
+            <ul id="activeLogs">
+            <!-- Logs populated dynamically -->
+            </ul>
+        </section>
+
+        <!-- Summary -->
+        <section class="summary-section">
+            <h2>Your Weekly Summary</h2>
+            <ul>
+                <li>On Duty Hours: @Model.TotalOnDutyHours</li>
+                <li>Driving Hours: @Model.TotalDrivingHours</li>
+                <li>Off Duty Hours: @Model.TotalOffDutyHours</li>
+            </ul>
+        </section>
+    </section>
+</div>
+
+<link rel="stylesheet" href="/css/driver_home.css">
+<script src="/js/driver_home.js"></script>
