@@ -59,6 +59,8 @@ body {
 .form-group {
     margin-bottom: 15px;
     text-align: left;
+    /* toggle button position */
+    position: relative; 
 }
 
 .form-label {
@@ -75,6 +77,42 @@ body {
     border: 1px solid #ccc;
     border-radius: 5px;
     margin-bottom: 10px;
+}
+
+/*Password visibility toggle button */
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #555;
+}
+
+.toggle-password:hover {
+    color: #007BFF;
+}
+
+/*Spinner styling */
+.spinner-border {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    border-top-color: #007BFF;
+    animation: spin 1s linear infinite;
+    margin-top: 20px;
+}
+
+/* Spinner animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .action-button {
@@ -106,4 +144,15 @@ body {
 
 .login-footer a:hover {
     text-decoration: underline;
+}
+
+/* Alert box - errors */
+.alert {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    text-align: left;
 }
