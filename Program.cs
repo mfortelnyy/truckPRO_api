@@ -12,6 +12,7 @@ using truckPRO_api.Services;
 using truckPro_api.Services;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Antiforgery;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,6 +72,8 @@ builder.Services.AddScoped<IUserValidationService, UserValidationService>();
 builder.Services.AddScoped<IFirebaseService, FirebaseService>();
 builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
+builder.Services.AddAntiforgery(); 
+
 
 // Add JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -121,5 +124,20 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
+
+// Enable antiforgery middleware
+app.Use(next => async context =>
+{
+    if (context.Request.Path == "/Login")
+    {
+        var antiforgery = app.Services.GetRequiredService<IAntiforgery>();
+        var tokens = antiforgery.GetAndStoreTokens(context);
+        context.Response.Headers.Add("RequestVerificationToken", tokens.RequestToken);
+    }
+
+    await next(context);
+});
+
+
 app.MapFallbackToPage("/Index");
 app.Run();
