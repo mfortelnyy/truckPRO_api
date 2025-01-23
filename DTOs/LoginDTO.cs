@@ -9,5 +9,10 @@ namespace truckPRO_api.DTOs
 
         [Required]
         public string Password { get; set; }
+
+        public LoginDTO(string email, string password){
+            Email = email;  
+            Password = password;
+        }
     }
 }
