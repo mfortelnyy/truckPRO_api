@@ -1,0 +1,45 @@
+.not-found {
+    text-align: center;
+    margin: 50px auto;
+    padding: 20px;
+    max-width: 600px;
+    color: #555;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.not-found h1 {
+    font-size: 3rem;
+    color: #e74c3c;
+    margin-bottom: 10px;
+}
+
+.not-found p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+.not-found img {
+    width: 300px;
+    height: auto;
+    margin: 20px auto;
+}
+
+.not-found .button-container {
+    margin-top: 20px;
+}
+
+.not-found .back-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.not-found .back-button:hover {
+    background-color: #2980b9;
+}
