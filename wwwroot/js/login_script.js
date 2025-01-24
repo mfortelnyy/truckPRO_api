@@ -35,13 +35,32 @@ document.querySelector("#loginForm").addEventListener("submit", async function (
 
             if (tokenStartIndex >= 0) {
                 const token = responseText.substring(tokenStartIndex + tokenPrefix.length).trim();
-                alert("Login successful! Token: " + token);
+                console.log("Login successful! Token:", token);
 
                 // Save the token to localStorage or sessionStorage
                 localStorage.setItem("authToken", token);
 
-                // Navigate to the appropriate home page
-                window.location.href = "/Home";
+                // Decode the token to extract the role
+                const base64Payload = token.split('.')[1];
+                const payloadData = JSON.parse(atob(base64Payload));
+                const userRole = payloadData["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+                console.log("User role extracted:", userRole);
+
+                // Navigate to the appropriate home page based on the role
+                switch (userRole) {
+                    case "Driver":
+                        window.location.href = "/DriverHome";
+                        break;
+                    case "Manager":
+                        window.location.href = "/ManagerHome";
+                        break;
+                    case "Admin":
+                        window.location.href = "/AdminHome";
+                        break;
+                    default:
+                        alert("Unknown role: " + userRole);
+                        window.location.href = "/Error";
+                }
             } else {
                 throw new Error("Token not found in the response.");
             }
