@@ -1,16 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using truckPRO_api.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using truckPRO_api.DTOs;
 using truckPRO_api.Services;
 using Microsoft.AspNetCore.Antiforgery;
-
-
+using truckPRO_api.Models;
 
 namespace truckPRO_api.Pages
 {
@@ -18,7 +13,6 @@ namespace truckPRO_api.Pages
     {
         private readonly IUserService _userService;
         private readonly IAntiforgery _antiforgery;
-
 
         [BindProperty]
         public string Email { get; set; }
@@ -31,102 +25,80 @@ namespace truckPRO_api.Pages
             _userService = userService;
             _antiforgery = antiforgery;
         }
+
         public string AntiforgeryToken { get; private set; }
 
         public void OnGet()
         {
-            //generate antiforgery token
+            // Generate antiforgery token
             AntiforgeryToken = _antiforgery.GetAndStoreTokens(HttpContext).RequestToken;
         }
 
-
         public async Task<IActionResult> OnPostAsync()
         {
-            //send http request to auth user and get token with decoded info about user
-            var token = await AuthenticateUserAsync(Email, Password);
-            if (!string.IsNullOrEmpty(token))
+            try
             {
-                //decode token to extract user role
+                // Authenticate user and get token
+                var token = await AuthenticateUserAsync(Email, Password);
+
+                // Decode token to extract user role
                 var handler = new JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
                 var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-                //store token in session or cookie
-                HttpContext.Session.SetString("AuthToken", token);
+                // Store token in a secure cookie
+                HttpContext.Response.Cookies.Append("AuthToken", token, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddHours(1) 
+                });
 
-                //navigate based on role
+                // Navigate based on role
                 return role switch
                 {
-                    "Driver" => RedirectToPage("/DriverHome"),
-                    "Manager" => RedirectToPage("/ManagerHome"),
-                    "Admin" => RedirectToPage("/AdminHome"),
+                    nameof(UserRole.Driver) => RedirectToPage("/DriverHome"),
+                    nameof(UserRole.Manager) => RedirectToPage("/ManagerHome"),
+                    nameof(UserRole.Admin) => RedirectToPage("/AdminHome"),
                     _ => RedirectToPage("/Error")
                 };
             }
-            else
+            catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "Invalid email or password. Please try again.";
+                Console.WriteLine($"Login failed: {ex.Message}");
                 return Page();
             }
         }
 
         private async Task<string> AuthenticateUserAsync(string email, string password)
         {
-            
-            //var client = _httpClientFactory.CreateClient();
-            LoginDTO loginDto = new LoginDTO(email, password);
-        
-            /*
-            var content = new StringContent(
-                JsonSerializer.Serialize(loginDto),
-                Encoding.UTF8,
-                "application/json");
-
-            var response = await client.PostAsync("https://truckcheck.org:443/Login", content);
-            
-            Console.WriteLine(response.Content);
-            if (response.IsSuccessStatusCode)
+            try
             {
-                //raw response string
-                var responseData = await response.Content.ReadAsStringAsync();
-
-                //get token
-                var token = ExtractToken(responseData);
-
-                return token;
+                var loginDto = new LoginDTO(email, password);
+                var response = await _userService.LoginUserAsync(loginDto);
+                if (string.IsNullOrEmpty(response))
+                {
+                    throw new InvalidOperationException("Authentication failed.");
+                }
+                return ExtractToken(response);
             }
-            */
-
-            //log error details
-            //var errorDetails = await response.Content.ReadAsStringAsync();
-            //Console.WriteLine($"Error during login: {errorDetails}");
-            
-            try{
-              var res = await _userService.LoginUserAsync(loginDto);
-              if(res != null)
-              {
-                return ExtractToken(res);
-              }
-              return res;
-            }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return null;
+                Console.WriteLine($"Error in AuthenticateUserAsync: {ex.Message}");
+                throw;
             }
         }
 
         private string ExtractToken(string responseMessage)
         {
             const string tokenPrefix = "Token: ";
-            //.log($"{responseMessage}");
             var tokenStartIndex = responseMessage.IndexOf(tokenPrefix, StringComparison.Ordinal);
-
             if (tokenStartIndex >= 0)
             {
-                // Extract the token
                 return responseMessage.Substring(tokenStartIndex + tokenPrefix.Length).Trim();
             }
-
             throw new InvalidOperationException("The response does not contain a token in the expected format.");
         }
     }
