@@ -1,0 +1,17 @@
+@page "/NotFound"
+@model truckPRO_api.Pages.NotFoundModel
+
+@{
+    ViewData["Title"] = "Page Not Found";
+}
+
+<div class="not-found">
+    <h1>404 - Page Not Found</h1>
+    <p>The page you are looking for is not available or you do not have access to it.</p>
+    <img src="/images/not_found.png" alt="Not Found" />
+    <div class="button-container">
+        <a href="/Login" class="back-button">Back to Login</a>
+    </div>
+</div>
+
+<link rel="stylesheet" href="/css/not_found.css">
