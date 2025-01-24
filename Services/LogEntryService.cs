@@ -262,7 +262,7 @@ namespace truckPRO_api.Services
         {
             var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
 
-            // calc total on-duty hours in the last 7 days
+            // calc total off-duty hours in the last 7 days
             var totalOffDutyHours = TimeSpan.FromHours(0);
             var allOffDutyLogsLast7days= await context.LogEntry
                 .Where(log => log.UserId == userId && log.LogEntryType == LogEntryType.OffDuty && log.StartTime >= sevenDaysAgo).ToListAsync();
