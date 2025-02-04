@@ -25,8 +25,14 @@ namespace truckPRO_api.Pages
 
         public async Task<IActionResult> OnGet()
         {
-            // Retrieve token from cookies
-            string token = Request.Cookies["AuthToken"];
+            // Retrieve the token from localStorage using JavaScript
+            if (!Request.Query.ContainsKey("token"))
+            {
+                return RedirectToPage("/NotFound");
+            }
+
+            string token = Request.Query["token"];
+            
             if (string.IsNullOrEmpty(token))
             {
                 return RedirectToPage("/NotFound");
@@ -41,6 +47,7 @@ namespace truckPRO_api.Pages
                 var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "userId");
                 if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int driverId))
                 {
+                    
                     return RedirectToPage("/NotFound");
                 }
 
