@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using truckPro_api.Models;
 
 namespace truckPRO_api.Models
 {
@@ -40,6 +41,10 @@ namespace truckPRO_api.Models
 
         public bool EmailVerified { get; set; }
         public string? EmailVerificationToken { get; set; }
+
+        [Required]
+        [EnumDataType(typeof(ActivityStatus))]
+        public ActivityStatus Status { get; set; } 
   
     }
 }
