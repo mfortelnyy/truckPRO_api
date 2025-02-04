@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+/*document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("token");
     const activeLogsList = document.getElementById("activeLogs");
 
@@ -23,4 +23,17 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch((error) => {
             console.error(error);
         });
+});
+*/
+
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
+    if (!token) {
+        alert("Unauthorized access. Redirecting to login.");
+        window.location.href = "/Login";
+        return;
+    }
+
+    // Attach the token to the URL for the server to decode
+    window.location.href = `/DriverHome?token=${encodeURIComponent(token)}`;
 });
