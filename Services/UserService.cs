@@ -274,5 +274,20 @@ namespace truckPRO_api.Services
                 return false;
             }
         }
+        public async Task<string> LogoutUserAsync(int userId)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.Id == userId);
+            
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found.");
+            }
+
+            // Set status to Inactive on logout
+            user.Status = ActivityStatus.Inactive;
+            await _context.SaveChangesAsync();
+
+            return "User successfully logged out.";
+        }
     }
 }
