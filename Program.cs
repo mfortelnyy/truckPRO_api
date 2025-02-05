@@ -73,6 +73,7 @@ builder.Services.AddScoped<IFirebaseService, FirebaseService>();
 builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
 builder.Services.AddAntiforgery(); 
+builder.Services.AddHostedService<UserActivityService>();
 
 
 // Add JWT Authentication
