@@ -203,7 +203,8 @@ namespace truckPRO_api.Services
                 //allows to enforce role-based authorization
                 new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim("userId", user.Id.ToString()),
-                new Claim("companyId", user.CompanyId.ToString())
+                new Claim("companyId", user.CompanyId.ToString()),
+                new Claim("exp", expirationTime.ToString())  //expiration timestamp
 
             };
 
