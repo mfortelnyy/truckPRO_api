@@ -193,6 +193,10 @@ namespace truckPRO_api.Services
             //the signing credentials are created using the security key and a hmacsha256 algorithms which
             //ensures that the token can’t be tampered with because any modification would result in an invalid signature.
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            //token is valid for 24hrs
+            var expirationTime = DateTime.UtcNow.AddHours(24);
+
             //Console.WriteLine(user.Role.ToString());
             //array of claims - key-value pairs 
             var claims = new[]
@@ -204,8 +208,7 @@ namespace truckPRO_api.Services
                 new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim("userId", user.Id.ToString()),
                 new Claim("companyId", user.CompanyId.ToString()),
-                new Claim("exp", expirationTime.ToString())  //expiration timestamp
-
+                new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(expirationTime).ToUnixTimeSeconds().ToString()) //expiration timestamp
             };
 
             //generate token with the expiaretion time of 1 hour
