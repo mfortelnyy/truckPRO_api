@@ -98,6 +98,11 @@ namespace truckPRO_api.Services
                 throw new Exception("Invalid username or password.");
             }
 
+            //update Activity Status to Active
+            driver.Status = ActivityStatus.Active;
+            await _context.SaveChangesAsync();
+
+
             string token = GenerateJwtToken(driver);
 
             //otherwise allow sign in 
