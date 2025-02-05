@@ -193,5 +193,32 @@ namespace truckPRO_api.Services
             return 0;
             
         }
+
+        public async Task<string> SwitchUserStatusAsync(int userId)
+        {
+            var user = await context.User.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found.");
+            }
+
+            if(user.Status == ActivityStatus.Inactive)
+            {
+                user.status = ActivityStatus.Inactive;
+            }
+            else if (user.Status == ActivityStatus.Active)
+            {
+                user.status = ActivityStatus.Active;
+            }
+            else
+            {
+                return $"User status can not be switched!";
+            }
+
+            await context.SaveChangesAsync();
+
+            return $"User status successfully updated to {newStatus}.";
+        }
     }
 }
