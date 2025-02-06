@@ -11,7 +11,8 @@ namespace truckPRO_api.Data
         public DbSet<Company> Company { get; set; }
         public DbSet<LogEntry> LogEntry { get; set; }
         public DbSet<PendingUser> PendingUser { get; set; }
-
+        public DbSet<UserToken> UserTokens { get; set; }
+        public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
