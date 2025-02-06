@@ -4,12 +4,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using truckPRO_api.Data;
 using truckPRO_api.DTOs;
-using truckPRO_api.Models;
+using truckPRO_api.Models;  
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
-using truckapi.DTOs;
 
 namespace truckPRO_api.Services
 {
@@ -24,8 +23,7 @@ namespace truckPRO_api.Services
 
         public async Task<string> CreateUserAsync(SignUpDTO signUpDTO)
         {
-            
-            
+                       
             var userExists = await _context.User.AnyAsync(u => u.Email == signUpDTO.Email);
             var pendingDriver = await _context.PendingUser.FirstOrDefaultAsync(pd => pd.Email == signUpDTO.Email);
             if (userExists)
@@ -43,13 +41,11 @@ namespace truckPRO_api.Services
                 throw new InvalidOperationException("Company Id does not match with the one provided by the manager.");
             }
             
-
             User newUser = _mapper.Map<User>(signUpDTO);
-            newUser.EmailVerified = false;
             bool duplicate = true;
             var emailCode = GenerateVerificationToken();
-            var allTokens = await _context.User.Select(x => x.EmailVerificationToken)
-                                                .Where(x=> x != null).ToListAsync();
+            var allTokens = await _context.EmailVerificationTokens.Select(x => x.Token).ToListAsync();
+
             //ensures token is unique 
             while(duplicate)
             {
@@ -62,7 +58,19 @@ namespace truckPRO_api.Services
                     duplicate = false;
                 }
             }
-            newUser.EmailVerificationToken = emailCode;
+
+            EmailVerificationToken emailVerificationToken = new EmailVerificationToken
+            {
+              UserId = newUser.Id,
+              Token = emailCode,
+              EmailVerified = true,
+              Expiration = DateTime.UtcNow.AddHours(6),
+              IsUsed = false,
+            };
+            
+            await _context.EmailVerificationTokens.AddAsync(emailVerificationToken);
+
+            newUser.EmailVerificationToken = emailVerificationToken;
 
             //hash password from signupDTO to User for db  
             newUser.Password = _passwordHasher.HashPassword(newUser, signUpDTO.Password);
@@ -70,7 +78,7 @@ namespace truckPRO_api.Services
             newUser.CreatedAt = DateTime.UtcNow;
             await _context.User.AddAsync(newUser);
             await _context.SaveChangesAsync();
-            return newUser.EmailVerificationToken; 
+            return newUser.EmailVerificationToken.Token; 
                 //$"{newUser.Role} with email {newUser.Email} was succesfully registered" ;
         }
         public static string GenerateVerificationToken()
@@ -102,8 +110,7 @@ namespace truckPRO_api.Services
             driver.Status = ActivityStatus.Active;
             await _context.SaveChangesAsync();
 
-
-            string token = GenerateJwtToken(driver);
+            string token = await GenerateJwtToken(driver);
 
             //otherwise allow sign in 
             return $"User with {driver.Email} succefully signed in. Token: {token}";
@@ -111,27 +118,27 @@ namespace truckPRO_api.Services
 
         public async Task<string> VerifyEmail(int userId, string emailToken)
         {
-            var user = await _context.User.FirstOrDefaultAsync(u => u.Id == userId);
+            var userEmailToken = await _context.EmailVerificationTokens.FirstOrDefaultAsync(evt => evt.UserId == userId);
 
-            Console.WriteLine($"email token: {emailToken}");
-            if (user == null || user.EmailVerificationToken != emailToken)
+            //Console.WriteLine($"email token: {emailToken}");
+            if (userEmailToken == null || userEmailToken.Token != emailToken)
             {
                 throw new InvalidOperationException("Invalid token!");
             }
-            user.EmailVerified = true;
-            user.EmailVerificationToken = null;
+            userEmailToken.EmailVerified = true;
             await _context.SaveChangesAsync();
             return "Email verfied Sucefully!";
         }
 
         public async Task<String> SaveNewVerificationCode(int userId)
         {
-            var user = await _context.User.Where(u => u.Id == userId).FirstOrDefaultAsync() ?? throw new InvalidOperationException("user not found!");
+            var userEmailToken = await _context.EmailVerificationTokens.FirstOrDefaultAsync(evt => evt.UserId == userId);
             
-            user.EmailVerified = false;
+            if(userEmailToken.EmailVerified = true) return "Email is Already Verified!";
             String newCode = GenerateVerificationToken();
         
-            user.EmailVerificationToken = newCode;
+            userEmailToken.Token = newCode;
+            userEmailToken.Expiration = DateTime.Now.AddHours(6);
             await _context.SaveChangesAsync();
             return newCode;
         }
@@ -184,7 +191,7 @@ namespace truckPRO_api.Services
         }
 
     
-        private String GenerateJwtToken(User user)
+        private async Task<String> GenerateJwtToken(User user)
         {
             //Console.WriteLine(_config["Jwt:Key"]);
             //symmetric security key is created using a secret key stored in appsetings.json
@@ -219,8 +226,53 @@ namespace truckPRO_api.Services
                 expires: expirationTime,
                 signingCredentials: credentials
                 );
+            
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            // Check if the user already has a valid token in the database
+            var existingUserToken = await _context.UserTokens
+                .Where(ut => ut.UserId == user.Id)
+                .FirstOrDefaultAsync();
+
+            if (existingUserToken != null)
+            {
+                // If an active token exists and is not expd and not revoked, return the existing token instead of generating a new one
+                if(existingUserToken.Expiration > DateTime.UtcNow && existingUserToken.IsRevoked == false)
+                {
+                    // Update last datetime used
+                    existingUserToken.LastUsed = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                    return existingUserToken.Token;
+                }
+
+                // If token is either expd or revoked than update the token and its info
+                else
+                {
+                    existingUserToken.Token = tokenString;
+                    existingUserToken.Expiration = expirationTime;
+                    existingUserToken.LastUsed = DateTime.UtcNow;
+                    existingUserToken.IsRevoked = false;
+                    await _context.SaveChangesAsync();
+                    return tokenString;
+                }
+
+            }
+
+            // If no valid token exists, create and store a new one
+            var newUserToken = new UserToken
+            {
+                UserId = user.Id,
+                Token = tokenString,
+                Expiration = expirationTime,
+                LastUsed = DateTime.UtcNow,
+                IsRevoked = false
+            };
+
+            _context.UserTokens.Add(newUserToken);
+            await _context.SaveChangesAsync();
+
+            return tokenString;
         }
 
         public async Task<string> ForgetPassword(String email)
