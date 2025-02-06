@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.SignalR;
 using FirebaseAdmin.Messaging;
 using truckPRO_api.Services;
 
-namespace truckPro_api.Hubs
+namespace truckPRO_api.Hubs
 {
     public class LogHub (IUserService userService) : Hub
     {

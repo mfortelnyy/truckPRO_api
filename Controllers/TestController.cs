@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
-using truckPro_api.Hubs;
+using truckPRO_api.Hubs;
 
 namespace truckPRO_api.Controllers
 {

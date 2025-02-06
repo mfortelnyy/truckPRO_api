@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using truckPRO_api.Models;
 
-namespace truckPro_api.DTOs
+namespace truckPRO_api.DTOs
 {
     public class LogEntryParent
     {
