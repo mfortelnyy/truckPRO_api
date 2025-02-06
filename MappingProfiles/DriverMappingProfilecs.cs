@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using truckapi.DTOs;
 using truckPRO_api.DTOs;
 using truckPRO_api.Models;
 

@@ -1,5 +1,4 @@
-﻿using truckapi.DTOs;
-using truckPRO_api.DTOs;
+﻿using truckPRO_api.DTOs;
 
 namespace truckPRO_api.Services
 {

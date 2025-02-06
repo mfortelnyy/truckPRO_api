@@ -1,7 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.Runtime;
-using truckapi.Models;
+using truckPRO_api.Models;
 
 
 namespace truckPRO_api.Services

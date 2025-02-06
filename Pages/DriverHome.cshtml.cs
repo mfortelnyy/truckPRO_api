@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using truckPRO_api.Services;
-using truckapi.DTOs;
+using truckPRO_api.DTOs;
 
 namespace truckPRO_api.Pages
 {

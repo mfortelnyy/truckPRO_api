@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FirebaseAdmin.Messaging;
 using truckPRO_api.Services;
 
-namespace truckPro_api.Services
+namespace truckPRO_api.Services
 {
     public class FirebaseService (IUserService userService) : IFirebaseService
     {

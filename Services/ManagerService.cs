@@ -1,7 +1,7 @@
 ﻿
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using truckPro_api.DTOs;
+using truckPRO_api.DTOs;
 using truckPRO_api.Data;
 using truckPRO_api.Models;
 
@@ -205,11 +205,11 @@ namespace truckPRO_api.Services
 
             if(user.Status == ActivityStatus.Inactive)
             {
-                user.status = ActivityStatus.Inactive;
+                user.Status = ActivityStatus.Inactive;
             }
             else if (user.Status == ActivityStatus.Active)
             {
-                user.status = ActivityStatus.Active;
+                user.Status = ActivityStatus.Active;
             }
             else
             {
@@ -218,7 +218,7 @@ namespace truckPRO_api.Services
 
             await context.SaveChangesAsync();
 
-            return $"User status successfully updated to {newStatus}.";
+            return $"User status successfully switched!";
         }
     }
 }

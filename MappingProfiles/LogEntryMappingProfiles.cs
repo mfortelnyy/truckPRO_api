@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Graph.Models;
-using truckPro_api.DTOs;
+using truckPRO_api.DTOs;
 using truckPRO_api.Models;
 
-namespace truckPro_api.MappingProfiles
+namespace truckPRO_api.MappingProfiles
 {
     public class LogEntryMappingProfiles : Profile
     {

@@ -1,4 +1,4 @@
-namespace truckPro_api.Models
+namespace truckPRO_api.Models
 {
     public enum ActivityStatus
     {
