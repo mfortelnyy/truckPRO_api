@@ -30,13 +30,11 @@ namespace truckPRO_api.Services
             
 
             User newUser = mapper.Map<User>(signUpDTO);
-            newUser.EmailVerified = false;
             newUser.CreatedAt = DateTime.UtcNow;
             newUser.FcmDeviceToken = "hello";
             bool duplicate = true;
             var emailCode = UserService.GenerateVerificationToken();
-            var allTokens = await context.User.Select(x => x.EmailVerificationToken)
-                                                .Where(x=> x != null).ToListAsync();
+            var allTokens = await context.EmailVerificationTokens.Select(x => x.Token).ToListAsync();
 
             //ensures token is unique 
             while(duplicate)
@@ -50,14 +48,26 @@ namespace truckPRO_api.Services
                     duplicate = false;
                 }
             }
-            newUser.EmailVerificationToken = emailCode;
+
+            EmailVerificationToken emailVerificationToken = new EmailVerificationToken
+            {
+              UserId = newUser.Id,
+              Token = emailCode,
+              EmailVerified = true,
+              Expiration = DateTime.UtcNow.AddHours(6),
+              IsUsed = false,
+            };
+            
+            await context.EmailVerificationTokens.AddAsync(emailVerificationToken);
+
+            newUser.EmailVerificationToken = emailVerificationToken;
 
             //hash password from signupDTO to User for db  
             newUser.Password = _passwordHasher.HashPassword(newUser, signUpDTO.Password);
 
             await context.User.AddAsync(newUser);
             await context.SaveChangesAsync();
-            return newUser.EmailVerificationToken; 
+            return newUser.EmailVerificationToken.Token; 
                 
         }
       
