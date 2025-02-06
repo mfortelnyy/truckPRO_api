@@ -211,12 +211,12 @@ namespace truckPRO_api.Services
                 new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(expirationTime).ToUnixTimeSeconds().ToString()) //expiration timestamp
             };
 
-            //generate token with the expiaretion time of 1 hour
+            //generate token with the expiaretion time of 24 hours
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"], 
                 claims: claims,
-                expires: DateTime.Now.AddHours(1),
+                expires: expirationTime,
                 signingCredentials: credentials
                 );
 
