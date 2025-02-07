@@ -1,158 +1,157 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+/* General Page Styles */
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
+  font-family: 'Nunito', sans-serif;
+  background-image: url('https://truckphotos.s3.us-east-2.amazonaws.com/Assets/registration_truck_bg.png');
+  background-size: cover;
+  background-position: center;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
 }
 
+/* Main container that centers all content */
 .main-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
 }
 
+/* App bar/header styling */
 .app-bar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #121212;
-    padding: 15px;
-    color: white;
+  width: 100%;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
+/* Login Card – similar to the registration card */
+.login-card {
+  background-color: rgba(255, 255, 255, 0.83);  /* Adjust transparency as needed */
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px auto;  /* Centers the card horizontally */
+  max-width: 450px;
+  width: 90%;
+  box-sizing: border-box;  /* Includes padding in width calculation */
 }
 
-.login-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex: 1;
-    padding: 20px;
-    background-color: #007BFF;
-    color: white;
+/* Headings & Instructions */
+h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
 }
 
-.login-content {
-    max-width: 400px;
-    width: 100%;
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    color: #333;
+.instructions {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
 }
 
-.login-content h1 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-}
-
-.login-content p {
-    font-size: 1rem;
-    margin-bottom: 20px;
-}
-
+/* Form Field Styling */
 .form-group {
-    margin-bottom: 15px;
-    text-align: left;
-    /* toggle button position */
-    position: relative; 
+  margin-bottom: 20px;
+  text-align: left;
 }
 
 .form-label {
-    font-size: 0.9rem;
-    margin-bottom: 5px;
-    display: block;
-    color: #555;
+  display: block;
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 8px;
+  /* Adding an accent underline for a distinctive look */
+  border-bottom: 2px solid #FF6600;
+  padding-bottom: 4px;
 }
 
 .form-input {
-    width: 100%;
-    padding: 10px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-bottom: 10px;
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
 }
 
-/*Password visibility toggle button */
-.toggle-password {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    color: #555;
+.form-input:focus {
+  border-color: #FF6600;
+  box-shadow: 0 0 8px rgba(255, 102, 0, 0.6);
+  outline: none;
 }
 
-.toggle-password:hover {
-    color: #007BFF;
-}
-
-/*Spinner styling */
-.spinner-border {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    border: 2px solid transparent;
-    border-radius: 50%;
-    border-top-color: #007BFF;
-    animation: spin 1s linear infinite;
-    margin-top: 20px;
-}
-
-/* Spinner animation */
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
+/* Button Styling */
 .action-button {
-    width: 100%;
-    padding: 10px;
-    font-size: 1rem;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  background-color: #FF6600;
+  color: #fff;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-top: 10px;
 }
 
 .action-button:hover {
-    background-color: #0056b3;
+  background-color: #e65c00;
+  transform: scale(1.03);
 }
 
+/* Login Footer */
 .login-footer {
-    margin-top: 15px;
-    font-size: 0.9rem;
-    color: #555;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 .login-footer a {
-    color: #007BFF;
-    text-decoration: none;
+  color: #FF6600;
+  text-decoration: none;
+  font-weight: bold;
+  transition: text-decoration 0.3s;
 }
 
 .login-footer a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
-/* Alert box - errors */
+/* Alert Box */
 .alert {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #f5c6cb;
-    border-radius: 5px;
-    text-align: left;
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  text-align: left;
+}
+
+/* Spinner Styling (if needed) */
+.spinner-border {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 0.4rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .login-card {
+    padding: 30px;
+    width: 90%;
+  }
 }
