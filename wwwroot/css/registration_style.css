@@ -1,134 +1,149 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+/* Optional: If you have access to a condensed, bold font similar to Trade Gothic, include it here;
+   otherwise, you can use a fallback such as 'Oswald' from Google Fonts or your own custom font.
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');
+*/
+
 /* General Page Styles */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-image: url('https://truckphotos.s3.us-east-2.amazonaws.com/Assets/registration_truck_bg.png');
-    background-size: cover;
-    background-position: center;
-    color: #333;
-    margin: 0;
-    padding: 0;
-    height: 100vh;
+  font-family: 'Nunito', sans-serif;
+  background-image: url('https://truckphotos.s3.us-east-2.amazonaws.com/Assets/registration_truck_bg.png');
+  background-size: cover;
+  background-position: center;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
 }
 
-/* Main Container for centering everything */
+/* Main container that centers all content */
 .main-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
 }
 
-/* Header Styling */
+/* App bar/header styling */
 .app-bar {
-    width: 100%;
-    padding: 15px;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: bold;
+  width: 100%;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: bold;
+  /* If you have a licensed bold condensed font, use it here:
+     font-family: 'Trade Gothic Std', sans-serif; 
+     Otherwise, you can use a fallback like Oswald:
+     font-family: 'Oswald', sans-serif;
+  */
+  letter-spacing: 1px;
 }
 
-/* Registration Box */
+/* Registration Card */
 .container {
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(255, 255, 255, 0.83);
     padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    margin: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    margin: 20px auto; /* Centers container horizontally */
     max-width: 450px;
     width: 90%;
-}
+    box-sizing: border-box; /* Ensures padding is included in the width */
+  }
+  
+  /* Form Field Styling */
+  .form-input {
+    width: 100%;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-sizing: border-box; /* Prevents overflow from padding */
+  }
 
-/* Form Styling */
+/* Form Field Styling */
 .form-group {
-    margin-bottom: 15px;
-    text-align: left; /* Align form labels and inputs to the left */
+  margin-bottom: 20px;
+  text-align: left;
 }
 
 .form-group label {
-    display: block;
-    font-size: 14px;
-    font-weight: 500;
-    color: #444;
-    margin-bottom: 5px;
-}
-
-.form-input {
-    width: 100%;
-    height: 35px; /* Smaller height */
-    padding: 8px;
-    font-size: 14px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    transition: border-color 0.3s;
+  display: block;
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 8px;
 }
 
 .form-input:focus {
-    border-color: #FF6600;
-    box-shadow: 0 0 5px rgba(255, 102, 0, 0.5);
+  border-color: #FF6600;
+  box-shadow: 0 0 8px rgba(255, 102, 0, 0.6);
+  outline: none;
 }
 
-/* Buttons */
+/* Button Styling */
 .action-button {
-    background-color: #FF6600;
-    color: white;
-    padding: 12px 15px;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
-    width: 100%;
-    transition: background-color 0.3s, transform 0.2s;
+  background-color: #FF6600;
+  color: #fff;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-top: 10px;
 }
 
 .action-button:hover {
-    background-color: #e65c00;
-    transform: scale(1.05);
+  background-color: #e65c00;
+  transform: scale(1.03);
 }
 
-/* Alerts */
-.alert {
-    font-size: 14px;
-    padding: 10px;
-    border-radius: 6px;
-    margin-top: 10px;
+/* Instructions & Footer */
+.instructions {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 20px;
 }
 
-.alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-/* Footer */
 .login-footer {
-    margin-top: 15px;
-    font-size: 14px;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #666;
 }
 
 .login-footer a {
-    color: #FF6600;
-    text-decoration: none;
-    font-weight: bold;
+  color: #FF6600;
+  text-decoration: none;
+  font-weight: bold;
+  transition: text-decoration 0.3s;
 }
 
 .login-footer a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
-/* Loading Spinner */
+/* Loading Spinner (if needed) */
 .spinner-border {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-width: 0.4rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 0.4rem;
 }
 
-/* Responsive Container */
+/* Responsive adjustments */
 @media (max-width: 600px) {
-    .container {
-        width: 90%;
-    }
+  .container {
+    width: 90%;
+    padding: 30px;
+  }
 }
