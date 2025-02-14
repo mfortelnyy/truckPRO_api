@@ -9,7 +9,7 @@ namespace truckPRO_api.Controllers
 {
     public class AdminController(IAdminService adminService, IUserService userService) : Controller
     {
-
+        //Test CI/CD
         [HttpPost]
         [Route("signUpManager")]
         [Authorize(Roles = "Admin")]
