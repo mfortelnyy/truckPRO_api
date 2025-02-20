@@ -1,4 +1,4 @@
-name: Deploy to Windows VPS
+name: Deploy TruckCheck to Windows VPS
 
 on:
   push:
